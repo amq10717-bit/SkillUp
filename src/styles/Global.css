@@ -1,0 +1,200 @@
+:root {
+    --BgPrimary-Color: #4CBC9A;
+    --BgSecondaryColor: #C2F7E7;
+    --BgWhiteColor: #ffffff;
+    --headingColor: #000000;
+    --yellowColor: #FEC64F;
+
+
+    --GreyBgColor: #EFEFEF;
+
+    /* Fonts and Sizes */
+
+    --font-primary: 'Poppins', sans-serif;
+
+
+    --heading-sm: 25px;
+    --heading-lg: 30px;
+    --heading-weight: 700;
+
+    --desc: 16px;
+    --description-weight: 400;
+
+
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes float1 {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-25px) rotate(5deg);
+    }
+}
+
+@keyframes float2 {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(-5deg);
+    }
+}
+
+@keyframes gradient-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-float1 {
+    animation: float1 6s ease-in-out infinite;
+}
+
+.animate-float2 {
+    animation: float2 5s ease-in-out infinite;
+}
+
+.animate-float3 {
+    animation: float1 7s ease-in-out infinite;
+}
+
+.animate-gradient-rotate {
+    animation: gradient-rotate 20s linear infinite;
+}
+
+@keyframes gradient-move {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+
+.bg-BgGradient {
+    background: linear-gradient(135deg, #4CBC9A, rgb(182, 241, 224), #4CBC9A);
+    background-size: 300% 300%;
+    animation: gradient-move 10s ease infinite;
+}
+
+.btn-primary {
+    background-color: var(--BgPrimary-Color);
+    color: white;
+    border: 1px solid var(--BgPrimary-Color);
+    font-family: 'Poppins', sans-serif;
+    padding: 7px 40px;
+
+    border-radius: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--BgWhiteColor);
+    color: var(--HoverText);
+}
+
+.bg-BgPrimary {
+    background-color: var(--BgPrimary-Color);
+}
+
+.focus\:border-primary:focus {
+    border-color: var(--BgPrimary-Color);
+}
+
+.bg-BgSecondary {
+    background-color: var(--BgSecondaryColor);
+}
+
+.hover\:border-hoverGreen:hover {
+    border-color: var(--BgPrimary-Color);
+}
+
+.hover\:border-hoverYellow:hover {
+    border-color: var(--yellowColor);
+}
+
+.border-hoverGreen {
+    border-color: var(--BgPrimary-Color);
+}
+
+.border-hoverLightGreen {
+    border-color: var(--BgSecondaryColor);
+}
+
+.bg-BgWhiteColor {
+    background-color: var(--BgWhiteColor);
+}
+
+.hover\:bg-BgWhiteColor:hover {
+    background-color: var(--BgWhiteColor);
+}
+
+.text-heading {
+    color: var(--headingColor);
+}
+
+.text-greenSmall {
+    color: var(--BgPrimary-Color);
+}
+
+.hover\:text-greenSmall:hover {
+    color: var(--BgPrimary-Color);
+}
+
+.bg-BgGreyColor {
+    background-color: var(--GreyBgColor);
+}
+
+/* font size*/
+.font-poppins {
+    font-family: var(--font-primary);
+}
+
+
+.heading-text-sm {
+    font-size: var(--heading-sm);
+    font-weight: var(--heading-weight);
+}
+
+.heading-text-lg {
+    font-size: var(--heading-lg);
+    font-weight: var(--heading-weight);
+}
+
+
+
+.desc-text {
+    font-size: var(--desc);
+    font-weight: var(--description-weight);
+
+}

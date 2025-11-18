@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+joblib
+scikit-learn
+nltk
+sentence-transformers
+torch
+pdf2image
+pytesseract
+Pillow
+PyPDF2
+tqdm
+pandas
+python-dotenv
+
