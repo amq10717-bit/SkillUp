@@ -186,7 +186,7 @@ function StudentDashboard() {
 
     return (
         <div className="min-h-screen mt-30 mb-30">
-            <div className='grid grid-cols-[75%_25%] max-w-6xl mx-auto'>
+            <div className='grid grid-cols-[75%_25%] max-w-7xl mx-auto'>
                 {/* --- Sidebar --- */}
                 <div className='order-2 z-1'>
                     <div className='space-y-8 sticky top-25'>
@@ -433,7 +433,7 @@ function StudentDashboard() {
                                 }
                             </p>
                             <Link
-                                to="/courses"
+                                to="/generated-courses"
                                 className="bg-[#6c5dd3] text-white px-4 py-2 rounded-lg hover:bg-[#5a4bbf] transition"
                             >
                                 {enrolledCourses.length === 0 ? 'Browse Courses' : 'View All Courses'}
@@ -503,7 +503,7 @@ function StudentDashboard() {
                             <h1 className='heading-text-lg font-poppins'>Enrolled Courses</h1>
                             {enrolledCourses.length > 0 && (
                                 <Link
-                                    to="/my-courses"
+                                    to="/generated-courses"
                                     className="text-BgPrimary hover:text-blue-700 font-medium flex items-center gap-2"
                                 >
                                     View All <i className="fas fa-arrow-right"></i>

@@ -38,9 +38,28 @@ function PerformanceAnalysis() {
                     getDocs(query(collection(db, 'enrollments'), where('studentId', '==', user.uid)))
                 ]);
 
-                const submissions = submissionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const quizAttempts = quizAttemptsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const enrollments = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const submissions = submissionsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    // Ensure dates are properly converted
+                    submittedAt: doc.data().submittedAt?.toDate?.() || null
+                }));
+
+                const quizAttempts = quizAttemptsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    // Ensure dates are properly converted
+                    completedAt: doc.data().completedAt?.toDate?.() || doc.data().submittedAt?.toDate?.() || null
+                }));
+
+                const enrollments = coursesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log('Submissions:', submissions);
+                console.log('Quiz Attempts:', quizAttempts);
+                console.log('Enrollments:', enrollments);
 
                 // Process performance data
                 const processedData = processPerformanceData(submissions, quizAttempts, enrollments);
@@ -175,22 +194,24 @@ function PerformanceAnalysis() {
         const allActivities = [
             ...submissions.map(s => ({
                 type: 'assignment',
-                title: s.assignmentTitle,
+                title: s.assignmentTitle || 'Assignment',
                 score: s.grade ? Math.round((s.grade / s.totalMarks) * 100) : null,
-                date: s.submittedAt?.toDate(),
-                status: s.status
+                date: s.submittedAt,
+                status: s.status || 'submitted'
             })),
             ...quizAttempts.map(q => ({
                 type: 'quiz',
-                title: q.quizTitle,
+                title: q.quizTitle || 'Quiz',
                 score: q.score,
-                date: q.completedAt?.toDate(),
+                date: q.completedAt,
                 status: 'completed'
             }))
         ];
 
+        // Sort by date, most recent first
         return allActivities
-            .sort((a, b) => (b.date || new Date(0)) - (a.date || new Date(0)))
+            .filter(activity => activity.date) // Only include activities with dates
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, 10);
     };
 

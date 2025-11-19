@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClockIcon, QuestionMarkCircleIcon, TrophyIcon, ChartBarIcon } from '@heroicons/react/24/outline';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import HeroSection from '../Hero Section/HeroSection';
 import { Link } from 'react-router-dom';
 
@@ -11,9 +11,11 @@ function QuizDetail() {
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('instructions');
+    const [hasAttempted, setHasAttempted] = useState(false);
+    const [previousAttempt, setPreviousAttempt] = useState(null);
 
     useEffect(() => {
-        const fetchQuiz = async () => {
+        const fetchQuizAndAttempts = async () => {
             try {
                 setLoading(true);
                 console.log('Fetching quiz with ID:', id);
@@ -27,6 +29,24 @@ function QuizDetail() {
                         id: quizDoc.id,
                         ...quizData
                     });
+
+                    // Check if current user has attempted this quiz
+                    const user = auth.currentUser;
+                    if (user) {
+                        const attemptsQuery = query(
+                            collection(db, 'quizAttempts'),
+                            where('studentId', '==', user.uid),
+                            where('quizId', '==', id)
+                        );
+                        const attemptsSnapshot = await getDocs(attemptsQuery);
+
+                        if (!attemptsSnapshot.empty) {
+                            setHasAttempted(true);
+                            const latestAttempt = attemptsSnapshot.docs[0].data();
+                            setPreviousAttempt(latestAttempt);
+                            console.log('Previous attempt found:', latestAttempt);
+                        }
+                    }
                 } else {
                     console.log('No quiz found with ID:', id);
                     setQuiz(null);
@@ -40,7 +60,7 @@ function QuizDetail() {
         };
 
         if (id) {
-            fetchQuiz();
+            fetchQuizAndAttempts();
         }
     }, [id]);
 
@@ -78,12 +98,16 @@ function QuizDetail() {
     const quizDescription = quiz.QuizDescription || quiz.quizDescription || 'No description available';
     const difficulty = quiz.difficulty || 'Intermediate';
     const totalPoints = quiz.totalPoints || 100;
-    const questionsCount = quiz.questionsCount || quiz.questions?.length || 0;
+    const questionsCount = quiz.questionsCount || (quiz.questions && quiz.questions.length) || 0;
     const timeLimit = quiz.timeLimit || 30;
-    const attemptsLeft = quiz.attemptsLeft || 1;
+    const attemptsAllowed = quiz.attemptsAllowed || 1;
     const passingScore = quiz.passingScore || 75;
     const timePerQuestion = quiz.timePerQuestion || 90;
-    const bestScore = quiz.bestScore || 0;
+    const bestScore = previousAttempt?.score || quiz.bestScore || 0;
+
+    // Calculate attempts left
+    const attemptsUsed = hasAttempted ? 1 : 0;
+    const attemptsLeft = Math.max(0, attemptsAllowed - attemptsUsed);
 
     // Safe array fallbacks
     const structure = quiz.structure || [
@@ -156,28 +180,48 @@ function QuizDetail() {
                                     <div className='space-y-2'>
                                         <div className='flex items-center justify-between p-2 bg-gray-50 rounded'>
                                             <span>Best Score</span>
-                                            <span className='font-medium text-purple-600'>{bestScore}/100</span>
+                                            <span className='font-medium text-purple-600'>{bestScore}%</span>
                                         </div>
                                         <div className='flex items-center justify-between p-2 bg-gray-50 rounded'>
-                                            <span>Average Score</span>
-                                            <span className='font-medium text-gray-600'>72/100</span>
+                                            <span>Status</span>
+                                            <span className={`font-medium ${hasAttempted ? 'text-green-600' : 'text-yellow-600'}`}>
+                                                {hasAttempted ? 'Completed' : 'Not Attempted'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <Link
-                                    to={`/quiz/${quiz.id}/start`}
-                                    className='btn-primary w-full py-3 text-sm mt-6 bg-purple-600 hover:bg-purple-700 text-center block'
-                                >
-                                    Start Quiz Now
-                                </Link>
-
-                                <div className='mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
-                                    <div className='flex items-center text-sm text-yellow-800'>
-                                        <ClockIcon className='w-4 h-4 mr-2' />
-                                        <span>You have {attemptsLeft} attempts remaining</span>
-                                    </div>
-                                </div>
+                                {hasAttempted ? (
+                                    <>
+                                        <Link
+                                            to={`/quiz/${id}/results`}
+                                            className='btn-primary w-full py-3 text-sm mt-6 bg-blue-600 hover:bg-blue-700 text-center block'
+                                        >
+                                            View Your Results
+                                        </Link>
+                                        <div className='mt-4 p-3 bg-green-50 border border-green-200 rounded-lg'>
+                                            <div className='flex items-center text-sm text-green-800'>
+                                                <TrophyIcon className='w-4 h-4 mr-2' />
+                                                <span>You have already completed this quiz</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            to={`/quiz/${id}/start`}
+                                            className='btn-primary w-full py-3 text-sm mt-6 bg-purple-600 hover:bg-purple-700 text-center block'
+                                        >
+                                            Start Quiz Now
+                                        </Link>
+                                        <div className='mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
+                                            <div className='flex items-center text-sm text-yellow-800'>
+                                                <ClockIcon className='w-4 h-4 mr-2' />
+                                                <span>You have {attemptsLeft} attempt{attemptsLeft !== 1 ? 's' : ''} remaining</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -191,6 +235,30 @@ function QuizDetail() {
                                     <h2 className='text-2xl font-semibold mb-3'>Quiz Overview</h2>
                                     <p className='text-gray-600 leading-relaxed'>{quizDescription}</p>
                                 </div>
+
+                                {hasAttempted && previousAttempt && (
+                                    <div className='mb-8 bg-green-50 p-6 rounded-xl border border-green-200'>
+                                        <h2 className='text-2xl font-semibold mb-3 text-green-800'>🎯 Your Previous Attempt</h2>
+                                        <div className='grid grid-cols-3 gap-4'>
+                                            <div className='text-center'>
+                                                <div className='text-3xl font-bold text-green-600'>{previousAttempt.score}%</div>
+                                                <div className='text-sm text-green-700'>Score</div>
+                                            </div>
+                                            <div className='text-center'>
+                                                <div className='text-3xl font-bold text-blue-600'>
+                                                    {previousAttempt.correctAnswers}/{previousAttempt.totalQuestions}
+                                                </div>
+                                                <div className='text-sm text-blue-700'>Correct Answers</div>
+                                            </div>
+                                            <div className='text-center'>
+                                                <div className='text-3xl font-bold text-purple-600'>
+                                                    {previousAttempt.timeSpent?.toFixed(1) || 'N/A'} min
+                                                </div>
+                                                <div className='text-sm text-purple-700'>Time Spent</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className='mb-8 bg-blue-50 p-6 rounded-xl'>
                                     <h2 className='text-2xl font-semibold mb-3'>📌 Quick Facts</h2>
@@ -253,27 +321,54 @@ function QuizDetail() {
                                         <div className='space-y-4'>
                                             {attempts.length === 0 ? (
                                                 <div className="text-center py-8 text-gray-500">
-                                                    No previous attempts
+                                                    <TrophyIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                                    <p>No previous attempts yet</p>
+                                                    <p className="text-sm">Complete the quiz to see your results here</p>
                                                 </div>
                                             ) : (
-                                                attempts.map((attempt, index) => (
-                                                    <div key={index} className='p-4 border rounded-lg hover:bg-gray-50'>
-                                                        <div className='flex justify-between items-center mb-2'>
-                                                            <div className='flex items-center'>
-                                                                <span className='font-medium'>Attempt #{index + 1}</span>
+                                                <div className="space-y-4">
+                                                    {attempts.map((attempt, index) => (
+                                                        <div key={index} className='p-4 border rounded-lg hover:bg-gray-50 transition-colors'>
+                                                            <div className='flex justify-between items-center mb-2'>
+                                                                <div className='flex items-center gap-3'>
+                                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${attempt.score >= 80 ? 'bg-green-100 text-green-600' :
+                                                                        attempt.score >= 60 ? 'bg-yellow-100 text-yellow-600' :
+                                                                            'bg-red-100 text-red-600'
+                                                                        }`}>
+                                                                        <TrophyIcon className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className='font-medium'>Attempt #{index + 1}</span>
+                                                                        <p className="text-xs text-gray-500">
+                                                                            {attempt.date?.toDate?.().toLocaleDateString() || 'Unknown date'}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <span className={`text-lg font-bold ${attempt.score >= passingScore ? 'text-green-600' : 'text-red-600'
+                                                                        }`}>
+                                                                        {attempt.score}%
+                                                                    </span>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {attempt.score >= passingScore ? 'Passed' : 'Failed'}
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                            <span className={`text-sm ${attempt.score >= passingScore ? 'text-green-600' :
-                                                                'text-red-600'
-                                                                }`}>
-                                                                {attempt.score}%
-                                                            </span>
+                                                            <div className='flex justify-between text-sm text-gray-500 mb-3'>
+                                                                <span>Time Spent: {attempt.timeSpent ? `${attempt.timeSpent.toFixed(1)}m` : 'N/A'}</span>
+                                                                <span>Score: {attempt.score}%</span>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <Link
+                                                                    to={`/quiz/${id}/results/${attempt.attemptId}`}
+                                                                    className="flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
+                                                                >
+                                                                    View Detailed Results
+                                                                </Link>
+                                                            </div>
                                                         </div>
-                                                        <div className='flex justify-between text-sm text-gray-500'>
-                                                            <span>{attempt.date || 'Unknown date'}</span>
-                                                            <span>Time Spent: {attempt.timeSpent || 'N/A'}m</span>
-                                                        </div>
-                                                    </div>
-                                                ))
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
                                     )}

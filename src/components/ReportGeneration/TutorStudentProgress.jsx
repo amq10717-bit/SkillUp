@@ -795,6 +795,7 @@ const StudentQuizzes = ({ student }) => (
                     <tr className="border-b">
                         <th className="text-left py-2">Quiz</th>
                         <th className="text-left py-2">Score</th>
+                        <th className="text-left py-2">Correct Answers</th>
                         <th className="text-left py-2">Time Spent</th>
                         <th className="text-left py-2">Completed</th>
                         <th className="text-left py-2">Details</th>
@@ -812,12 +813,22 @@ const StudentQuizzes = ({ student }) => (
                                     {attempt.score}%
                                 </span>
                             </td>
-                            <td className="py-3">{attempt.timeSpent || 'N/A'} min</td>
+                            <td className="py-3">
+                                {attempt.correctAnswers || 0}/{attempt.totalQuestions || 'N/A'}
+                            </td>
+                            <td className="py-3">{attempt.timeSpent ? `${attempt.timeSpent.toFixed(1)} min` : 'N/A'}</td>
                             <td className="py-3 text-sm text-gray-500">
-                                {attempt.completedAt?.toDate?.().toLocaleDateString() || 'N/A'}
+                                {attempt.completedAt?.toDate?.().toLocaleDateString() ||
+                                    attempt.submittedAt?.toDate?.().toLocaleDateString() || 'N/A'}
                             </td>
                             <td className="py-3">
-                                <button className="text-blue-600 hover:text-blue-800 text-sm">
+                                <button
+                                    className="text-blue-600 hover:text-blue-800 text-sm"
+                                    onClick={() => {
+                                        // You can implement a modal to show detailed quiz results
+                                        console.log('Quiz details:', attempt);
+                                    }}
+                                >
                                     View Details
                                 </button>
                             </td>
@@ -825,7 +836,7 @@ const StudentQuizzes = ({ student }) => (
                     ))}
                     {student.quizAttempts.length === 0 && (
                         <tr>
-                            <td colSpan="5" className="py-4 text-center text-gray-500">
+                            <td colSpan="6" className="py-4 text-center text-gray-500">
                                 No quiz attempts found
                             </td>
                         </tr>

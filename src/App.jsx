@@ -36,6 +36,7 @@ import PerformanceAnalysis from './components/ReportGeneration/PerformanceAnalys
 import TutorStudentProgress from './components/ReportGeneration/TutorStudentProgress';
 import CreateCourse from './components/CreateCourse';
 import CourseAnalytics from './components/CourseAnalytics';
+import QuizResults from './components/Quiz/QuizResults';
 
 
 function App() {
@@ -73,6 +74,8 @@ function App() {
             <Route path="/assignment/:id" element={<AssignmentDetail />} />
             <Route path="/quizzes/:id" element={<QuizDetail />} />
             <Route path="/quiz/:id/start" element={<QuizSession />} />
+            <Route path="/quiz/:id/results/:attemptId?" element={<QuizResults />} />
+
 
             {/* Tutor Routes */}
             <Route path="/tutor-dashboard" element={<TutorDashboard />} />
