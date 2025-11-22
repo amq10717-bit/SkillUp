@@ -145,7 +145,7 @@ export default function Header() {
 
     return (
         <div className="mt-auto">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 {/* Sidebar Background Overlay */}
                 {sidebarOpen && (
                     <div
@@ -354,7 +354,7 @@ export default function Header() {
                 </div>
 
                 {/* Top Navbar */}
-                <div className="flex-1 w-full z-99 fixed top-0 max-w-6xl">
+                <div className="flex-1 w-full z-50 fixed top-0 left-0 right-0 mx-auto max-w-6xl">
                     <header className="bg-white p-4 flex items-center justify-between shadow-lg rounded-t-0 rounded-b-2xl">
                         {/* Left: Menu Icon */}
                         <div className="flex-shrink-0">
