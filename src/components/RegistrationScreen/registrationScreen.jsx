@@ -108,21 +108,21 @@ function Registration_Screen() {
     }
 
     return (
-        <div className="min-h-screen bg-BgGradient flex items-center justify-center sm:p-10 ">
-            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-20">
+        <div className="min-h-screen bg-BgGradient flex items-center justify-center py-10 px-[15px] sm:p-10">
+            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-4 lg:pt-20">
                 {/* Logo Section */}
-                <div className="lg:w-1/2 flex flex-col justify-center sm:items-center lg:items-start">
-                    <img src={logoWhite} alt="logo" className="w-100" />
+                <div className="lg:w-1/2 flex flex-col justify-center items-center lg:items-start mb-8 lg:mb-0">
+                    <img src={logoWhite} alt="logo" className="w-48 lg:w-100" />
                 </div>
 
                 {/* Form Section */}
-                <div className="lg:w-1/2 bg-BgWhiteColor flex flex-col p-10 justify-center rounded-2xl shadow-lg">
-                    <h1 className="heading-text-lg font-bold text-[headingColor]">Create Account</h1>
-                    <form onSubmit={handleSubmit} className="space-y-5 py-5">
+                <div className="lg:w-1/2 bg-BgWhiteColor flex flex-col p-6 lg:p-10 justify-center rounded-2xl shadow-lg">
+                    <h1 className="text-2xl lg:heading-text-lg font-bold text-[headingColor] text-center lg:text-left mb-2 lg:mb-0">Create Account</h1>
+                    <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-5 py-4 lg:py-5">
 
                         {/* Name */}
                         <div>
-                            <label htmlFor="name" className="block">
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                                 Full Name*
                             </label>
                             <input
@@ -131,14 +131,14 @@ function Registration_Screen() {
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 required
                             />
                         </div>
 
                         {/* Email */}
                         <div>
-                            <label htmlFor="email" className="block">
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                 Email Address*
                             </label>
                             <input
@@ -147,14 +147,14 @@ function Registration_Screen() {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 required
                             />
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                 Password*
                             </label>
                             <input
@@ -163,7 +163,7 @@ function Registration_Screen() {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 required
                                 minLength="6"
                             />
@@ -171,7 +171,7 @@ function Registration_Screen() {
 
                         {/* Phone */}
                         <div>
-                            <label htmlFor="phone" className="block">
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                                 Phone Number
                             </label>
                             <input
@@ -180,14 +180,14 @@ function Registration_Screen() {
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 placeholder="Optional"
                             />
                         </div>
 
                         {/* Location */}
                         <div>
-                            <label htmlFor="location" className="block">
+                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
                                 Location
                             </label>
                             <input
@@ -196,14 +196,14 @@ function Registration_Screen() {
                                 name="location"
                                 value={formData.location}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 placeholder="Optional"
                             />
                         </div>
 
                         {/* Website */}
                         <div>
-                            <label htmlFor="website" className="block">
+                            <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
                                 Website
                             </label>
                             <input
@@ -212,14 +212,14 @@ function Registration_Screen() {
                                 name="website"
                                 value={formData.website}
                                 onChange={handleInputChange}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                 placeholder="https://example.com"
                             />
                         </div>
 
                         {/* Bio */}
                         <div>
-                            <label htmlFor="bio" className="block">
+                            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
                                 Bio
                             </label>
                             <textarea
@@ -228,21 +228,21 @@ function Registration_Screen() {
                                 value={formData.bio}
                                 onChange={handleInputChange}
                                 rows="3"
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 resize-none"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 resize-none text-base"
                                 placeholder="Tell us a bit about yourself..."
                             />
                         </div>
 
                         {/* Role Selection */}
                         <div>
-                            <label htmlFor="role" className="block">
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                                 Select Role*
                             </label>
                             <select
                                 id="role"
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 bg-transparent text-base"
                                 required
                             >
                                 <option value="student">Student</option>
@@ -258,25 +258,25 @@ function Registration_Screen() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="text-red-600 text-sm p-3 bg-red-50 rounded-lg border border-red-200">
-                                <i className="fas fa-exclamation-circle mr-2"></i>
-                                {error}
+                            <div className="text-red-600 text-sm p-3 bg-red-50 rounded-lg border border-red-200 flex items-center">
+                                <i className="fas fa-exclamation-circle mr-2 flex-shrink-0"></i>
+                                <span>{error}</span>
                             </div>
                         )}
 
                         {/* Success Message */}
                         {success && (
-                            <div className="text-green-600 text-sm p-3 bg-green-50 rounded-lg border border-green-200">
-                                <i className="fas fa-check-circle mr-2"></i>
-                                {success}
+                            <div className="text-green-600 text-sm p-3 bg-green-50 rounded-lg border border-green-200 flex items-center">
+                                <i className="fas fa-check-circle mr-2 flex-shrink-0"></i>
+                                <span>{success}</span>
                             </div>
                         )}
 
                         {/* Submit */}
-                        <div className="flex justify-center">
+                        <div className="flex justify-center pt-2">
                             <button
                                 type="submit"
-                                className="btn-primary w-full max-w-xs"
+                                className="btn-primary w-full max-w-xs py-3 text-base"
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -291,13 +291,13 @@ function Registration_Screen() {
                         </div>
 
                         {/* Terms Notice */}
-                        <div className="text-center text-xs text-gray-500 mt-4">
+                        <div className="text-center text-xs text-gray-500 mt-4 px-4">
                             By creating an account, you agree to our Terms of Service and Privacy Policy
                         </div>
 
                         {/* Social Login */}
                         <div className="mt-6 text-center text-sm text-gray-500">Or Register with Social Media</div>
-                        <div className="flex justify-center space-x-4 mt-4 text-xl text-gray-600">
+                        <div className="flex justify-center space-x-6 mt-4 text-2xl text-gray-600">
                             <i className="fab fa-twitter cursor-pointer hover:text-greenSmall transition-colors duration-300"></i>
                             <i className="fab fa-google cursor-pointer hover:text-greenSmall transition-colors duration-300"></i>
                             <i className="fab fa-github cursor-pointer hover:text-greenSmall transition-colors duration-300"></i>

@@ -80,16 +80,16 @@ const CreateCourse = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 mt-30">
+        <div className="min-h-screen bg-gray-50 py-8 mt-20 pb-10">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] p-6 text-white">
-                        <h1 className="text-2xl font-bold">Create New Course</h1>
+                    <div className="bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] p-4 lg:p-6 text-white">
+                        <h1 className="text-xl lg:text-2xl font-bold">Create New Course</h1>
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleCreateCourse} className="p-6 space-y-6">
+                    <form onSubmit={handleCreateCourse} className="p-4 lg:p-6 space-y-4 lg:space-y-6">
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 gap-4">
                             <div>
@@ -101,7 +101,7 @@ const CreateCourse = () => {
                                     name="title"
                                     value={courseData.title}
                                     onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3]"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
                                     required
                                     placeholder="Enter course title"
                                 />
@@ -115,7 +115,7 @@ const CreateCourse = () => {
                                     value={courseData.description}
                                     onChange={handleInputChange}
                                     rows="4"
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3]"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
                                     required
                                     placeholder="Describe what students will learn in this course..."
                                 />
@@ -132,7 +132,7 @@ const CreateCourse = () => {
                                     name="category"
                                     value={courseData.category}
                                     onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3]"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base bg-white"
                                     required
                                 >
                                     <option value="">Select Category</option>
@@ -151,7 +151,7 @@ const CreateCourse = () => {
                                     name="difficulty"
                                     value={courseData.difficulty}
                                     onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3]"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base bg-white"
                                 >
                                     <option value="beginner">Beginner</option>
                                     <option value="intermediate">Intermediate</option>
@@ -159,11 +159,13 @@ const CreateCourse = () => {
                                 </select>
                             </div>
                             <div>
-
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Price ($)
+                                </label>
                                 <input
                                     type="number"
                                     onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3]"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
                                     min="0"
                                     step="0.01"
                                     placeholder="0.00"
@@ -172,11 +174,18 @@ const CreateCourse = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-3 pt-6 border-t">
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t">
+                            <button
+                                type="button"
+                                onClick={() => navigate("/tutor-dashboard")}
+                                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-sm lg:text-base"
+                            >
+                                Cancel
+                            </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 bg-[#6c5dd3] text-white py-3 rounded-lg hover:bg-[#5a4bbf] disabled:opacity-50 font-medium"
+                                className="flex-1 bg-[#6c5dd3] text-white py-3 rounded-lg hover:bg-[#5a4bbf] disabled:opacity-50 font-medium text-sm lg:text-base"
                             >
                                 {loading ? (
                                     <>
@@ -186,13 +195,6 @@ const CreateCourse = () => {
                                 ) : (
                                     "Create Course"
                                 )}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => navigate("/tutor-dashboard")}
-                                className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
-                            >
-                                Cancel
                             </button>
                         </div>
                     </form>

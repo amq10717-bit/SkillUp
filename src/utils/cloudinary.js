@@ -1,78 +1,179 @@
 // src/utils/cloudinary.js
-export const uploadToCloudinarySigned = async (file, folder = "chat_media") => {
+export const uploadToCloudinarySigned = async (file, folder = "assignments") => {
     try {
-        // ✅ Works in Vite
-        const baseURL = import.meta.env.VITE_API_BASE_URL;
-
-        if (!baseURL) {
-            throw new Error("VITE_API_BASE_URL is not defined in environment variables");
-        }
-
-        console.log('Fetching Cloudinary signature from:', `${baseURL}/api/cloudinary-signature`);
-
-        const response = await fetch(`${baseURL}/api/cloudinary-signature`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to get signature from backend: ${response.status} ${response.statusText}`);
-        }
-
-        const signatureData = await response.json();
-        console.log('Signature data received:', signatureData);
-
-        const { timestamp, signature, apiKey, cloudName, folder: signedFolder } = signatureData;
-
-        // Validate required fields
-        if (!timestamp || !signature || !apiKey || !cloudName) {
-            throw new Error("Invalid signature data received from server");
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("api_key", apiKey);
-        formData.append("timestamp", timestamp);
-        formData.append("signature", signature);
-        // Use the folder parameter passed to the function, fallback to signed folder or "chat_media"
-        formData.append("folder", folder || signedFolder || "chat_media");
-
-        console.log('Uploading to Cloudinary...', {
-            cloudName: cloudName,
-            folder: folder || signedFolder || "chat_media",
-            fileType: file.type,
-            fileSize: file.size
+        console.log('🚀 Starting Cloudinary upload process...');
+        console.log('📁 File details:', {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            folder: folder
         });
 
-        const uploadResponse = await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
+        const baseURL = import.meta.env.VITE_API_BASE_URL;
 
-        if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            console.error('Cloudinary upload failed:', uploadResponse.status, errorText);
-            throw new Error(`Cloudinary upload failed: ${uploadResponse.status} ${errorText}`);
+        // If backend URL is defined, try to get signature from backend
+        if (baseURL && baseURL !== 'undefined') {
+            try {
+                console.log('🔍 Getting signature from backend...');
+                const signatureResponse = await fetch(`${baseURL}/api/cloudinary-signature`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (signatureResponse.ok) {
+                    const signatureData = await signatureResponse.json();
+                    console.log('✅ Signature received from backend');
+
+                    if (signatureData.timestamp && signatureData.signature && signatureData.apiKey && signatureData.cloudName) {
+                        return await uploadWithSignature(file, folder, signatureData);
+                    }
+                }
+            } catch (backendError) {
+                console.warn('❌ Backend signature failed, using direct upload:', backendError.message);
+            }
         }
 
-        const data = await uploadResponse.json();
-        console.log('Cloudinary upload successful:', data);
+        // Fallback to direct upload with environment variables
+        console.log('🔄 Using direct upload with env credentials');
+        return await uploadToCloudinaryDirect(file, folder);
 
-        return {
-            url: data.secure_url,
-            publicId: data.public_id,
-            format: data.format,
-            bytes: data.bytes,
-            width: data.width,
-            height: data.height,
-            resourceType: data.resource_type,
-            originalFilename: data.original_filename,
-            createdAt: data.created_at
-        };
     } catch (error) {
-        console.error("Cloudinary upload error:", error);
-        throw error;
+        console.error("❌ Cloudinary upload error:", error);
+        throw new Error(`Upload failed: ${error.message}`);
     }
+};
+
+// Upload with backend signature
+const uploadWithSignature = async (file, folder, signatureData) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signatureData.apiKey);
+    formData.append("timestamp", signatureData.timestamp);
+    formData.append("signature", signatureData.signature);
+    formData.append("folder", folder || "assignments");
+
+    // Set resource type based on file type
+    if (file.type === 'application/pdf') {
+        formData.append("resource_type", "raw");
+    } else if (file.type.startsWith('image/')) {
+        formData.append("resource_type", "image");
+    } else if (file.type.startsWith('video/')) {
+        formData.append("resource_type", "video");
+    } else {
+        formData.append("resource_type", "auto");
+    }
+
+    console.log('📤 Uploading to Cloudinary with signature...');
+
+    const uploadResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/auto/upload`,
+        {
+            method: "POST",
+            body: formData,
+        }
+    );
+
+    if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('❌ Cloudinary upload failed:', uploadResponse.status, errorText);
+        throw new Error(`Cloudinary upload failed: ${uploadResponse.status}`);
+    }
+
+    const data = await uploadResponse.json();
+    console.log('✅ Cloudinary upload successful:', {
+        secure_url: data.secure_url,
+        public_id: data.public_id,
+        resource_type: data.resource_type,
+        format: data.format,
+        bytes: data.bytes
+    });
+
+    return {
+        secure_url: data.secure_url,
+        public_id: data.public_id,
+        format: data.format,
+        bytes: data.bytes,
+        width: data.width,
+        height: data.height,
+        resource_type: data.resource_type,
+        original_filename: data.original_filename,
+        created_at: data.created_at
+    };
+};
+
+// Direct upload with environment variables
+const uploadToCloudinaryDirect = async (file, folder = "assignments") => {
+    console.log('🔄 Using direct upload with environment credentials');
+
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
+
+    if (!cloudName) {
+        throw new Error("Cloudinary cloud name not configured");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    formData.append("folder", folder);
+
+    // Add API key if available (for signed uploads)
+    if (apiKey) {
+        formData.append("api_key", apiKey);
+    }
+
+    // Set resource type
+    if (file.type === 'application/pdf') {
+        formData.append("resource_type", "raw");
+    } else if (file.type.startsWith('image/')) {
+        formData.append("resource_type", "image");
+    } else if (file.type.startsWith('video/')) {
+        formData.append("resource_type", "video");
+    }
+
+    console.log('📤 Uploading to Cloudinary direct:', {
+        cloudName: cloudName,
+        folder: folder,
+        fileType: file.type,
+        fileSize: file.size,
+        uploadPreset: uploadPreset
+    });
+
+    const uploadResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+        {
+            method: "POST",
+            body: formData,
+        }
+    );
+
+    if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('❌ Cloudinary direct upload failed:', uploadResponse.status, errorText);
+        throw new Error(`Upload failed: ${uploadResponse.status} - ${errorText}`);
+    }
+
+    const data = await uploadResponse.json();
+    console.log('✅ Direct upload successful:', {
+        secure_url: data.secure_url,
+        public_id: data.public_id,
+        resource_type: data.resource_type
+    });
+
+    return {
+        secure_url: data.secure_url,
+        public_id: data.public_id,
+        format: data.format,
+        bytes: data.bytes,
+        width: data.width,
+        height: data.height,
+        resource_type: data.resource_type,
+        original_filename: data.original_filename,
+        created_at: data.created_at
+    };
 };
 
 // Alias for backward compatibility
@@ -86,7 +187,6 @@ export const getOptimizedImageUrl = (publicId, options = {}) => {
     if (width) transformation += `,w_${width}`;
     if (height) transformation += `,h_${height}`;
 
-    // You'll need to set VITE_CLOUDINARY_CLOUD_NAME in your .env file
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
     if (!cloudName) {
         console.warn('VITE_CLOUDINARY_CLOUD_NAME is not defined in environment variables');
@@ -115,10 +215,38 @@ export const getFileCategory = (file) => {
     return 'file';
 };
 
-// Format file size for display
 export const formatFileSize = (bytes) => {
     if (!bytes) return '';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+};
+
+// New function to validate file before upload
+export const validateFile = (file, options = {}) => {
+    const {
+        maxSize = 25 * 1024 * 1024, // 25MB default
+        allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'text/plain'
+        ]
+    } = options;
+
+    // Check file size
+    if (file.size > maxSize) {
+        throw new Error(`File size too large. Maximum size is ${formatFileSize(maxSize)}.`);
+    }
+
+    // Check file type
+    if (!allowedTypes.includes(file.type)) {
+        throw new Error(`File type not supported. Allowed types: ${allowedTypes.join(', ')}`);
+    }
+
+    return true;
 };

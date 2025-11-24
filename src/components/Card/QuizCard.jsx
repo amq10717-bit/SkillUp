@@ -93,7 +93,7 @@ function QuizCard({ quizzes }) {
         return {
             text: 'Start Quiz',
             style: 'bg-BgPrimary hover:bg-blue-700',
-            link: `/quiz/${quizId}`
+            link: `/quizzes/${quizId}`
         };
     };
 
@@ -104,23 +104,18 @@ function QuizCard({ quizzes }) {
     console.log('QuizCard rendering:', { quizId, quizTitle, hasAttempted, bestScore });
 
     return (
-        <div className={`group relative p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border-l-4 ${hasAttempted ? 'border-green-500' : 'border-hoverGreen hover:border-hoverYellow'
-            } font-poppins`}>
-            {/* Status Badge */}
+        <div className={`group relative p-4 lg:p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border-l-4 ${hasAttempted ? 'border-green-500' : 'border-hoverGreen hover:border-hoverYellow'} font-poppins`}>
 
-
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${hasAttempted ? 'bg-green-50' : 'bg-emerald-50'
-                        }`}>
-                        <PuzzlePieceIcon className={`w-6 h-6 ${hasAttempted ? 'text-green-600' : 'text-greenSmall'
-                            }`} />
+            <div className="flex justify-between items-start mb-3 lg:mb-4">
+                <div className="flex items-start space-x-3">
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${hasAttempted ? 'bg-green-50' : 'bg-emerald-50'}`}>
+                        <PuzzlePieceIcon className={`w-6 h-6 ${hasAttempted ? 'text-green-600' : 'text-greenSmall'}`} />
                     </div>
-                    <div>
-                        <h2 className="font-semibold text-md text-gray-900 mb-1">
+                    <div className="min-w-0">
+                        <h2 className="font-semibold text-base lg:text-md text-gray-900 mb-1 break-words">
                             {quizTitle}
                         </h2>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-wrap gap-2">
                             <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getDifficultyColor(difficulty)}`}>
                                 {difficulty}
                             </span>
@@ -130,10 +125,10 @@ function QuizCard({ quizzes }) {
                         </div>
                     </div>
                 </div>
-
             </div>
-            <div className='flex items-center justify-start mb-5'>
-                <div className="flex items-center justify-center mr-5">
+
+            <div className='flex flex-wrap items-center justify-start mb-4 lg:mb-5 gap-y-2'>
+                <div className="flex items-center justify-center mr-3 lg:mr-5">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}>
                         {hasAttempted && <CheckCircleIcon className="w-3 h-3 mr-1" />}
                         {statusInfo.text}
@@ -143,16 +138,14 @@ function QuizCard({ quizzes }) {
                     <ClockIcon className="w-4 h-4" />
                     <span>{timeLimit} mins</span>
                 </div>
-
             </div>
 
-
-            <p className="text-black text-sm mb-6 line-clamp-2">
+            <p className="text-black text-sm mb-4 lg:mb-6 line-clamp-2">
                 {quizDescription}
             </p>
 
-            <div className="flex items-center justify-between border-t pt-4">
-                <div className="flex items-center space-x-4 text-sm text-black">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-between border-t pt-4 gap-3 sm:gap-0">
+                <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start sm:space-x-4 text-sm text-black">
                     <div className="flex items-center space-x-1">
                         <QuestionMarkCircleIcon className="w-4 h-4" />
                         <span>{questionsCount} Questions</span>
@@ -165,7 +158,7 @@ function QuizCard({ quizzes }) {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-star text-yellow-300 text-1xl"></i>
+                                <i className="fas fa-star text-yellow-300 text-base"></i>
                                 <span>{totalPoints} Points</span>
                             </>
                         )}
@@ -174,8 +167,7 @@ function QuizCard({ quizzes }) {
 
                 <Link
                     to={buttonInfo.link}
-                    className={`px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg ${buttonInfo.style} ${loading ? 'cursor-not-allowed' : ''
-                        }`}
+                    className={`w-full sm:w-auto text-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg ${buttonInfo.style} ${loading ? 'cursor-not-allowed' : ''}`}
                     onClick={(e) => {
                         if (loading) {
                             e.preventDefault();

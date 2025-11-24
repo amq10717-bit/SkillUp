@@ -27,25 +27,25 @@ const CourseFilters = ({
     ];
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6 mb-6 lg:mb-8 border border-gray-100">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 lg:mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Find Your Perfect Course</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-1 lg:mb-2">Find Your Perfect Course</h3>
+                    <p className="text-sm lg:text-base text-gray-600">
                         <span className="font-semibold text-[#6c5dd3]">{filteredCount}</span> of{" "}
                         <span className="font-semibold">{totalCourses}</span> courses match your criteria
                     </p>
                 </div>
                 <button
                     onClick={onClearFilters}
-                    className="px-4 py-2 text-[#6c5dd3] hover:text-[#5a4bbf] font-medium text-sm border border-[#6c5dd3] hover:border-[#5a4bbf] rounded-lg transition"
+                    className="w-full lg:w-auto px-4 py-2 text-[#6c5dd3] hover:text-[#5a4bbf] font-medium text-sm border border-[#6c5dd3] hover:border-[#5a4bbf] rounded-lg transition text-center"
                 >
                     Clear All Filters
                 </button>
             </div>
 
             {/* Search Bar */}
-            <div className="mb-6">
+            <div className="mb-4 lg:mb-6">
                 <div className="relative">
                     <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     <input
@@ -53,23 +53,23 @@ const CourseFilters = ({
                         placeholder="Search courses, tutors, categories, or topics..."
                         value={filters.search}
                         onChange={(e) => handleFilterUpdate('search', e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent text-lg shadow-sm"
+                        className="w-full pl-12 pr-4 py-3 lg:py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent text-base lg:text-lg shadow-sm"
                     />
                 </div>
             </div>
 
-            {/* Filter Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Filter Grid - Stack on mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                 {/* Category Filter */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 lg:mb-3">
                         <i className="fas fa-tag mr-2 text-[#4CBC9A]"></i>
                         Category
                     </label>
                     <select
                         value={filters.category}
                         onChange={(e) => handleFilterUpdate('category', e.target.value)}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm"
+                        className="w-full border border-gray-300 rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm bg-white"
                     >
                         <option value="all">All Categories</option>
                         {categories.map((category, index) => (
@@ -82,14 +82,14 @@ const CourseFilters = ({
 
                 {/* Difficulty Filter */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 lg:mb-3">
                         <i className="fas fa-signal mr-2 text-[#FEC64F]"></i>
                         Difficulty Level
                     </label>
                     <select
                         value={filters.difficulty}
                         onChange={(e) => handleFilterUpdate('difficulty', e.target.value)}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm"
+                        className="w-full border border-gray-300 rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm bg-white"
                     >
                         {difficultyOptions.map(option => (
                             <option key={option.value} value={option.value}>
@@ -101,14 +101,14 @@ const CourseFilters = ({
 
                 {/* Tutor Filter */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 lg:mb-3">
                         <i className="fas fa-chalkboard-teacher mr-2 text-[#6c5dd3]"></i>
                         Instructor
                     </label>
                     <select
                         value={filters.tutor}
                         onChange={(e) => handleFilterUpdate('tutor', e.target.value)}
-                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm"
+                        className="w-full border border-gray-300 rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent shadow-sm bg-white"
                     >
                         <option value="all">All Instructors</option>
                         {tutors.map((tutorId) => (
@@ -122,52 +122,52 @@ const CourseFilters = ({
 
             {/* Active Filters */}
             {(filters.category !== 'all' || filters.difficulty !== 'all' || filters.tutor !== 'all' || filters.search) && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-4 lg:mt-6 pt-4 lg:pt-6 border-t border-gray-200">
                     <h4 className="text-sm font-semibold text-gray-700 mb-3">Active Filters:</h4>
                     <div className="flex flex-wrap gap-2">
                         {filters.category !== 'all' && (
-                            <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-full text-sm font-medium border border-blue-200">
+                            <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium border border-blue-200">
                                 <i className="fas fa-tag text-blue-500"></i>
-                                Category: {filters.category}
+                                <span className="truncate max-w-[150px]">Category: {filters.category}</span>
                                 <button
                                     onClick={() => handleFilterUpdate('category', 'all')}
-                                    className="hover:text-blue-900 ml-1"
+                                    className="hover:text-blue-900 ml-1 p-0.5"
                                 >
                                     ×
                                 </button>
                             </span>
                         )}
                         {filters.difficulty !== 'all' && (
-                            <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-full text-sm font-medium border border-green-200">
+                            <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium border border-green-200">
                                 <i className="fas fa-signal text-green-500"></i>
                                 Level: {filters.difficulty}
                                 <button
                                     onClick={() => handleFilterUpdate('difficulty', 'all')}
-                                    className="hover:text-green-900 ml-1"
+                                    className="hover:text-green-900 ml-1 p-0.5"
                                 >
                                     ×
                                 </button>
                             </span>
                         )}
                         {filters.tutor !== 'all' && (
-                            <span className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-2 rounded-full text-sm font-medium border border-purple-200">
+                            <span className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium border border-purple-200">
                                 <i className="fas fa-chalkboard-teacher text-purple-500"></i>
-                                Instructor: {getTutorDisplayName(filters.tutor)}
+                                <span className="truncate max-w-[150px]">Instructor: {getTutorDisplayName(filters.tutor)}</span>
                                 <button
                                     onClick={() => handleFilterUpdate('tutor', 'all')}
-                                    className="hover:text-purple-900 ml-1"
+                                    className="hover:text-purple-900 ml-1 p-0.5"
                                 >
                                     ×
                                 </button>
                             </span>
                         )}
                         {filters.search && (
-                            <span className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-2 rounded-full text-sm font-medium border border-orange-200">
+                            <span className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium border border-orange-200">
                                 <i className="fas fa-search text-orange-500"></i>
-                                Search: "{filters.search}"
+                                <span className="truncate max-w-[150px]">Search: "{filters.search}"</span>
                                 <button
                                     onClick={() => handleFilterUpdate('search', '')}
-                                    className="hover:text-orange-900 ml-1"
+                                    className="hover:text-orange-900 ml-1 p-0.5"
                                 >
                                     ×
                                 </button>

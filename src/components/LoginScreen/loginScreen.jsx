@@ -235,22 +235,22 @@ function Login_Screen() {
     }
 
     return (
-        <div className="min-h-screen bg-BgGradient flex items-center justify-center sm:p-10">
-            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-20">
+        <div className="min-h-screen bg-BgGradient flex items-center justify-center py-10 px-[15px] sm:p-10">
+            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-4 lg:pt-20">
                 {/* Logo Section */}
-                <div className="lg:w-1/2 flex flex-col justify-center sm:items-center lg:items-start">
-                    <img src={logoWhite} alt="logo" className="w-100" />
+                <div className="lg:w-1/2 flex flex-col justify-center items-center lg:items-start mb-8 lg:mb-0">
+                    <img src={logoWhite} alt="logo" className="w-48 lg:w-100" />
                 </div>
 
                 {/* Form Section */}
-                <div className="lg:w-1/2 bg-BgWhiteColor flex flex-col p-10 justify-center rounded-2xl shadow-lg">
-                    <h1 className="heading-text-lg font-bold text-[headingColor]">
+                <div className="lg:w-1/2 bg-BgWhiteColor flex flex-col p-6 lg:p-10 justify-center rounded-2xl shadow-lg">
+                    <h1 className="text-2xl lg:heading-text-lg font-bold text-[headingColor] text-center lg:text-left mb-2 lg:mb-0">
                         {showForgotPassword ? 'Reset Your Password' : 'Sign In'}
                     </h1>
 
                     {!showForgotPassword ? (
                         // Login Form
-                        <form onSubmit={handleSubmit} className="space-y-5 py-5">
+                        <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-5 py-4 lg:py-5">
                             {/* Email */}
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -261,7 +261,7 @@ function Login_Screen() {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                     placeholder="your@email.com"
                                     disabled={loading}
                                 />
@@ -277,7 +277,7 @@ function Login_Screen() {
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                     placeholder="••••••••"
                                     disabled={loading}
                                 />
@@ -302,7 +302,7 @@ function Login_Screen() {
                             {error && (
                                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                                     <div className="flex items-center">
-                                        <i className="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                                        <i className="fas fa-exclamation-circle text-red-500 mr-2 flex-shrink-0"></i>
                                         <span className="text-red-700 text-sm">{error}</span>
                                     </div>
                                 </div>
@@ -312,7 +312,7 @@ function Login_Screen() {
                             {success && (
                                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                                     <div className="flex items-center">
-                                        <i className="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <i className="fas fa-check-circle text-green-500 mr-2 flex-shrink-0"></i>
                                         <span className="text-green-700 text-sm">{success}</span>
                                     </div>
                                 </div>
@@ -322,7 +322,7 @@ function Login_Screen() {
                             <div className="flex justify-center">
                                 <button
                                     type="submit"
-                                    className="btn-primary w-full max-w-xs"
+                                    className="btn-primary w-full max-w-xs py-3 text-base"
                                     disabled={loading}
                                 >
                                     {loading ? (
@@ -357,7 +357,7 @@ function Login_Screen() {
                                     {socialLoading === 'Google' ? (
                                         <i className="fas fa-spinner fa-spin text-gray-400"></i>
                                     ) : (
-                                        <i className="fab fa-google text-red-500"></i>
+                                        <i className="fab fa-google text-red-500 text-lg"></i>
                                     )}
                                     <span className="text-sm font-medium">Google</span>
                                 </button>
@@ -397,7 +397,7 @@ function Login_Screen() {
                                     id="resetEmail"
                                     value={resetEmail}
                                     onChange={(e) => setResetEmail(e.target.value)}
-                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2"
+                                    className="w-full border-b border-gray-400 focus:outline-none focus:border-primary py-2 text-base"
                                     placeholder="your@email.com"
                                     disabled={resetLoading}
                                     autoFocus
@@ -408,7 +408,7 @@ function Login_Screen() {
                             {error && (
                                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                                     <div className="flex items-center">
-                                        <i className="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                                        <i className="fas fa-exclamation-circle text-red-500 mr-2 flex-shrink-0"></i>
                                         <span className="text-red-700 text-sm">{error}</span>
                                     </div>
                                 </div>
@@ -418,7 +418,7 @@ function Login_Screen() {
                             {success && (
                                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                                     <div className="flex items-center">
-                                        <i className="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <i className="fas fa-check-circle text-green-500 mr-2 flex-shrink-0"></i>
                                         <span className="text-green-700 text-sm">{success}</span>
                                     </div>
                                 </div>
@@ -428,7 +428,7 @@ function Login_Screen() {
                             <div className="flex flex-col gap-3">
                                 <button
                                     type="submit"
-                                    className="btn-primary w-full"
+                                    className="btn-primary w-full py-3 text-base"
                                     disabled={resetLoading}
                                 >
                                     {resetLoading ? (
@@ -449,7 +449,7 @@ function Login_Screen() {
                                         setSuccess('')
                                         setResetEmail('')
                                     }}
-                                    className="w-full p-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="w-full p-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-base"
                                     disabled={resetLoading}
                                 >
                                     Back to Login

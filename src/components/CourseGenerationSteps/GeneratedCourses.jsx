@@ -202,51 +202,57 @@ function GeneratedCourses() {
                     { label: 'Courses' },
                 ]}
             />
-            <div className="min-h-screen mt-30 mb-30">
-                <div className="max-w-7xl mx-auto px-4">
+            <div className="min-h-screen my-10 lg:mt-30 lg:mb-30">
+                <div className="max-w-7xl mx-auto px-[15px] lg:px-4">
                     {/* Header */}
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                    <div className="text-center mb-8 lg:mb-12">
+                        <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-3 lg:mb-4">
                             Discover Amazing Courses
                         </h1>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                        <p className="text-base lg:text-xl text-gray-600 max-w-3xl mx-auto">
                             Learn from expert tutors across various subjects. All courses are completely free to enroll and start learning immediately.
                         </p>
                     </div>
 
                     {/* Course Features */}
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mb-12">
-                        <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 lg:p-8 mb-8 lg:mb-12">
+                        <h2 className="text-xl lg:text-2xl font-bold text-center mb-6 lg:mb-8 text-gray-800">
                             Why Choose Our Courses?
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="flex flex-col items-center text-center p-4">
-                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <img src={animation} alt="Animations" className="w-8 h-8" />
+
+
+
+                        [Image of online learning platform features diagram]
+
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                            <div className="flex flex-col items-center text-center p-3 lg:p-4">
+                                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
+                                    <img src={animation} alt="Animations" className="w-6 h-6 lg:w-8 lg:h-8" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">Interactive Animations</h3>
-                                <p className="text-gray-600 text-sm">Engaging visual content to enhance learning</p>
+                                <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-1 lg:mb-2">Interactive Animations</h3>
+                                <p className="text-gray-600 text-xs lg:text-sm">Engaging visual content to enhance learning</p>
                             </div>
-                            <div className="flex flex-col items-center text-center p-4">
-                                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <img src={Education} alt="IDE Integration" className="w-8 h-8" />
+                            <div className="flex flex-col items-center text-center p-3 lg:p-4">
+                                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
+                                    <img src={Education} alt="IDE Integration" className="w-6 h-6 lg:w-8 lg:h-8" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">IDE Integration</h3>
-                                <p className="text-gray-600 text-sm">Practice coding with built-in development environment</p>
+                                <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-1 lg:mb-2">IDE Integration</h3>
+                                <p className="text-gray-600 text-xs lg:text-sm">Practice coding with built-in development environment</p>
                             </div>
-                            <div className="flex flex-col items-center text-center p-4">
-                                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <img src={Brain} alt="Quizzes & Assignments" className="w-8 h-8" />
+                            <div className="flex flex-col items-center text-center p-3 lg:p-4">
+                                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
+                                    <img src={Brain} alt="Quizzes & Assignments" className="w-6 h-6 lg:w-8 lg:h-8" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">Quizzes & Assignments</h3>
-                                <p className="text-gray-600 text-sm">Test your knowledge with interactive assessments</p>
+                                <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-1 lg:mb-2">Quizzes & Assignments</h3>
+                                <p className="text-gray-600 text-xs lg:text-sm">Test your knowledge with interactive assessments</p>
                             </div>
-                            <div className="flex flex-col items-center text-center p-4">
-                                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <img src={Microscope} alt="Expert Tutors" className="w-8 h-8" />
+                            <div className="flex flex-col items-center text-center p-3 lg:p-4">
+                                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
+                                    <img src={Microscope} alt="Expert Tutors" className="w-6 h-6 lg:w-8 lg:h-8" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">Expert Tutors</h3>
-                                <p className="text-gray-600 text-sm">Learn from experienced industry professionals</p>
+                                <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-1 lg:mb-2">Expert Tutors</h3>
+                                <p className="text-gray-600 text-xs lg:text-sm">Learn from experienced industry professionals</p>
                             </div>
                         </div>
                     </div>
@@ -265,23 +271,23 @@ function GeneratedCourses() {
                     />
 
                     {/* Courses Grid Header */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 mt-6 lg:mt-0">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
                                 Available Courses
                             </h2>
-                            <p className="text-gray-600">
+                            <p className="text-sm lg:text-base text-gray-600">
                                 Showing {filteredCourses.length} of {courses.length} courses
                             </p>
                         </div>
 
                         {/* Sort Options */}
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
                             <span className="text-sm text-gray-500 whitespace-nowrap">Sort by:</span>
                             <select
                                 value={filters.sortBy}
                                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent"
+                                className="flex-1 sm:flex-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent bg-white"
                             >
                                 <option value="newest">Newest First</option>
                                 <option value="oldest">Oldest First</option>
@@ -294,12 +300,12 @@ function GeneratedCourses() {
                     </div>
 
                     {/* Courses Grid */}
-                    <div className="mt-8">
+                    <div className="mt-6 lg:mt-8">
                         {filteredCourses.length === 0 ? (
-                            <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
-                                <i className="fas fa-search text-4xl text-gray-300 mb-4"></i>
-                                <h3 className="text-xl font-semibold text-gray-600 mb-2">No courses found</h3>
-                                <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                            <div className="text-center py-10 lg:py-16 bg-white rounded-2xl shadow-sm">
+                                <i className="fas fa-search text-3xl lg:text-4xl text-gray-300 mb-4"></i>
+                                <h3 className="text-lg lg:text-xl font-semibold text-gray-600 mb-2">No courses found</h3>
+                                <p className="text-sm lg:text-base text-gray-500 mb-6 max-w-md mx-auto px-4">
                                     {courses.length === 0
                                         ? 'No courses available yet. Check back later for new courses.'
                                         : 'Try adjusting your filters or search terms to find more courses.'
@@ -307,7 +313,7 @@ function GeneratedCourses() {
                                 </p>
                                 <button
                                     onClick={clearFilters}
-                                    className="bg-[#6c5dd3] text-white px-6 py-3 rounded-lg hover:bg-[#5a4bbf] transition font-semibold"
+                                    className="bg-[#6c5dd3] text-white px-6 py-2 lg:py-3 rounded-lg hover:bg-[#5a4bbf] transition font-semibold text-sm lg:text-base"
                                 >
                                     Clear All Filters
                                 </button>
@@ -318,47 +324,47 @@ function GeneratedCourses() {
                     </div>
 
                     {/* Call to Action */}
-                    <div className="mt-16 bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] rounded-2xl p-8 text-center text-white">
-                        <h2 className="text-2xl font-bold mb-4">Ready to Start Learning?</h2>
-                        <p className="text-lg mb-6 max-w-2xl mx-auto">
+                    <div className="mt-8 lg:mt-16 bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] rounded-2xl p-6 lg:p-8 text-center text-white">
+                        <h2 className="text-xl lg:text-2xl font-bold mb-3 lg:mb-4">Ready to Start Learning?</h2>
+                        <p className="text-base lg:text-lg mb-6 max-w-2xl mx-auto">
                             Join thousands of students who are already advancing their skills with our free courses.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center">
                             <button
                                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                                className="bg-white text-[#6c5dd3] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                                className="bg-white text-[#6c5dd3] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition active:scale-95"
                             >
                                 Browse Top Courses
                             </button>
-                            <button className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-[#6c5dd3] transition">
+                            <button className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-[#6c5dd3] transition active:scale-95">
                                 How to Enroll
                             </button>
                         </div>
                     </div>
 
                     {/* Statistics */}
-                    <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                        <div className="bg-white p-6 rounded-xl shadow-sm">
-                            <div className="text-2xl font-bold text-[#6c5dd3] mb-2">{courses.length}</div>
-                            <div className="text-gray-600">Total Courses</div>
+                    <div className="mt-8 lg:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 text-center">
+                        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-sm">
+                            <div className="text-xl lg:text-2xl font-bold text-[#6c5dd3] mb-1 lg:mb-2">{courses.length}</div>
+                            <div className="text-xs lg:text-base text-gray-600">Total Courses</div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm">
-                            <div className="text-2xl font-bold text-[#4CBC9A] mb-2">
+                        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-sm">
+                            <div className="text-xl lg:text-2xl font-bold text-[#4CBC9A] mb-1 lg:mb-2">
                                 {tutors.length}
                             </div>
-                            <div className="text-gray-600">Expert Tutors</div>
+                            <div className="text-xs lg:text-base text-gray-600">Expert Tutors</div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm">
-                            <div className="text-2xl font-bold text-[#FEC64F] mb-2">
+                        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-sm">
+                            <div className="text-xl lg:text-2xl font-bold text-[#FEC64F] mb-1 lg:mb-2">
                                 {categories.length}
                             </div>
-                            <div className="text-gray-600">Categories</div>
+                            <div className="text-xs lg:text-base text-gray-600">Categories</div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm">
-                            <div className="text-2xl font-bold text-[#FF6B6B] mb-2">
+                        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-sm">
+                            <div className="text-xl lg:text-2xl font-bold text-[#FF6B6B] mb-1 lg:mb-2">
                                 {courses.reduce((total, course) => total + (course.enrolledCount || 0), 0)}
                             </div>
-                            <div className="text-gray-600">Total Enrollments</div>
+                            <div className="text-xs lg:text-base text-gray-600">Total Enrollments</div>
                         </div>
                     </div>
                 </div>

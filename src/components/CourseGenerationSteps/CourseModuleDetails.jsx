@@ -1,299 +1,494 @@
-// src/pages/CourseModuleDetails.jsx
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase.js';
+import { generateModuleContent } from '../../services/geminiService.js';
 
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getModuleContentFromAPI } from '../../services/contentService';
-
-// (The pickDescription function remains the same, so it's omitted for brevity)
-function pickDescription(content, moduleName) {
-    const candidates = [
-        content?.description,
-        content?.module_description,
-        content?.overview,
-        content?.summary,
-        content?.intro,
-        content?.introduction,
-    ];
-    for (const candidate of candidates) {
-        if (typeof candidate === 'string') {
-            const trimmed = candidate.trim();
-            if (trimmed.length > 0) return trimmed;
-        }
-    }
-    if (Array.isArray(content?.lessons) && content.lessons.length > 0) {
-        const firstLessonDesc = content.lessons[0]?.description;
-        if (typeof firstLessonDesc === 'string' && firstLessonDesc.trim().length > 0) {
-            return firstLessonDesc.trim();
-        }
-    }
-    if (Array.isArray(content?.objectives) && content.objectives.length > 0) {
-        return `Objectives: ${content.objectives.slice(0, 3).join('; ')}`;
-    }
-    return '';
-}
-
-
-function CourseModuleDetails() {
+const CourseModuleDetails = () => {
+    const { courseId } = useParams();
     const navigate = useNavigate();
-    const location = useLocation();
+    const [course, setCourse] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [generating, setGenerating] = useState({});
+    const [activeModule, setActiveModule] = useState(0);
+    const [modules, setModules] = useState([]);
+    const [editMode, setEditMode] = useState({});
+    const [rawContent, setRawContent] = useState({});
 
-    const initialModules = location.state?.modules || [];
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const courseDoc = await getDoc(doc(db, 'courses', courseId));
+                if (courseDoc.exists()) {
+                    const courseData = courseDoc.data();
+                    setCourse(courseData);
+                    setModules(courseData.modules || []);
 
-    const [moduleDetails, setModuleDetails] = useState(
-        initialModules.map(module => ({
-            ...module,
-            description: `Details for ${module.name} will be generated here.`,
-            duration: 'Pending...',
-            objectives: [],
-            lessons: [],
-            assessment: { type: 'Pending...', weight: 'Pending...', description: '' },
-            isGenerated: false, // Add a flag to track generation status
-        }))
-    );
-
-    const [expandedModule, setExpandedModule] = useState(null);
-    const [expandedLesson, setExpandedLesson] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [contentGenerated, setContentGenerated] = useState(false);
-
-    // (Helper functions toggleModule, toggleLesson, handleModuleEdit, handleLessonEdit remain the same)
-    const toggleModule = (id) => {
-        setExpandedModule(expandedModule === id ? null : id);
-        setExpandedLesson(null);
-    };
-
-    const toggleLesson = (lessonId) => {
-        setExpandedLesson(expandedLesson === lessonId ? null : lessonId);
-    };
-
-    const handleModuleEdit = (moduleId, field, value) => {
-        setModuleDetails(prevModules =>
-            prevModules.map(module =>
-                module.id === moduleId ? { ...module, [field]: value } : module
-            )
-        );
-    };
-
-    const handleLessonEdit = (moduleId, lessonId, field, value) => {
-        setModuleDetails(prevModules =>
-            prevModules.map(module =>
-                module.id === moduleId
-                    ? {
-                        ...module,
-                        lessons: module.lessons.map(lesson =>
-                            lesson.id === lessonId ? { ...lesson, [field]: value } : lesson
-                        )
-                    }
-                    : module
-            )
-        );
-    };
-
-    // --- REWRITTEN FOR PROGRESSIVE UPDATES ---
-    const generateModuleContent = async () => {
-        if (contentGenerated || loading) return;
-
-        setLoading(true);
-        setError('');
-
-        const courseInfo = location.state?.courseInfo || {
-            title: "Course",
-            description: "A comprehensive course",
-            expertiseLevel: "Beginners"
+                    // Generate content for modules that don't have it
+                    const modulesWithContent = await Promise.all(
+                        (courseData.modules || []).map(async (module, index) => {
+                            if (!module.content && module.title) {
+                                setGenerating(prev => ({ ...prev, [index]: true }));
+                                try {
+                                    const content = await generateModuleContent(
+                                        module.title,
+                                        courseData.difficulty,
+                                        courseData.title,
+                                        courseData.description
+                                    );
+                                    return { ...module, content };
+                                } catch (error) {
+                                    console.error(`Error generating content for module ${index}:`, error);
+                                    return { ...module, content: '<div style="font-family: Arial, sans-serif; padding: 20px;"><h1 style="color: #2c3e50;">' + module.title + '</h1><p>Content generation failed. Please try regenerating this module.</p></div>' };
+                                } finally {
+                                    setGenerating(prev => ({ ...prev, [index]: false }));
+                                }
+                            }
+                            return module;
+                        })
+                    );
+                    setModules(modulesWithContent);
+                }
+            } catch (error) {
+                console.error('Error fetching course:', error);
+                alert('Failed to load course');
+            } finally {
+                setLoading(false);
+            }
         };
 
-        let successfulGenerations = 0;
-        let failedGenerations = 0;
+        fetchCourse();
+    }, [courseId]);
 
-        // Process modules sequentially to update UI as each one completes
-        for (const moduleToProcess of initialModules) {
-            try {
-                console.log(`🚀 Starting content generation for: ${moduleToProcess.name}`);
-                const content = await getModuleContentFromAPI(
-                    moduleToProcess.name,
-                    courseInfo.description,
-                    courseInfo.expertiseLevel
-                );
+    const handleContentChange = (index, content) => {
+        const updatedModules = modules.map((module, i) =>
+            i === index ? { ...module, content } : module
+        );
+        setModules(updatedModules);
+    };
 
-                // Update the state for THIS specific module immediately
-                setModuleDetails(prevModules =>
-                    prevModules.map(m =>
-                        m.id === moduleToProcess.id
-                            ? {
-                                ...m,
-                                description: pickDescription(content, m.name) || `AI-generated description for ${m.name}.`,
-                                duration: content.duration || '2 weeks',
-                                objectives: content.objectives || ['Understand core concepts.'],
-                                lessons: (content.lessons || []).map((lesson, lessonIndex) => ({
-                                    id: lesson.id || lessonIndex + 1,
-                                    ...lesson,
-                                })),
-                                assessment: content.assessment || { type: 'Project', weight: '30%', description: 'Final project.' },
-                                isGenerated: true,
-                            }
-                            : m
-                    )
-                );
-                successfulGenerations++;
-
-            } catch (err) {
-                console.error(`❌ Failed to generate content for module "${moduleToProcess.name}":`, err);
-                failedGenerations++;
-
-                // Update the specific module to show an error state
-                setModuleDetails(prevModules =>
-                    prevModules.map(m =>
-                        m.id === moduleToProcess.id
-                            ? {
-                                ...m,
-                                description: `Failed to generate content for ${m.name}. Please try again or fill in the details manually.`,
-                                isGenerated: false, // Mark as not generated
-                            }
-                            : m
-                    )
-                );
-            }
-        }
-
-        console.log("🎉 Content generation process finished.");
-        setLoading(false);
-        setContentGenerated(true); // Mark the overall process as complete
-
-        if (failedGenerations > 0) {
-            setError(`${failedGenerations} out of ${initialModules.length} modules failed to generate. Please review them and check the console for details.`);
+    const toggleEditMode = (index) => {
+        setEditMode(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+        if (!editMode[index]) {
+            setRawContent(prev => ({
+                ...prev,
+                [index]: modules[index].content
+            }));
         }
     };
 
+    const regenerateModuleContent = async (index) => {
+        if (!course) return;
 
-    const handleConfirm = () => {
-        console.log('Module details confirmed:', moduleDetails);
-        navigate('/add-course/final-review', { state: { moduleDetails } });
+        setGenerating(prev => ({ ...prev, [index]: true }));
+        try {
+            const content = await generateModuleContent(
+                modules[index].title,
+                course.difficulty,
+                course.title,
+                course.description
+            );
+
+            const updatedModules = modules.map((module, i) =>
+                i === index ? { ...module, content } : module
+            );
+            setModules(updatedModules);
+            setEditMode(prev => ({ ...prev, [index]: false }));
+        } catch (error) {
+            console.error('Error regenerating content:', error);
+            alert('Failed to regenerate content');
+        } finally {
+            setGenerating(prev => ({ ...prev, [index]: false }));
+        }
     };
 
-    // ... (rest of the JSX remains the same) ...
+    const saveContent = async (index) => {
+        if (editMode[index]) {
+            handleContentChange(index, rawContent[index]);
+        }
+        setEditMode(prev => ({ ...prev, [index]: false }));
+    };
 
-    // You can also use the `isGenerated` flag for more granular UI feedback,
-    // for example, by adding a small checkmark icon next to generated modules.
+    const saveAndPublish = async (status = 'published') => {
+        if (modules.some(module => !module.content.trim())) {
+            alert('Please ensure all modules have content');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            await updateDoc(doc(db, 'courses', courseId), {
+                modules: modules,
+                status: status,
+                updatedAt: new Date(),
+                creationStep: 'completed'
+            });
+
+            alert(`Course ${status === 'published' ? 'published' : 'saved as draft'} successfully!`);
+            navigate('/tutor-dashboard');
+        } catch (error) {
+            console.error('Error saving course:', error);
+            alert('Failed to save course');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Function to safely render HTML content
+    const renderModuleContent = (content) => {
+        return { __html: content };
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8 mt-20 flex items-center justify-center">
+                <div className="text-center">
+                    <i className="fas fa-spinner fa-spin text-3xl text-[#6c5dd3] mb-4"></i>
+                    <p className="text-gray-600">Generating course content...</p>
+                    <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!course) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8 mt-20 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 text-lg">Course not found</p>
+                    <button
+                        onClick={() => navigate('/tutor-dashboard')}
+                        className="mt-4 bg-[#6c5dd3] text-white px-6 py-2 rounded-lg"
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen mt-30 mb-30">
-            {/* Header Section */}
-            <div className='max-w-6xl mx-auto flex flex-row justify-between items-center p-4'>
-                <h1 className='heading-text-lg'>Generate your course in 4 easy steps!</h1>
-                <div className="flex items-center gap-4 text-[15px] text-black "><i className="fas fa-calendar-alt cursor-pointer"></i><i className="fas fa-bookmark cursor-pointer"></i><i className="fas fa-share-alt cursor-pointer"></i></div>
-            </div>
-
-            {/* Progress Steps Component */}
-            <div className="flex justify-center pt-10">
-                <div className="relative flex items-center justify-center w-20 h-20"><div className="z-10 w-16 h-16 bg-BgPrimary rounded-full flex items-center justify-center text-white text-xl font-bold">1</div><div className="absolute top-0 w-20 h-10 border-2 border-hoverGreen rounded-t-full border-b-0"></div><div className="absolute -left-[2.9px] bottom-[35px] w-2 h-2 bg-white border-1 border-hoverGreen rounded-full"></div></div>
-                <div className="relative flex items-center justify-center w-20 h-20"><div className="z-10 w-16 h-16 bg-BgPrimary rounded-full flex items-center justify-center text-white text-xl font-bold">2</div><div className="absolute bottom-0 w-20 h-10 border-2 border-hoverGreen rounded-b-full border-t-0"></div><div className="absolute -left-[2.9px] bottom-[35px] w-2 h-2 bg-white border-1 z-1 border-hoverGreen rounded-full"></div></div>
-                <div className="relative flex items-center justify-center w-20 h-20"><div className="z-10 w-16 h-16 bg-BgPrimary rounded-full flex items-center justify-center text-white text-xl font-bold">3</div><div className="absolute top-0 w-20 h-10 border-2 border-hoverGreen rounded-t-full border-b-0"></div><div className="absolute -left-[2.9px] bottom-[35px] w-2 h-2 bg-white z-1 border-1 border-hoverGreen rounded-full"></div></div>
-                <div className="relative flex items-center justify-center w-20 h-20"><div className="z-10 w-16 h-16 bg-BgSecondary rounded-full flex items-center justify-center text-black text-xl font-bold">4</div><div className="absolute bottom-0 w-20 h-10 border-2 border-hoverLightGreen rounded-b-full border-t-0"></div><div className="absolute -left-[2.9px] bottom-[35px] w-2 h-2 bg-white z-1 border-1 border-hoverLightGreen rounded-full"></div></div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className='max-w-6xl mx-auto pt-20 p-4 flex flex-col'>
-                <h1 className='text-2xl font-bold pb-6'>Review Module Details and Lesson Structure</h1>
-                <div className="space-y-4 mb-8">
-                    <p className="text-gray-700">Review the detailed structure of each module. You can expand modules to see individual lessons, edit content, and customize the learning experience for your students.</p>
-                    <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-blue-800 mb-1">{contentGenerated ? 'Content Generation Complete!' : 'Generate AI-Powered Content'}</h3>
-                            <p className="text-sm text-blue-600">{contentGenerated ? 'Module content has been generated. You can now review and edit the details below.' : 'Click the button below to generate detailed content, lessons, and objectives for all modules using AI.'}</p>
+        <div className="min-h-screen bg-gray-50 py-8 mt-20 pb-10">
+            <div className="max-w-6xl mx-auto px-4">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] p-4 lg:p-6 text-white">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-xl lg:text-2xl font-bold">Generate Module Content</h1>
+                                <p className="text-blue-100 mt-2">Step 3: Review and edit AI-generated content</p>
+                                <p className="text-blue-100 text-sm mt-1">Course: {course.title}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-blue-100">{modules.length} Modules</p>
+                                <p className="text-blue-100 text-sm">Click modules to preview content</p>
+                            </div>
                         </div>
-                        <button onClick={generateModuleContent} disabled={loading || contentGenerated} className={`px-6 py-2 rounded-lg font-medium transition-colors ${loading || contentGenerated ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
-                            {loading ? (<div className="flex items-center gap-2"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div><span>Generating...</span></div>) : contentGenerated ? (<div className="flex items-center gap-2"><i className="fas fa-check"></i><span>Generated</span></div>) : (<div className="flex items-center gap-2"><i className="fas fa-magic"></i><span>Generate Content</span></div>)}
-                        </button>
                     </div>
-                    {error && (<div className="p-4 bg-red-50 rounded-lg border border-red-200"><div className="flex items-center gap-2"><i className="fas fa-exclamation-triangle text-red-600"></i><span className="text-red-800 font-medium">Error</span></div><p className="text-sm text-red-600 mt-1">{error}</p></div>)}
-                </div>
-                <div className="space-y-6">
-                    {moduleDetails.map((module) => (
-                        <div key={module.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                            <div className="bg-BgGreyColor p-6 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleModule(module.id)}>
-                                <div className="flex items-start space-x-4 flex-1">
-                                    <div className="flex-shrink-0 w-10 h-10 bg-BgPrimary rounded-full flex items-center justify-center text-white font-bold">{module.id}</div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">{module.name}</h3>
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                                            <span className="flex items-center gap-1"><i className="fas fa-clock"></i>{module.duration}</span>
-                                            <span className="flex items-center gap-1"><i className="fas fa-book"></i>{module.lessons.length} lessons</span>
-                                            <span className="flex items-center gap-1"><i className="fas fa-tasks"></i>{module.assessment.type}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <span className="text-sm text-gray-500 font-medium">{expandedModule === module.id ? 'Collapse' : 'Expand Details'}</span>
-                                    <i className={`fas fa-chevron-${expandedModule === module.id ? 'up' : 'down'} text-gray-500 text-lg`}></i>
+
+                    <div className="flex flex-col lg:flex-row">
+                        {/* Module Navigation */}
+                        <div className="lg:w-1/4 border-r border-gray-200 bg-white">
+                            <div className="p-4">
+                                <h3 className="font-semibold text-gray-800 mb-4">Course Modules</h3>
+                                <div className="space-y-2">
+                                    {modules.map((module, index) => (
+                                        <button
+                                            key={module.id}
+                                            onClick={() => setActiveModule(index)}
+                                            className={`w-full text-left p-3 rounded-lg transition ${activeModule === index
+                                                ? 'bg-[#6c5dd3] text-white'
+                                                : 'bg-gray-50 hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${activeModule === index
+                                                    ? 'bg-white text-[#6c5dd3]'
+                                                    : 'bg-gray-200 text-gray-600'
+                                                    }`}>
+                                                    {index + 1}
+                                                </div>
+                                                <span className="font-medium truncate">{module.title}</span>
+                                            </div>
+                                            {generating[index] && (
+                                                <div className="flex items-center gap-1 text-xs mt-1 text-yellow-200">
+                                                    <i className="fas fa-spinner fa-spin"></i>
+                                                    <span>Generating...</span>
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                            {expandedModule === module.id && (
-                                <div className="p-6 bg-white border-t border-gray-200 space-y-6">
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        <div className="lg:col-span-2">
-                                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i className="fas fa-align-left text-BgPrimary"></i>Module Description</h4>
-                                            <textarea value={module.description} onChange={(e) => handleModuleEdit(module.id, 'description', e.target.value)} className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-BgPrimary focus:border-transparent resize-vertical" placeholder="Enter module description..." />
+                        </div>
+
+                        {/* Module Content Preview */}
+                        <div className="lg:w-3/4 bg-gray-50">
+                            {modules.length > 0 && (
+                                <div className="p-4 lg:p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h2 className="text-xl lg:text-2xl font-bold text-gray-800">
+                                                {modules[activeModule].title}
+                                            </h2>
+                                            <p className="text-gray-600">Module {activeModule + 1} of {modules.length}</p>
                                         </div>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><i className="fas fa-bullseye text-BgPrimary"></i>Learning Objectives</h4>
-                                                <div className="space-y-2">{module.objectives.map((objective, index) => (<div key={index} className="flex items-start gap-2"><i className="fas fa-check text-green-500 mt-1 text-sm"></i><span className="text-sm text-gray-700">{objective}</span></div>))}</div>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2"><i className="fas fa-chart-pie text-BgPrimary"></i>Assessment</h4>
-                                                <div className="bg-blue-50 p-3 rounded-lg"><p className="text-sm text-gray-700"><strong>Type:</strong> {module.assessment.type}</p><p className="text-sm text-gray-700"><strong>Weight:</strong> {module.assessment.weight}</p><p className="text-sm text-gray-700 mt-1">{module.assessment.description}</p></div>
-                                            </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => toggleEditMode(activeModule)}
+                                                className="bg-[#6c5dd3] text-white px-4 py-2 rounded-lg hover:bg-[#5a4bbf] transition flex items-center gap-2"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                                {editMode[activeModule] ? 'Preview' : 'Edit HTML'}
+                                            </button>
+                                            <button
+                                                onClick={() => regenerateModuleContent(activeModule)}
+                                                disabled={generating[activeModule]}
+                                                className="bg-[#4CBC9A] text-white px-4 py-2 rounded-lg hover:bg-[#3aa384] disabled:opacity-50 transition flex items-center gap-2"
+                                            >
+                                                {generating[activeModule] ? (
+                                                    <i className="fas fa-spinner fa-spin"></i>
+                                                ) : (
+                                                    <i className="fas fa-sync-alt"></i>
+                                                )}
+                                                Regenerate
+                                            </button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="flex items-center justify-between mb-4"><h4 className="font-semibold text-gray-800 text-lg flex items-center gap-2"><i className="fas fa-play-circle text-BgPrimary"></i>Lessons in this Module</h4><span className="text-sm text-gray-500">{module.lessons.length} lessons</span></div>
-                                        <div className="space-y-4">
-                                            {module.lessons.map((lesson) => (
-                                                <div key={lesson.id} className="border border-gray-200 rounded-lg">
-                                                    <div className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => toggleLesson(lesson.id)}>
-                                                        <div className="flex items-start space-x-4 flex-1">
-                                                            <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 text-sm font-bold">{lesson.id}</div>
-                                                            <div className="flex-1">
-                                                                <input type="text" value={lesson.title} onChange={(e) => handleLessonEdit(module.id, lesson.id, 'title', e.target.value)} className="text-lg font-semibold text-gray-800 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-BgPrimary rounded px-2 py-1 w-full mb-1" onClick={(e) => e.stopPropagation()} />
-                                                                <div className="flex flex-wrap gap-3 text-sm text-gray-600"><span className="flex items-center gap-1"><i className="fas fa-clock"></i>{lesson.duration}</span><span className="flex items-center gap-1"><i className="fas fa-tag"></i>{lesson.type}</span></div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center space-x-2"><span className="text-sm text-gray-500">{expandedLesson === lesson.id ? 'Less' : 'More'}</span><i className={`fas fa-chevron-${expandedLesson === lesson.id ? 'up' : 'down'} text-gray-500`}></i></div>
-                                                    </div>
-                                                    {expandedLesson === lesson.id && (
-                                                        <div className="p-4 bg-gray-50 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                            <div><h5 className="font-semibold text-gray-700 mb-2">Lesson Description</h5><textarea value={lesson.description} onChange={(e) => handleLessonEdit(module.id, lesson.id, 'description', e.target.value)} className="w-full h-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-BgPrimary focus:border-transparent resize-vertical text-sm" onClick={(e) => e.stopPropagation()} /></div>
-                                                            <div>
-                                                                <h5 className="font-semibold text-gray-700 mb-2">Learning Materials</h5>
-                                                                <div className="space-y-2">{(lesson.materials || []).map((material, index) => (<div key={index} className="flex items-center gap-2 text-sm text-gray-700"><i className="fas fa-file-alt text-BgPrimary text-xs"></i>{material}</div>))}</div>
-                                                                <h5 className="font-semibold text-gray-700 mt-4 mb-2">Lesson Objectives</h5>
-                                                                <div className="space-y-1">{(lesson.objectives || []).map((objective, index) => (<div key={index} className="flex items-start gap-2 text-sm text-gray-700"><i className="fas fa-circle text-BgPrimary text-xs mt-1"></i>{objective}</div>))}</div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
+
+                                    {editMode[activeModule] ? (
+                                        // Edit Mode - Raw HTML Editor
+                                        <div className="mb-6">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Edit HTML Content
+                                                </label>
+                                                <button
+                                                    onClick={() => saveContent(activeModule)}
+                                                    className="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700"
+                                                >
+                                                    Save Changes
+                                                </button>
+                                            </div>
+                                            <textarea
+                                                value={rawContent[activeModule] || modules[activeModule].content}
+                                                onChange={(e) => setRawContent(prev => ({ ...prev, [activeModule]: e.target.value }))}
+                                                rows="20"
+                                                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] resize-none font-mono text-sm"
+                                                placeholder="Edit HTML content here..."
+                                            />
                                         </div>
+                                    ) : (
+                                        // Preview Mode - Beautiful Frontend Display
+                                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                            <div
+                                                className="module-content-preview p-6 lg:p-8 min-h-[500px] overflow-y-auto"
+                                                dangerouslySetInnerHTML={renderModuleContent(modules[activeModule].content)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Navigation between modules */}
+                                    <div className="flex justify-between pt-6 border-t mt-6">
+                                        <button
+                                            onClick={() => setActiveModule(prev => Math.max(0, prev - 1))}
+                                            disabled={activeModule === 0}
+                                            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition flex items-center gap-2"
+                                        >
+                                            <i className="fas fa-arrow-left"></i>
+                                            Previous Module
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveModule(prev => Math.min(modules.length - 1, prev + 1))}
+                                            disabled={activeModule === modules.length - 1}
+                                            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition flex items-center gap-2"
+                                        >
+                                            Next Module
+                                            <i className="fas fa-arrow-right"></i>
+                                        </button>
                                     </div>
                                 </div>
                             )}
                         </div>
-                    ))}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col-reverse sm:flex-row gap-4 p-6 border-t">
+                        <button
+                            onClick={() => navigate(`/add-course/modules/${courseId}`)}
+                            className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                        >
+                            <i className="fas fa-arrow-left mr-2"></i>
+                            Back to Modules
+                        </button>
+
+                        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                            <button
+                                onClick={() => saveAndPublish('draft')}
+                                disabled={saving}
+                                className="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 disabled:opacity-50 font-medium"
+                            >
+                                {saving ? (
+                                    <i className="fas fa-spinner fa-spin"></i>
+                                ) : (
+                                    'Save as Draft'
+                                )}
+                            </button>
+                            <button
+                                onClick={() => saveAndPublish('published')}
+                                disabled={saving}
+                                className="flex-1 bg-[#4CBC9A] text-white py-3 rounded-lg hover:bg-[#3aa384] disabled:opacity-50 font-medium flex items-center justify-center gap-2"
+                            >
+                                {saving ? (
+                                    <i className="fas fa-spinner fa-spin"></i>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-rocket"></i>
+                                        Publish Course
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex justify-between items-center pt-8 mt-8 border-t border-gray-200">
-                    <button onClick={() => navigate(-1)} className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"><i className="fas fa-arrow-left"></i>Back to Modules</button>
-                    <button onClick={handleConfirm} className="btn-primary px-8 py-3 font-medium flex items-center gap-2">Continue to Final Review<i className="fas fa-arrow-right"></i></button>
+
+                {/* Progress Indicator */}
+                <div className="mt-6 bg-white rounded-2xl shadow-lg p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-[#4CBC9A] text-white rounded-full flex items-center justify-center font-semibold">
+                                <i className="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-800">Course Description</p>
+                                <p className="text-sm text-gray-600">Completed</p>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 h-1 bg-gray-200 mx-4">
+                            <div className="h-1 bg-[#4CBC9A] w-full"></div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-[#4CBC9A] text-white rounded-full flex items-center justify-center font-semibold">
+                                <i className="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-800">Module Organization</p>
+                                <p className="text-sm text-gray-600">Completed</p>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 h-1 bg-gray-200 mx-4">
+                            <div className="h-1 bg-[#4CBC9A] w-full"></div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-[#6c5dd3] text-white rounded-full flex items-center justify-center font-semibold">
+                                3
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-800">Content Generation</p>
+                                <p className="text-sm text-gray-600">Current Step</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-start">
-                        <i className="fas fa-info-circle text-blue-500 mt-1 mr-3 text-lg"></i>
-                        <div><h4 className="font-semibold text-blue-800">Next: Final Course Review</h4><p className="text-blue-700 text-sm mt-1">In the next step, you'll review the complete course structure, set pricing, and configure additional settings before publishing your course.</p></div>
+
+                {/* Quick Tips */}
+                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fas fa-lightbulb text-blue-600 mt-1"></i>
+                        <div>
+                            <h4 className="font-semibold text-blue-800 mb-1">Quick Tips</h4>
+                            <ul className="text-blue-700 text-sm space-y-1">
+                                <li>• Click "Preview" to see how students will view the content</li>
+                                <li>• Use "Edit HTML" to make custom changes to the formatting</li>
+                                <li>• "Regenerate" creates new content if you're not satisfied</li>
+                                <li>• Navigate between modules using Previous/Next buttons</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* Add CSS for better content display */}
+            <style jsx>{`
+                .module-content-preview h1 {
+                    color: #2c3e50;
+                    font-size: 2rem;
+                    font-weight: bold;
+                    margin-bottom: 1rem;
+                    border-bottom: 2px solid #3498db;
+                    padding-bottom: 0.5rem;
+                }
+                
+                .module-content-preview h2 {
+                    color: #34495e;
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    margin-top: 1.5rem;
+                    margin-bottom: 0.75rem;
+                }
+                
+                .module-content-preview h3 {
+                    color: #2c3e50;
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    margin-top: 1.25rem;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .module-content-preview p {
+                    line-height: 1.6;
+                    margin-bottom: 1rem;
+                    color: #4a5568;
+                }
+                
+                .module-content-preview ul, .module-content-preview ol {
+                    margin: 1rem 0;
+                    padding-left: 1.5rem;
+                }
+                
+                .module-content-preview li {
+                    line-height: 1.6;
+                    margin-bottom: 0.5rem;
+                    color: #4a5568;
+                }
+                
+                .module-content-preview code {
+                    background: #2c3e50;
+                    color: white;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 0.25rem;
+                    font-family: 'Courier New', monospace;
+                    font-size: 0.9rem;
+                }
+                
+                .module-content-preview pre {
+                    background: #2c3e50;
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    overflow-x: auto;
+                    margin: 1rem 0;
+                    font-family: 'Courier New', monospace;
+                }
+                
+                .module-content-preview blockquote {
+                    border-left: 4px solid #3498db;
+                    background: #f8f9fa;
+                    padding: 1rem;
+                    margin: 1rem 0;
+                    font-style: italic;
+                }
+            `}</style>
         </div>
     );
-}
+};
 
 export default CourseModuleDetails;

@@ -76,7 +76,7 @@ const CreateQuiz = () => {
         }
     };
 
-    // 3. Handle Final Generation
+    // 3. Handle Final Generation - UPDATED TO FIX CORRECT ANSWER FORMAT
     const handleAiGenerate = async () => {
         if (!selectedTopic) {
             alert("Please select a topic first.");
@@ -96,14 +96,64 @@ const CreateQuiz = () => {
                 courseName
             );
 
-            setQuestions(generatedQuestions);
+            console.log('Raw generated questions:', generatedQuestions);
+
+            // Process the generated questions to ensure correctAnswer is an index
+            const processedQuestions = generatedQuestions.map((question, index) => {
+                console.log(`Processing question ${index}:`, question);
+
+                // Handle different correctAnswer formats from AI
+                let correctAnswerIndex = 0; // Default to first option
+
+                if (typeof question.correctAnswer === 'number') {
+                    // If it's already a number, use it directly
+                    correctAnswerIndex = question.correctAnswer;
+                } else if (typeof question.correctAnswer === 'string') {
+                    // If it's a string, try to parse it as a number
+                    const parsed = parseInt(question.correctAnswer);
+                    if (!isNaN(parsed) && parsed >= 0 && parsed < question.options.length) {
+                        correctAnswerIndex = parsed;
+                    } else {
+                        // If it's a string of the answer text, find the matching option index
+                        const matchingIndex = question.options.findIndex(option =>
+                            option.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
+                        );
+                        if (matchingIndex !== -1) {
+                            correctAnswerIndex = matchingIndex;
+                        } else {
+                            console.warn(`Could not find matching option for correct answer: "${question.correctAnswer}" in question ${index + 1}`);
+                            // Fallback: try to find by first letter or partial match
+                            const fallbackIndex = question.options.findIndex(option =>
+                                option.trim().toLowerCase().includes(question.correctAnswer.trim().toLowerCase()) ||
+                                question.correctAnswer.trim().toLowerCase().includes(option.trim().toLowerCase())
+                            );
+                            if (fallbackIndex !== -1) {
+                                correctAnswerIndex = fallbackIndex;
+                                console.log(`Used fallback matching for question ${index + 1}`);
+                            }
+                        }
+                    }
+                }
+
+                console.log(`Question ${index + 1} - Correct answer index:`, correctAnswerIndex);
+
+                return {
+                    ...question,
+                    correctAnswer: correctAnswerIndex
+                };
+            });
+
+            console.log('Processed questions:', processedQuestions);
+
+            setQuestions(processedQuestions);
 
             // Update title to be more specific
             setQuizTitle(`${selectedTopic} Quiz (${selectedDifficulty})`);
             setShowAiModal(false);
-            alert("Questions generated successfully!");
+            alert("Questions generated successfully! Please review and ensure correct answers are properly selected.");
         } catch (error) {
-            alert(error.message);
+            console.error('Error generating questions:', error);
+            alert(error.message || "Failed to generate questions. Please try again.");
         } finally {
             setIsGenerating(false);
         }
@@ -141,11 +191,41 @@ const CreateQuiz = () => {
         setQuestions(values);
     };
 
+    // Function to validate all questions have correct answers selected
+    const validateQuestions = () => {
+        for (let i = 0; i < questions.length; i++) {
+            const question = questions[i];
+            if (!question.questionText.trim()) {
+                alert(`Please fill in the text for Question ${i + 1}`);
+                return false;
+            }
+            if (question.correctAnswer === undefined || question.correctAnswer === null) {
+                alert(`Please select a correct answer for Question ${i + 1}`);
+                return false;
+            }
+            // Check if all options are filled
+            for (let j = 0; j < question.options.length; j++) {
+                if (!question.options[j].trim()) {
+                    alert(`Please fill in all options for Question ${i + 1}`);
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!quizTitle || questions.some(q => !q.questionText || q.correctAnswer === undefined)) {
-            return alert('Please fill all fields and select correct answers for all questions.');
+
+        if (!quizTitle.trim()) {
+            alert('Please enter a quiz title.');
+            return;
         }
+
+        if (!validateQuestions()) {
+            return;
+        }
+
         setLoading(true);
         try {
             await addDoc(collection(db, 'quizzes'), {
@@ -173,13 +253,13 @@ const CreateQuiz = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 mt-16 mb-16 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800">Create a New Quiz</h1>
+            <div className="max-w-4xl mx-auto bg-white p-6 lg:p-8 rounded-xl shadow-lg">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Create a New Quiz</h1>
                     <button
                         type="button"
                         onClick={() => setShowAiModal(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition"
+                        className="w-full sm:w-auto flex justify-center items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition text-sm lg:text-base"
                     >
                         ✨ Generate with Ai
                     </button>
@@ -187,9 +267,9 @@ const CreateQuiz = () => {
 
                 {/* --- NEW AI MODAL --- */}
                 {showAiModal && (
-                    <div className="mb-8 p-6 bg-purple-50 border border-purple-200 rounded-xl animate-fade-in relative">
+                    <div className="mb-6 lg:mb-8 p-4 lg:p-6 bg-purple-50 border border-purple-200 rounded-xl animate-fade-in relative">
                         <button onClick={() => setShowAiModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">✕</button>
-                        <h3 className="font-bold text-purple-800 text-lg mb-4">Generate Quiz from Your Courses</h3>
+                        <h3 className="font-bold text-purple-800 text-base lg:text-lg mb-4 pr-8">Generate Quiz from Your Courses</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -199,7 +279,7 @@ const CreateQuiz = () => {
                                 <select
                                     value={selectedCourseId}
                                     onChange={handleCourseChange}
-                                    className="w-full p-2 border border-purple-200 rounded-md bg-white"
+                                    className="w-full p-2 border border-purple-200 rounded-md bg-white text-sm lg:text-base"
                                 >
                                     <option value="">-- Choose a Course --</option>
                                     {myCourses.map(course => (
@@ -218,7 +298,7 @@ const CreateQuiz = () => {
                                     value={selectedTopic}
                                     onChange={(e) => setSelectedTopic(e.target.value)}
                                     disabled={!selectedCourseId || isExtracting}
-                                    className="w-full p-2 border border-purple-200 rounded-md bg-white disabled:bg-gray-100"
+                                    className="w-full p-2 border border-purple-200 rounded-md bg-white disabled:bg-gray-100 text-sm lg:text-base"
                                 >
                                     <option value="">-- {extractedTopics.length > 0 ? 'Choose a Topic' : 'Waiting for Course...'} --</option>
                                     {extractedTopics.map((topic, index) => (
@@ -233,7 +313,7 @@ const CreateQuiz = () => {
                                 <select
                                     value={selectedDifficulty}
                                     onChange={(e) => setSelectedDifficulty(e.target.value)}
-                                    className="w-full p-2 border border-purple-200 rounded-md bg-white"
+                                    className="w-full p-2 border border-purple-200 rounded-md bg-white text-sm lg:text-base"
                                 >
                                     <option>Beginner</option>
                                     <option>Intermediate</option>
@@ -248,7 +328,7 @@ const CreateQuiz = () => {
                                     type="number" min="1" max="20"
                                     value={aiQuestionCount}
                                     onChange={(e) => setAiQuestionCount(parseInt(e.target.value))}
-                                    className="w-full p-2 border border-purple-200 rounded-md"
+                                    className="w-full p-2 border border-purple-200 rounded-md text-sm lg:text-base"
                                 />
                             </div>
                         </div>
@@ -257,46 +337,101 @@ const CreateQuiz = () => {
                             type="button"
                             onClick={handleAiGenerate}
                             disabled={isGenerating || !selectedTopic}
-                            className="mt-6 w-full bg-purple-600 text-white py-3 rounded-md font-semibold hover:bg-purple-700 disabled:opacity-50 shadow-md transition-all"
+                            className="mt-6 w-full bg-purple-600 text-white py-3 rounded-md font-semibold hover:bg-purple-700 disabled:opacity-50 shadow-md transition-all text-sm lg:text-base"
                         >
                             {isGenerating ? 'Generating Questions...' : 'Generate Questions'}
                         </button>
                     </div>
                 )}
 
+                {/* Debug Info - Show current questions state */}
+                {questions.length > 0 && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                        <details className="text-sm">
+                            <summary className="cursor-pointer font-medium text-blue-800">
+                                Debug: Current Questions State (Click to expand)
+                            </summary>
+                            <pre className="mt-2 text-xs overflow-auto">
+                                {JSON.stringify(questions, null, 2)}
+                            </pre>
+                        </details>
+                    </div>
+                )}
+
                 {/* Existing Manual Form */}
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Quiz Title</label>
-                        <input type="text" value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Quiz Title</label>
+                        <input
+                            type="text"
+                            value={quizTitle}
+                            onChange={(e) => setQuizTitle(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm lg:text-base"
+                            required
+                        />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea value={quizDescription} onChange={(e) => setQuizDescription(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" rows="3"></textarea>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            value={quizDescription}
+                            onChange={(e) => setQuizDescription(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm lg:text-base"
+                            rows="3"
+                        ></textarea>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Deadline</label>
-                            <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                            <input
+                                type="date"
+                                value={deadline}
+                                onChange={(e) => setDeadline(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm lg:text-base"
+                                required
+                            />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Time Limit (mins)</label>
-                            <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(parseInt(e.target.value))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Time Limit (mins)</label>
+                            <input
+                                type="number"
+                                value={timeLimit}
+                                onChange={(e) => setTimeLimit(parseInt(e.target.value))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm lg:text-base"
+                                required
+                            />
                         </div>
                     </div>
 
-                    <hr />
-                    <h2 className="text-xl font-semibold text-gray-800">Questions</h2>
+                    <hr className="my-6" />
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-lg lg:text-xl font-semibold text-gray-800">Questions ({questions.length})</h2>
+                        <div className="text-sm text-gray-600">
+                            {questions.filter(q => q.correctAnswer !== undefined && q.correctAnswer !== null).length} / {questions.length} questions have correct answers selected
+                        </div>
+                    </div>
 
                     {questions.map((question, qIndex) => (
                         <div key={qIndex} className="p-4 border rounded-lg space-y-4 relative bg-gray-50">
-                            <h3 className="font-semibold text-gray-700">Question {qIndex + 1}</h3>
+                            <div className="flex justify-between items-start pr-8">
+                                <h3 className="font-semibold text-gray-700 text-sm lg:text-base">Question {qIndex + 1}</h3>
+                                {questions.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeQuestion(qIndex)}
+                                        className="absolute top-2 right-2 text-red-500 p-2 hover:bg-red-100 rounded-full"
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                )}
+                            </div>
                             <textarea
                                 name="questionText"
-                                placeholder="Question text"
+                                placeholder="Enter question text..."
                                 value={question.questionText}
                                 onChange={e => handleQuestionChange(qIndex, e)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md" required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm lg:text-base"
+                                required
+                                rows="2"
                             />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {question.options.map((option, oIndex) => (
@@ -306,7 +441,7 @@ const CreateQuiz = () => {
                                             name={`correct-${qIndex}`}
                                             checked={question.correctAnswer === oIndex}
                                             onChange={() => handleCorrectAnswerChange(qIndex, oIndex)}
-                                            className="h-4 w-4 text-green-600"
+                                            className="h-4 w-4 text-green-600 flex-shrink-0"
                                             required
                                         />
                                         <input
@@ -314,28 +449,41 @@ const CreateQuiz = () => {
                                             placeholder={`Option ${oIndex + 1}`}
                                             value={option}
                                             onChange={e => handleOptionChange(qIndex, oIndex, e)}
-                                            className={`w-full px-3 py-2 border rounded-md ${question.correctAnswer === oIndex ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                                            className={`w-full px-3 py-2 border rounded-md text-sm lg:text-base ${question.correctAnswer === oIndex
+                                                ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
+                                                : 'border-gray-300'
                                                 }`}
                                             required
                                         />
+                                        {question.correctAnswer === oIndex && (
+                                            <span className="text-green-600 text-xs font-medium bg-green-100 px-2 py-1 rounded">
+                                                Correct
+                                            </span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
-                            {questions.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeQuestion(qIndex)}
-                                    className="absolute top-2 right-2 text-red-500 p-2 hover:bg-red-100 rounded-full"
-                                >
-                                    <i className="fas fa-trash"></i>
-                                </button>
-                            )}
+                            <div className="text-xs text-gray-500">
+                                Current correct answer: Option {question.correctAnswer + 1}
+                            </div>
                         </div>
                     ))}
 
-                    <div className="flex justify-between pt-4">
-                        <button type="button" onClick={addQuestion} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50">+ Add Question</button>
-                        <button type="submit" disabled={loading} className="px-8 py-3 bg-[#4CBC9A] text-white rounded-md font-medium hover:bg-[#3aa384] disabled:bg-gray-400">{loading ? 'Creating...' : 'Create Quiz'}</button>
+                    <div className="flex flex-col sm:flex-row justify-between pt-4 gap-4 sm:gap-0">
+                        <button
+                            type="button"
+                            onClick={addQuestion}
+                            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 text-center"
+                        >
+                            + Add Question
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full sm:w-auto px-8 py-3 bg-[#4CBC9A] text-white rounded-md font-medium hover:bg-[#3aa384] disabled:bg-gray-400 text-center"
+                        >
+                            {loading ? 'Creating...' : 'Create Quiz'}
+                        </button>
                     </div>
                 </form>
             </div>

@@ -34,9 +34,11 @@ import AdminDashboard from './components/Admin/admindashboard';
 import AdminLoginScreen from './components/LoginScreen/AdminLoginScreen';
 import PerformanceAnalysis from './components/ReportGeneration/PerformanceAnalysis';
 import TutorStudentProgress from './components/ReportGeneration/TutorStudentProgress';
-import CreateCourse from './components/CreateCourse';
 import CourseAnalytics from './components/CourseAnalytics';
 import QuizResults from './components/Quiz/QuizResults';
+import TutorCourseView from './components/TutorPortal/TutorCourseView';
+import TutorRoute from './components/TutorPortal/TutorRoute';
+import StudentCourseView from './components/StudentPortal/StudentCourseView';
 
 
 function App() {
@@ -69,6 +71,8 @@ function App() {
             <Route path="/student-dashboard" element={<StudentDashboard />} />
             <Route path="/book-recomendation" element={<BookRecommendation />} />
             <Route path="/performance-analysis" element={<PerformanceAnalysis />} />
+            <Route path="/learn/course/:id" element={<StudentCourseView />} />
+
 
             {/* Assignment & Quiz Routes (Student) */}
             <Route path="/assignment/:id" element={<AssignmentDetail />} />
@@ -78,19 +82,49 @@ function App() {
 
 
             {/* Tutor Routes */}
-            <Route path="/tutor-dashboard" element={<TutorDashboard />} />
-            <Route path="/tutor/create-course" element={<CreateCourse />} />
-            <Route path="/tutor/course/:id/edit" element={<CreateCourse />} />
-            <Route path="/tutor/student-progress" element={<TutorStudentProgress />} />
-            <Route path="/tutor/course/:courseId/analytics" element={<CourseAnalytics />} />
+            // Update the tutor routes to be protected
+            <Route path="/tutor-dashboard" element={
+              <TutorRoute>
+                <TutorDashboard />
+              </TutorRoute>
+            } />
+            <Route path="/tutor/course/:id" element={
+              <TutorRoute>
+                <TutorCourseView />
+              </TutorRoute>
+            } />
+            <Route path="/tutor/student-progress" element={
+              <TutorRoute>
+                <TutorStudentProgress />
+              </TutorRoute>
+            } />
+            <Route path="/tutor/course/:courseId/analytics" element={
+              <TutorRoute>
+                <CourseAnalytics />
+              </TutorRoute>
+            } />
+
+            <Route path="/create-quiz" element={<CreateQuiz />} />
+            <Route path="/create-assignment" element={<CreateAssignment />} />
+
 
 
             {/* Tutor Content Creation Routes */}
-            <Route path="/create-assignment" element={<CreateAssignment />} />
-            <Route path="/create-quiz" element={<CreateQuiz />} />
-            <Route path="/add-course" element={<CourseDescribe />} />
-            <Route path="/add-course/modules" element={<CourseModules />} />
-            <Route path="/add-course/module-details" element={<CourseModuleDetails />} />
+            <Route path="/add-course" element={
+              <TutorRoute>
+                <CourseDescribe />
+              </TutorRoute>
+            } />
+            <Route path="/add-course/modules/:courseId" element={
+              <TutorRoute>
+                <CourseModules />
+              </TutorRoute>
+            } />
+            <Route path="/add-course/module-details/:courseId" element={
+              <TutorRoute>
+                <CourseModuleDetails />
+              </TutorRoute>
+            } />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

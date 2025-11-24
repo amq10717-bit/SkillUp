@@ -2,7 +2,6 @@ import React from 'react'
 import QuizCard from '../Card/QuizCard'
 
 function QuizPreview({ quizzes }) {
-    // Add debug logging
     console.log('QuizPreview received quizzes:', quizzes);
 
     if (!quizzes || quizzes.length === 0) {
@@ -16,7 +15,7 @@ function QuizPreview({ quizzes }) {
     }
 
     return (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5 w-full">
             {quizzes.map((quizItem, index) => (
                 <QuizCard
                     key={quizItem.id || quizItem.QuizId || index}

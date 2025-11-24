@@ -182,16 +182,34 @@ function QuizSession() {
             // Save to quizAttempts collection
             const attemptRef = await addDoc(collection(db, 'quizAttempts'), quizAttemptData);
 
-            // Also update the quiz document to include this attempt in its attempts array
-            await updateDoc(doc(db, 'quizzes', id), {
-                attempts: arrayUnion({
-                    attemptId: attemptRef.id,
-                    studentId: user.uid,
-                    score: result.percentage,
-                    date: serverTimestamp(),
-                    timeSpent: quizAttemptData.timeSpent
-                })
-            });
+            // For the quiz document, we'll store a simplified version without serverTimestamp
+            const attemptRecord = {
+                attemptId: attemptRef.id,
+                studentId: user.uid,
+                score: result.percentage,
+                date: new Date(), // Client-side date
+                timeSpent: quizAttemptData.timeSpent,
+                timestamp: new Date().getTime() // For sorting
+            };
+
+            console.log('Updating quiz with attempt:', attemptRecord);
+
+            // Get current quiz data first
+            const quizDoc = await getDoc(doc(db, 'quizzes', id));
+            if (quizDoc.exists()) {
+                const currentQuiz = quizDoc.data();
+                const currentAttempts = currentQuiz.attempts || [];
+
+                // Update the attempts array
+                await updateDoc(doc(db, 'quizzes', id), {
+                    attempts: [...currentAttempts, attemptRecord]
+                });
+            } else {
+                // If quiz doesn't exist (shouldn't happen), create with attempts array
+                await updateDoc(doc(db, 'quizzes', id), {
+                    attempts: [attemptRecord]
+                });
+            }
 
             console.log('Quiz attempt saved successfully with ID:', attemptRef.id);
             return attemptRef.id;
@@ -357,27 +375,28 @@ function QuizSession() {
     const questionOptions = getQuestionOptions(currentQuestionData);
 
     return (
-        <div className="mt-30 mb-30 font-poppins">
-            <div className='grid grid-cols-[65%_35%] max-w-6xl mx-auto'>
-                {/* Right Sidebar */}
-                <div className='order-2 z-1'>
-                    <div className='shadow-lg rounded-sm p-5 m-4 bg-white sticky top-20 pb-10'>
+        <div className="mt-8 mb-8 lg:mt-30 lg:mb-30 font-poppins">
+            <div className='flex flex-col lg:grid lg:grid-cols-[65%_35%] max-w-6xl mx-auto px-[15px] lg:px-0 gap-6 lg:gap-0'>
+
+                {/* Right Sidebar (Navigation & Timer) - Stacked on mobile */}
+                <div className='order-2 lg:order-2 z-1 w-full'>
+                    <div className='shadow-lg rounded-sm p-4 lg:p-5 bg-white static lg:sticky lg:top-20 pb-6 lg:pb-10 mb-6 lg:mb-4'>
                         <div className='flex flex-col gap-4'>
-                            <div className='flex justify-between items-center mb-4'>
-                                <span className='text-lg font-semibold'>Time Remaining</span>
+                            <div className='flex justify-between items-center mb-2 lg:mb-4'>
+                                <span className='text-base lg:text-lg font-semibold'>Time Remaining</span>
                                 <div className={`flex items-center px-3 py-1 rounded-lg ${timeLeft < 300 ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                                    <ClockIcon className='w-5 h-5 mr-1' />
-                                    <span className='font-medium'>{formatTime(timeLeft)}</span>
+                                    <ClockIcon className='w-4 h-4 lg:w-5 lg:h-5 mr-1' />
+                                    <span className='font-medium text-sm lg:text-base'>{formatTime(timeLeft)}</span>
                                 </div>
                             </div>
 
-                            <div className='grid grid-cols-5 gap-2'>
+                            <div className='grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2'>
                                 {questions.map((_, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setCurrentQuestion(index)}
                                         disabled={submitted || hasExistingAttempt}
-                                        className={`h-10 rounded flex items-center justify-center text-sm font-medium ${currentQuestion === index
+                                        className={`h-8 lg:h-10 rounded flex items-center justify-center text-xs lg:text-sm font-medium ${currentQuestion === index
                                             ? 'bg-purple-600 text-white'
                                             : answers[index] !== undefined
                                                 ? 'bg-green-100 text-green-800 border border-green-300'
@@ -389,8 +408,8 @@ function QuizSession() {
                                 ))}
                             </div>
 
-                            <div className='mt-4 p-3 bg-gray-50 rounded-lg'>
-                                <div className='flex justify-between text-sm'>
+                            <div className='mt-2 lg:mt-4 p-3 bg-gray-50 rounded-lg'>
+                                <div className='flex justify-between text-xs lg:text-sm'>
                                     <span>Answered: {Object.keys(answers).length}</span>
                                     <span>Remaining: {questions.length - Object.keys(answers).length}</span>
                                 </div>
@@ -399,15 +418,15 @@ function QuizSession() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitted || hasExistingAttempt}
-                                className='btn-primary w-full py-3 text-sm mt-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
+                                className='btn-primary w-full py-3 text-sm mt-2 lg:mt-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg'
                             >
                                 {submitted ? 'Submitting...' : hasExistingAttempt ? 'Quiz Completed' : 'Submit Quiz'}
                             </button>
 
                             {submitted && savedAttemptId && (
                                 <div className='mt-4 p-3 bg-green-50 border border-green-200 rounded-lg'>
-                                    <div className='flex items-center text-sm text-green-800'>
-                                        <CheckCircleIcon className='w-4 h-4 mr-2' />
+                                    <div className='flex items-center text-xs lg:text-sm text-green-800'>
+                                        <CheckCircleIcon className='w-4 h-4 mr-2 flex-shrink-0' />
                                         <span>Quiz submitted! Redirecting to results...</span>
                                     </div>
                                 </div>
@@ -418,27 +437,27 @@ function QuizSession() {
 
                 {/* Main Content - Only show if not submitted or during quiz */}
                 {!submitted && (
-                    <div className='order-1 pr-5'>
-                        <div className='bg-white rounded-2xl pb-10 px-10 shadow-2xl'>
+                    <div className='order-1 w-full lg:pr-5'>
+                        <div className='bg-white rounded-xl lg:rounded-2xl pb-6 lg:pb-10 px-4 lg:px-10 shadow-lg lg:shadow-2xl'>
                             <div className="pt-6 pb-6 max-w-4xl mx-auto text-gray-800">
-                                <div className='flex justify-between items-center mb-8'>
-                                    <h1 className='text-2xl font-semibold'>
+                                <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 lg:mb-8 gap-2 sm:gap-0'>
+                                    <h1 className='text-xl lg:text-2xl font-semibold'>
                                         Question {currentQuestion + 1} of {questions.length}
                                     </h1>
-                                    <span className='text-purple-600 font-semibold'>
+                                    <span className='text-purple-600 font-semibold text-sm lg:text-base'>
                                         {questionPoints} Points
                                     </span>
                                 </div>
 
-                                <p className='text-xl mb-8'>{questionText}</p>
+                                <p className='text-lg lg:text-xl mb-6 lg:mb-8 font-medium leading-relaxed'>{questionText}</p>
 
-                                <div className='space-y-4'>
+                                <div className='space-y-3 lg:space-y-4'>
                                     {questionOptions.map((option, index) => (
                                         <button
                                             key={index}
                                             onClick={() => handleAnswerSelect(currentQuestion, index)}
                                             disabled={submitted || hasExistingAttempt}
-                                            className={`w-full text-left p-4 rounded-lg border-2 transition-all ${answers[currentQuestion] === index
+                                            className={`w-full text-left p-3 lg:p-4 rounded-lg border-2 transition-all text-sm lg:text-base ${answers[currentQuestion] === index
                                                 ? 'border-purple-600 bg-purple-50'
                                                 : 'border-gray-200 hover:border-purple-400 hover:bg-purple-25'
                                                 } ${submitted || hasExistingAttempt ? 'cursor-not-allowed' : ''}`}
@@ -448,18 +467,18 @@ function QuizSession() {
                                     ))}
                                 </div>
 
-                                <div className='flex justify-between mt-10'>
+                                <div className='flex justify-between mt-8 lg:mt-10 gap-4'>
                                     <button
                                         onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
                                         disabled={currentQuestion === 0 || submitted || hasExistingAttempt}
-                                        className='btn-secondary py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed'
+                                        className='btn-secondary py-2 px-4 lg:px-6 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none text-center border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm lg:text-base'
                                     >
                                         Previous
                                     </button>
                                     <button
                                         onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
                                         disabled={currentQuestion === questions.length - 1 || submitted || hasExistingAttempt}
-                                        className='btn-primary bg-purple-600 hover:bg-purple-700 py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed'
+                                        className='btn-primary bg-purple-600 hover:bg-purple-700 py-2 px-4 lg:px-6 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none text-center rounded-lg text-sm lg:text-base'
                                     >
                                         Next
                                     </button>
@@ -471,17 +490,17 @@ function QuizSession() {
 
                 {/* Show loading message when submitted and redirecting */}
                 {submitted && (
-                    <div className='order-1 pr-5'>
-                        <div className='bg-white rounded-2xl pb-10 px-10 shadow-2xl'>
+                    <div className='order-1 w-full lg:pr-5'>
+                        <div className='bg-white rounded-xl lg:rounded-2xl pb-6 lg:pb-10 px-4 lg:px-10 shadow-lg lg:shadow-2xl'>
                             <div className="pt-6 pb-6 max-w-4xl mx-auto text-gray-800 text-center">
-                                <div className='py-12'>
-                                    <CheckCircleIcon className='w-16 h-16 text-green-500 mx-auto mb-4' />
-                                    <h2 className='text-2xl font-semibold text-gray-800 mb-2'>Quiz Submitted Successfully!</h2>
-                                    <p className='text-gray-600 mb-6'>Your results are being calculated...</p>
+                                <div className='py-8 lg:py-12'>
+                                    <CheckCircleIcon className='w-12 h-12 lg:w-16 lg:h-16 text-green-500 mx-auto mb-4' />
+                                    <h2 className='text-xl lg:text-2xl font-semibold text-gray-800 mb-2'>Quiz Submitted Successfully!</h2>
+                                    <p className='text-gray-600 mb-6 text-sm lg:text-base'>Your results are being calculated...</p>
                                     <div className='animate-pulse'>
-                                        <div className='w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full mx-auto animate-spin'></div>
+                                        <div className='w-12 h-12 lg:w-16 lg:h-16 border-4 border-purple-600 border-t-transparent rounded-full mx-auto animate-spin'></div>
                                     </div>
-                                    <p className='text-sm text-gray-500 mt-4'>Redirecting to results page</p>
+                                    <p className='text-xs lg:text-sm text-gray-500 mt-4'>Redirecting to results page</p>
                                 </div>
                             </div>
                         </div>

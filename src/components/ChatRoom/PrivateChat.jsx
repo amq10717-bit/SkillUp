@@ -942,18 +942,24 @@ const PrivateChat = () => {
     }
 
     return (
-        <div className="mb-30 min-h-screen bg-gray-50">
+        <div className="mb-10 lg:mb-30 min-h-screen bg-gray-50">
             {uploading && <UploadProgress />}
 
-            <div className='grid grid-cols-[350px_1fr] max-w-7xl mx-auto min-h-screen pt-30 gap-6'>
+            {/* Refactored Layout: 
+            1. Added px-[15px] for edge safety on mobile.
+            2. Changed to flex-col for mobile, kept grid for lg+ screens.
+            3. Adjusted top padding for better mobile spacing.
+        */}
+            <div className='flex flex-col lg:grid lg:grid-cols-[350px_1fr] max-w-7xl mx-auto min-h-[calc(100vh-100px)] lg:min-h-screen pt-24 lg:pt-30 gap-4 lg:gap-6 px-[15px] lg:px-6'>
+
                 {/* Sidebar */}
-                <div className='bg-white rounded-xl shadow-sm border border-gray-200'>
-                    <div className='p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl'>
+                <div className='bg-white rounded-xl shadow-sm border border-gray-200 w-full'>
+                    <div className='p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl'>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                                {getUserAvatar(currentUserData, 'w-14 h-14')}
+                                {getUserAvatar(currentUserData, 'w-10 h-10 lg:w-14 lg:h-14')}
                                 <div>
-                                    <div className="font-bold font-poppins text-gray-800">
+                                    <div className="font-bold font-poppins text-sm lg:text-base text-gray-800">
                                         {getUserDisplayName(currentUserData)}
                                     </div>
                                     <div className="text-sm text-green-600 font-poppins flex items-center">
@@ -969,7 +975,7 @@ const PrivateChat = () => {
                     </div>
 
                     {/* Search Bar */}
-                    <div className="p-4 border-b border-gray-200">
+                    <div className="p-3 lg:p-4 border-b border-gray-200">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                             <input
@@ -977,60 +983,60 @@ const PrivateChat = () => {
                                 placeholder="Search chats..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
                             />
                         </div>
                     </div>
 
-                    <div className='p-6 border-b border-gray-200'>
+                    <div className='p-4 lg:p-6 border-b border-gray-200'>
                         <div className="flex items-center justify-between">
-                            <p className='font-bold font-poppins text-lg text-gray-800'>Conversations</p>
+                            <p className='font-bold font-poppins text-base lg:text-lg text-gray-800'>Conversations</p>
                             <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                                 {privateChats.length + groupChats.length}
                             </span>
                         </div>
                     </div>
 
-                    {/* Tabs - Added Archive Tab */}
-                    <div className='flex border-b border-gray-200 px-6'>
+                    {/* Tabs - Added overflow scroll for very small screens if needed */}
+                    <div className='flex border-b border-gray-200 px-2 lg:px-6 overflow-x-auto no-scrollbar'>
                         <button
                             onClick={() => setActiveTab('private')}
-                            className={`flex items-center justify-center gap-2 flex-1 py-4 font-poppins cursor-pointer border-b-2 transition-all ${activeTab === 'private'
+                            className={`flex items-center justify-center gap-2 flex-1 py-3 lg:py-4 font-poppins cursor-pointer border-b-2 transition-all whitespace-nowrap text-sm lg:text-base ${activeTab === 'private'
                                 ? 'border-blue-500 text-blue-600 font-semibold'
                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            <Users size={18} />
+                            <Users size={16} className="lg:w-[18px] lg:h-[18px]" />
                             Private
                         </button>
                         <button
                             onClick={() => setActiveTab('group')}
-                            className={`flex items-center justify-center gap-2 flex-1 py-4 font-poppins cursor-pointer border-b-2 transition-all ${activeTab === 'group'
+                            className={`flex items-center justify-center gap-2 flex-1 py-3 lg:py-4 font-poppins cursor-pointer border-b-2 transition-all whitespace-nowrap text-sm lg:text-base ${activeTab === 'group'
                                 ? 'border-green-500 text-green-600 font-semibold'
                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            <Users size={18} />
+                            <Users size={16} className="lg:w-[18px] lg:h-[18px]" />
                             Group
                         </button>
                         <button
                             onClick={() => setActiveTab('archived')}
-                            className={`flex items-center justify-center gap-2 flex-1 py-4 font-poppins cursor-pointer border-b-2 transition-all ${activeTab === 'archived'
+                            className={`flex items-center justify-center gap-2 flex-1 py-3 lg:py-4 font-poppins cursor-pointer border-b-2 transition-all whitespace-nowrap text-sm lg:text-base ${activeTab === 'archived'
                                 ? 'border-orange-500 text-orange-600 font-semibold'
                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            <Archive size={18} />
+                            <Archive size={16} className="lg:w-[18px] lg:h-[18px]" />
                             Archived
                         </button>
                     </div>
 
                     {/* New Chat Buttons - Hidden for Archive Tab */}
                     {activeTab !== 'archived' && (
-                        <div className="p-4 border-b border-gray-200 bg-gray-50">
+                        <div className="p-3 lg:p-4 border-b border-gray-200 bg-gray-50">
                             <button
                                 onClick={() => setShowNewChatModal(true)}
-                                className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-50 border border-blue-200 transition-all shadow-sm"
+                                className="w-full bg-white text-blue-600 py-2 lg:py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-50 border border-blue-200 transition-all shadow-sm text-sm lg:text-base"
                             >
                                 <Plus size={18} />
                                 New Private Chat
@@ -1039,7 +1045,7 @@ const PrivateChat = () => {
                             {(currentUserData?.role === 'tutor' || currentUserData?.role === 'admin') && (
                                 <button
                                     onClick={() => setShowNewGroupModal(true)}
-                                    className="w-full bg-white text-green-600 py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-green-50 border border-green-200 transition-all shadow-sm mt-2"
+                                    className="w-full bg-white text-green-600 py-2 lg:py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-green-50 border border-green-200 transition-all shadow-sm mt-2 text-sm lg:text-base"
                                 >
                                     <Users size={18} />
                                     New Group Chat
@@ -1048,13 +1054,13 @@ const PrivateChat = () => {
                         </div>
                     )}
 
-                    {/* Chats List */}
-                    <div className="overflow-y-auto max-h-[calc(100vh-400px)]">
-                        <div className='p-4'>
+                    {/* Chats List - Constrained height on mobile to allow scrolling to chat window */}
+                    <div className="overflow-y-auto h-64 lg:h-auto lg:max-h-[calc(100vh-400px)]">
+                        <div className='p-3 lg:p-4'>
                             {getFilteredChats().length === 0 ? (
                                 <div className="text-center py-8 text-gray-500">
-                                    <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                                    <p>
+                                    <Users size={40} className="mx-auto mb-3 text-gray-300 lg:w-12 lg:h-12" />
+                                    <p className="text-sm lg:text-base">
                                         {activeTab === 'archived'
                                             ? 'No archived chats'
                                             : activeTab === 'private'
@@ -1062,7 +1068,7 @@ const PrivateChat = () => {
                                                 : 'No group chats yet'
                                         }
                                     </p>
-                                    <p className="text-sm">
+                                    <p className="text-xs lg:text-sm mt-1">
                                         {activeTab === 'archived'
                                             ? 'Archived chats will appear here'
                                             : activeTab === 'private'
@@ -1100,39 +1106,39 @@ const PrivateChat = () => {
                     </div>
                 </div>
 
-                {/* Chat Area */}
-                <div className='bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col'>
+                {/* Chat Area - Fixed height on mobile for internal scrolling */}
+                <div className='bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col w-full h-[600px] lg:h-auto'>
                     {selectedChat ? (
                         <div className="flex flex-col h-full">
                             {/* Chat Header */}
-                            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 rounded-t-xl">
+                            <div className="p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 rounded-t-xl">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3 lg:gap-4">
                                         {selectedChat.type === 'private' ? (
-                                            getUserAvatar(selectedChat.otherUser, 'w-14 h-14')
+                                            getUserAvatar(selectedChat.otherUser, 'w-10 h-10 lg:w-14 lg:h-14')
                                         ) : (
-                                            <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-sm">
-                                                <Users className="text-white" size={24} />
+                                            <div className="w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-sm">
+                                                <Users className="text-white w-5 h-5 lg:w-6 lg:h-6" />
                                             </div>
                                         )}
-                                        <div className="flex-1">
-                                            <div className="font-bold font-poppins text-xl text-gray-800">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold font-poppins text-base lg:text-xl text-gray-800 truncate">
                                                 {getChatDisplayName(selectedChat)}
                                             </div>
                                             {selectedChat.type === 'group' ? (
-                                                <div className="text-sm text-gray-600">
+                                                <div className="text-xs lg:text-sm text-gray-600 truncate">
                                                     {selectedChat.participants?.length || 0} participants
                                                     {selectedChat.courseInfo?.title && ` • ${selectedChat.courseInfo.title}`}
                                                 </div>
                                             ) : (
-                                                <div className="text-sm text-gray-600 capitalize">
+                                                <div className="text-xs lg:text-sm text-gray-600 capitalize">
                                                     {selectedChat.otherUser?.role || 'user'}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <div className="text-sm text-green-600 font-poppins flex items-center bg-white px-3 py-1 rounded-full border border-green-200">
+                                        <div className="hidden sm:flex text-sm text-green-600 font-poppins items-center bg-white px-3 py-1 rounded-full border border-green-200">
                                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                                             Online
                                         </div>
@@ -1167,12 +1173,12 @@ const PrivateChat = () => {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto py-6 px-6 space-y-4 bg-gray-50">
+                            <div className="flex-1 overflow-y-auto py-4 px-3 lg:py-6 lg:px-6 space-y-3 lg:space-y-4 bg-gray-50">
                                 {messages.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-12">
-                                        <Send size={48} className="mx-auto mb-3 text-gray-300" />
-                                        <h3 className="text-lg font-semibold mb-2">No messages yet</h3>
-                                        <p>Start the conversation by sending a message</p>
+                                    <div className="text-center text-gray-500 py-8 lg:py-12">
+                                        <Send size={40} className="mx-auto mb-3 text-gray-300 lg:w-12 lg:h-12" />
+                                        <h3 className="text-base lg:text-lg font-semibold mb-2">No messages yet</h3>
+                                        <p className="text-sm">Start the conversation by sending a message</p>
                                     </div>
                                 ) : (
                                     messages.map((msg) => (
@@ -1191,8 +1197,8 @@ const PrivateChat = () => {
                             </div>
 
                             {/* Message Input */}
-                            <div className="p-6 border-t border-gray-200 bg-white rounded-b-xl">
-                                <div className="flex items-center gap-3 relative">
+                            <div className="p-3 lg:p-6 border-t border-gray-200 bg-white rounded-b-xl">
+                                <div className="flex items-center gap-2 lg:gap-3 relative">
                                     <div className="relative">
                                         <button
                                             onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
@@ -1209,13 +1215,13 @@ const PrivateChat = () => {
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyPress={handleKeyPress}
                                         placeholder="Type your message here..."
-                                        className="flex-1 border border-gray-300 rounded-full px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                                        className="flex-1 border border-gray-300 rounded-full px-4 py-2 lg:py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                                         disabled={uploading}
                                     />
                                     <button
                                         onClick={sendMessage}
                                         disabled={!input.trim() || uploading}
-                                        className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+                                        className="bg-blue-500 text-white p-2 lg:p-3 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
                                     >
                                         {uploading ? (
                                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -1228,12 +1234,11 @@ const PrivateChat = () => {
                         </div>
                     ) : (
                         <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center text-gray-500 py-12">
+                            <div className="text-center text-gray-500 py-12 px-4">
                                 <Users size={64} className="mx-auto mb-4 text-gray-200" />
-                                <h3 className="text-xl font-semibold mb-2 text-gray-600">Welcome to Chat</h3>
-                                <p className="text-gray-500 max-w-md">
+                                <h3 className="text-lg lg:text-xl font-semibold mb-2 text-gray-600">Welcome to Chat</h3>
+                                <p className="text-sm lg:text-base text-gray-500 max-w-md">
                                     Select a conversation from the sidebar or start a new one to begin messaging.
-                                    Connect with your classmates, tutors, and course participants.
                                 </p>
                             </div>
                         </div>
@@ -1242,26 +1247,9 @@ const PrivateChat = () => {
             </div>
 
             {/* Hidden file inputs */}
-            <input
-                type="file"
-                ref={imageInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-            />
-            <input
-                type="file"
-                ref={videoInputRef}
-                onChange={handleVideoUpload}
-                accept="video/*"
-                className="hidden"
-            />
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleDocumentUpload}
-                className="hidden"
-            />
+            <input type="file" ref={imageInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+            <input type="file" ref={videoInputRef} onChange={handleVideoUpload} accept="video/*" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleDocumentUpload} className="hidden" />
 
             {/* New Private Chat Modal */}
             {showNewChatModal && (
@@ -1305,13 +1293,13 @@ const MessageBubble = ({ message, isOwnMessage, showSenderName, formatTime, form
     const FileIcon = getFileIcon(message);
 
     return (
-        <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${isOwnMessage
+        <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-2 lg:mb-0`}>
+            <div className={`max-w-[85%] lg:max-w-[75%] p-3 lg:px-4 lg:py-3 rounded-2xl shadow-sm ${isOwnMessage
                 ? 'bg-blue-500 text-white rounded-br-none'
                 : 'bg-white border border-gray-200 rounded-bl-none'
                 }`}>
                 {showSenderName && (
-                    <div className="text-xs font-semibold text-gray-600 mb-1">
+                    <div className="text-[10px] lg:text-xs font-semibold text-gray-600 mb-1">
                         {message.senderName}
                     </div>
                 )}
@@ -1322,11 +1310,11 @@ const MessageBubble = ({ message, isOwnMessage, showSenderName, formatTime, form
                         <img
                             src={message.mediaUrl}
                             alt="Shared image"
-                            className="max-w-xs rounded-lg border border-gray-200"
+                            className="w-full lg:w-auto lg:max-w-xs rounded-lg border border-gray-200 object-cover"
                             loading="lazy"
                         />
                         {message.cloudinaryData?.bytes && (
-                            <div className="text-xs opacity-75 mt-1">
+                            <div className="text-[10px] lg:text-xs opacity-75 mt-1">
                                 {formatFileSize(message.cloudinaryData.bytes)}
                             </div>
                         )}
@@ -1336,43 +1324,43 @@ const MessageBubble = ({ message, isOwnMessage, showSenderName, formatTime, form
                         <video
                             src={message.mediaUrl}
                             controls
-                            className="max-w-xs rounded-lg border border-gray-200"
+                            className="w-full lg:w-auto lg:max-w-xs rounded-lg border border-gray-200"
                         />
                         {message.cloudinaryData?.bytes && (
-                            <div className="text-xs opacity-75 mt-1">
+                            <div className="text-[10px] lg:text-xs opacity-75 mt-1">
                                 {formatFileSize(message.cloudinaryData.bytes)}
                             </div>
                         )}
                     </div>
                 ) : (message.type === 'file' || message.mediaUrl) ? (
-                    <div className="flex items-center gap-3 p-3 bg-black bg-opacity-10 rounded-lg mb-2">
-                        <FileIcon size={24} className={isOwnMessage ? 'text-blue-100' : 'text-blue-500'} />
+                    <div className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-black bg-opacity-10 rounded-lg mb-2">
+                        <FileIcon size={20} className={`flex-shrink-0 ${isOwnMessage ? 'text-blue-100' : 'text-blue-500'}`} />
                         <div className="flex-1 min-w-0">
                             <a
                                 href={message.mediaUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`font-medium hover:underline block truncate ${isOwnMessage ? 'text-blue-100' : 'text-blue-600'}`}
+                                className={`font-medium hover:underline block truncate text-sm ${isOwnMessage ? 'text-blue-100' : 'text-blue-600'}`}
                             >
                                 {message.text || 'Download file'}
                             </a>
                             {message.cloudinaryData?.bytes && (
-                                <div className="text-xs opacity-75">
+                                <div className="text-[10px] lg:text-xs opacity-75">
                                     {formatFileSize(message.cloudinaryData.bytes)}
                                 </div>
                             )}
                         </div>
-                        <Download size={16} className={isOwnMessage ? 'text-blue-200' : 'text-gray-400'} />
+                        <Download size={16} className={`flex-shrink-0 ${isOwnMessage ? 'text-blue-200' : 'text-gray-400'}`} />
                     </div>
                 ) : null}
 
                 {/* Text Content */}
                 {message.text && message.type === 'text' && (
-                    <div className="text-sm leading-relaxed">{message.text}</div>
+                    <div className="text-sm leading-relaxed break-words">{message.text}</div>
                 )}
 
                 {/* Timestamp */}
-                <div className={`text-xs mt-2 ${isOwnMessage ? 'text-blue-100' : 'text-gray-400'}`}>
+                <div className={`text-[10px] lg:text-xs mt-1 lg:mt-2 text-right ${isOwnMessage ? 'text-blue-100' : 'text-gray-400'}`}>
                     {formatTime(message.timestamp)}
                 </div>
             </div>
@@ -1402,28 +1390,29 @@ const ChatItem = ({
     return (
         <div
             onClick={() => onSelect(chat)}
-            className={`p-4 font-poppins cursor-pointer rounded-xl mb-3 transition-all relative group ${isSelected
+            className={`p-3 lg:p-4 font-poppins cursor-pointer rounded-xl mb-2 lg:mb-3 transition-all relative group ${isSelected
                 ? 'bg-blue-50 border border-blue-200 shadow-sm'
                 : 'hover:bg-gray-50 border border-transparent'
                 }`}
         >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 lg:gap-4">
                 {chat.type === 'private' ? (
-                    getUserAvatar(chat.otherUser)
+                    // Passing responsive classes to avatar generator
+                    getUserAvatar(chat.otherUser, "w-10 h-10 lg:w-12 lg:h-12")
                 ) : (
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-sm">
-                        <Users className="text-white" size={20} />
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
+                        <Users className="text-white" size={16} /> {/* Adjusted icon size for mobile */}
                     </div>
                 )}
                 <div className='flex-1 min-w-0'>
                     <div className="flex items-center justify-between">
-                        <div className="font-semibold text-gray-800 truncate flex items-center gap-2">
+                        <div className="font-semibold text-sm lg:text-base text-gray-800 truncate flex items-center gap-2">
                             {getChatDisplayName(chat)}
-                            {chat.isPinned && <Pin size={14} className="text-yellow-500" />}
+                            {chat.isPinned && <Pin size={12} className="text-yellow-500 lg:w-[14px] lg:h-[14px]" />}
                         </div>
                         <div className="flex items-center gap-2">
                             {chat.lastMessageTime && (
-                                <div className="text-xs text-gray-400 whitespace-nowrap">
+                                <div className="text-[10px] lg:text-xs text-gray-400 whitespace-nowrap">
                                     {formatTime(chat.lastMessageTime)}
                                 </div>
                             )}
@@ -1432,21 +1421,22 @@ const ChatItem = ({
                                     e.stopPropagation();
                                     onMenuToggle(chat.id);
                                 }}
-                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition"
+                                // Mobile: Always visible (opacity-100). Desktop: Visible on hover (lg:opacity-0 lg:group-hover...)
+                                className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition"
                             >
                                 <MoreVertical size={16} />
                             </button>
                         </div>
                     </div>
-                    <div className="text-sm text-gray-600 truncate mt-1">
+                    <div className="text-xs lg:text-sm text-gray-600 truncate mt-1">
                         {chat.lastMessage || 'No messages yet'}
                     </div>
                     {chat.type === 'private' ? (
-                        <div className="text-xs text-gray-400 mt-1 capitalize">
+                        <div className="text-[10px] lg:text-xs text-gray-400 mt-1 capitalize">
                             {chat.otherUser?.role || 'user'}
                         </div>
                     ) : (
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className="text-[10px] lg:text-xs text-gray-400 mt-1">
                             {chat.participants?.length || 0} members
                             {chat.courseInfo?.title && ` • ${chat.courseInfo.title}`}
                         </div>
@@ -1458,7 +1448,7 @@ const ChatItem = ({
             {showMenu && (
                 <div
                     ref={menuRef}
-                    className="absolute right-2 top-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-48 z-10"
+                    className="absolute right-2 top-8 lg:top-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-40 lg:min-w-48 z-10"
                 >
                     <ChatMenu
                         chat={chat}
@@ -1557,32 +1547,34 @@ const ChatMenu = ({
 };
 
 // New Chat Modal Component
+// New Private Chat Modal Component
 const NewChatModal = ({ availableUsers, onCreateChat, onClose, getUserAvatar, getUserDisplayName }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl w-full max-w-md mx-auto">
-            <div className="p-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800">Start New Chat</h3>
-                <p className="text-gray-600 text-sm mt-1">Select a user to start a conversation</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-white rounded-xl w-full max-w-md mx-auto shadow-2xl overflow-hidden transform transition-all">
+            <div className="p-4 lg:p-6 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg lg:text-xl font-bold text-gray-800">Start New Chat</h3>
+                <p className="text-gray-600 text-xs lg:text-sm mt-1">Select a user to start a conversation</p>
             </div>
-            <div className="max-h-96 overflow-y-auto">
+
+            <div className="max-h-[60vh] lg:max-h-96 overflow-y-auto">
                 {availableUsers.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                        <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                        <p>No users available to chat with</p>
+                        <Users size={40} className="mx-auto mb-3 text-gray-300 lg:w-12 lg:h-12" />
+                        <p className="text-sm">No users available to chat with</p>
                     </div>
                 ) : (
                     availableUsers.map(user => (
                         <div
                             key={user.id}
                             onClick={() => onCreateChat(user.id)}
-                            className="flex items-center gap-4 p-4 hover:bg-blue-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
+                            className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 hover:bg-blue-50 cursor-pointer transition border-b border-gray-100 last:border-b-0 group"
                         >
-                            {getUserAvatar(user, 'w-12 h-12')}
-                            <div className="flex-1">
-                                <div className="font-semibold text-gray-800">
+                            {getUserAvatar(user, 'w-10 h-10 lg:w-12 lg:h-12 transition-transform group-hover:scale-105')}
+                            <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-800 text-sm lg:text-base truncate">
                                     {getUserDisplayName(user)}
                                 </div>
-                                <div className="text-sm text-gray-500 capitalize">
+                                <div className="text-xs lg:text-sm text-gray-500 capitalize truncate">
                                     {user.role || 'user'} • {user.email}
                                 </div>
                             </div>
@@ -1590,10 +1582,11 @@ const NewChatModal = ({ availableUsers, onCreateChat, onClose, getUserAvatar, ge
                     ))
                 )}
             </div>
-            <div className="p-4 border-t border-gray-200">
+
+            <div className="p-4 lg:p-6 border-t border-gray-200 bg-gray-50">
                 <button
                     onClick={onClose}
-                    className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 transition font-medium"
+                    className="w-full bg-white border border-gray-300 text-gray-700 py-2 lg:py-3 rounded-lg hover:bg-gray-50 transition font-medium text-sm lg:text-base shadow-sm active:scale-[0.98]"
                 >
                     Cancel
                 </button>
@@ -1617,32 +1610,32 @@ const NewGroupModal = ({
     getUserAvatar,
     getUserDisplayName
 }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl w-full max-w-md mx-auto">
-            <div className="p-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800">Create Group Chat</h3>
-                <p className="text-gray-600 text-sm mt-1">Create a group for course discussions</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-white rounded-xl w-full max-w-md mx-auto shadow-2xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+            <div className="p-4 lg:p-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <h3 className="text-lg lg:text-xl font-bold text-gray-800">Create Group Chat</h3>
+                <p className="text-gray-600 text-xs lg:text-sm mt-1">Create a group for course discussions</p>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 lg:p-6 space-y-3 lg:space-y-4 overflow-y-auto flex-1">
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">Group Name *</label>
+                    <label className="block text-xs lg:text-sm font-medium mb-1 lg:mb-2 text-gray-700">Group Name *</label>
                     <input
                         type="text"
                         value={groupName}
                         onChange={(e) => setGroupName(e.target.value)}
                         placeholder="Enter group name"
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 lg:px-4 lg:py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                     />
                 </div>
 
                 {availableCourses.length > 0 && (
                     <div>
-                        <label className="block text-sm font-medium mb-2 text-gray-700">Course (Optional)</label>
+                        <label className="block text-xs lg:text-sm font-medium mb-1 lg:mb-2 text-gray-700">Course (Optional)</label>
                         <select
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 lg:px-4 lg:py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition bg-white"
                         >
                             <option value="">Select a course</option>
                             {availableCourses.map(course => (
@@ -1654,36 +1647,40 @@ const NewGroupModal = ({
                     </div>
                 )}
 
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">Select Participants *</label>
-                    <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-gray-50">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <label className="block text-xs lg:text-sm font-medium mb-1 lg:mb-2 text-gray-700">Select Participants *</label>
+                    <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-gray-50 min-h-[150px]">
                         {availableUsers.length === 0 ? (
-                            <div className="text-center py-4 text-gray-500">
+                            <div className="text-center py-8 text-gray-500">
                                 <Users size={32} className="mx-auto mb-2 text-gray-300" />
-                                <p>No users available to add</p>
+                                <p className="text-sm">No users available to add</p>
                             </div>
                         ) : (
                             availableUsers.map(user => (
                                 <div
                                     key={user.id}
                                     onClick={() => toggleUserSelection(user.id)}
-                                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition mb-2 last:mb-0 ${selectedUsers.includes(user.id)
-                                        ? 'bg-blue-100 border border-blue-200'
-                                        : 'bg-white border border-gray-200 hover:bg-gray-50'
+                                    className={`flex items-center gap-3 p-2 lg:p-3 cursor-pointer transition border-b border-gray-100 last:border-b-0 ${selectedUsers.includes(user.id)
+                                        ? 'bg-blue-50'
+                                        : 'hover:bg-white'
                                         }`}
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedUsers.includes(user.id)}
-                                        onChange={() => { }}
-                                        className="rounded text-blue-500 focus:ring-blue-500"
-                                    />
-                                    {getUserAvatar(user, 'w-10 h-10')}
-                                    <div className="flex-1">
-                                        <div className="text-sm font-medium text-gray-800">
+                                    <div className={`w-4 h-4 lg:w-5 lg:h-5 rounded border flex items-center justify-center transition-colors ${selectedUsers.includes(user.id)
+                                        ? 'bg-blue-500 border-blue-500'
+                                        : 'border-gray-400 bg-white'
+                                        }`}>
+                                        {selectedUsers.includes(user.id) && (
+                                            <Check size={12} className="text-white" />
+                                        )}
+                                    </div>
+
+                                    {getUserAvatar(user, 'w-8 h-8 lg:w-10 lg:h-10')}
+
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium text-gray-800 truncate">
                                             {getUserDisplayName(user)}
                                         </div>
-                                        <div className="text-xs text-gray-500 capitalize">
+                                        <div className="text-xs text-gray-500 capitalize truncate">
                                             {user.role || 'user'}
                                         </div>
                                     </div>
@@ -1691,23 +1688,23 @@ const NewGroupModal = ({
                             ))
                         )}
                     </div>
-                    <div className="text-sm text-gray-600 mt-2">
+                    <div className="text-xs text-gray-500 mt-2 text-right">
                         Selected: <span className="font-semibold text-blue-600">{selectedUsers.length}</span> users
                     </div>
                 </div>
             </div>
 
-            <div className="p-6 border-t border-gray-200 flex gap-3">
+            <div className="p-4 lg:p-6 border-t border-gray-200 bg-gray-50 flex gap-3 flex-shrink-0">
                 <button
                     onClick={onClose}
-                    className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 transition font-medium"
+                    className="flex-1 bg-white border border-gray-300 text-gray-700 py-2 lg:py-3 rounded-lg hover:bg-gray-50 transition font-medium text-sm lg:text-base shadow-sm active:scale-[0.98]"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={onCreateGroup}
                     disabled={!groupName.trim() || selectedUsers.length === 0}
-                    className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium shadow-sm"
+                    className="flex-1 bg-green-500 text-white py-2 lg:py-3 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium shadow-md active:scale-[0.98] text-sm lg:text-base"
                 >
                     Create Group
                 </button>

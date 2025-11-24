@@ -41,8 +41,8 @@ function StartingPage() {
     };
 
     return (
-        <div className='min-h-screen bg-BgGradient flex items-center justify-center sm:p-10 font-poppins'>
-            <div className='flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-20'>
+        <div className='min-h-screen bg-BgGradient flex items-center justify-center py-10 px-[15px] sm:p-10 font-poppins'>
+            <div className='flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-10 lg:pt-20'>
                 <div className='w-full'>
                     <AnimatePresence mode='wait'>
                         <motion.div
@@ -51,50 +51,48 @@ function StartingPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
                             transition={{ duration: 0.3 }}
-                            className='bg-[#4CBC9A]/60 backdrop-blur-sm rounded-2xl p-8 lg:p-12'
+                            className='bg-[#4CBC9A]/60 backdrop-blur-sm rounded-2xl p-6 lg:p-12'
                         >
-                            <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
-
+                            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center'>
                                 <motion.div
                                     initial={{ scale: 0.95 }}
                                     animate={{ scale: 1 }}
                                     transition={{ duration: 0.3 }}
-                                    className='order-last lg:order-first'
+                                    className='order-first lg:order-first mb-4 lg:mb-0'
                                 >
                                     <img
                                         src={slides[currentSlide].image}
                                         alt='Illustration'
-                                        className='w-full h-auto max-w-md mx-auto object-contain'
+                                        className='w-full h-auto max-w-xs lg:max-w-md mx-auto object-contain'
                                     />
                                 </motion.div>
 
-
-                                <div className='space-y-6'>
-                                    <h1 className='text-4xl font-bold text-white'>{slides[currentSlide].title}</h1>
-                                    <h2 className='text-[20px] text-white'>{slides[currentSlide].heading}</h2>
-                                    <p className='text-[15px] text-white'>{slides[currentSlide].text}</p>
+                                <div className='space-y-4 lg:space-y-6'>
+                                    <h1 className='text-2xl lg:text-4xl font-bold text-white'>{slides[currentSlide].title}</h1>
+                                    <h2 className='text-lg lg:text-[20px] text-white'>{slides[currentSlide].heading}</h2>
+                                    <p className='text-sm lg:text-[15px] text-white leading-relaxed'>{slides[currentSlide].text}</p>
 
                                     {slides[currentSlide].features && (
-                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-6'>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mt-4 lg:mt-6'>
                                             {slides[currentSlide].features.map((feature, index) => (
                                                 <div
                                                     key={index}
-                                                    className='p-4 bg-white/10 rounded-lg flex items-start gap-3'
+                                                    className='p-3 lg:p-4 bg-white/10 rounded-lg flex items-start gap-3'
                                                 >
-                                                    <div className='w-2 h-2 bg-white rounded-full mt-2' />
-                                                    <span className='text-white text-[14px]'>{feature}</span>
+                                                    <div className='w-2 h-2 bg-white rounded-full mt-1.5 lg:mt-2 flex-shrink-0' />
+                                                    <span className='text-white text-xs lg:text-[14px]'>{feature}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
 
-                                    <div className='flex justify-between items-center mt-8'>
+                                    <div className='flex flex-col-reverse sm:flex-row justify-between items-center mt-6 lg:mt-8 gap-4 sm:gap-0'>
                                         <div className='flex gap-2'>
                                             {slides.map((_, index) => (
                                                 <button
                                                     key={index}
                                                     onClick={() => setCurrentSlide(index)}
-                                                    className={`w-3 h-3 rounded-full transition-all ${currentSlide === index ? 'bg-white' : 'bg-white/30'
+                                                    className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full transition-all ${currentSlide === index ? 'bg-white' : 'bg-white/30'
                                                         }`}
                                                 />
                                             ))}
@@ -102,12 +100,12 @@ function StartingPage() {
 
                                         <button
                                             onClick={handleNext}
-                                            className='flex items-center gap-2 bg-white hover:bg-[#3aa37f] text-[#4CBC9A] hover:text-white px-6 py-3 rounded-xl transition-colors'
+                                            className='w-full sm:w-auto flex justify-center items-center gap-2 bg-white hover:bg-[#3aa37f] text-[#4CBC9A] hover:text-white px-6 py-3 rounded-xl transition-colors text-sm lg:text-base font-medium'
                                         >
                                             {currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}
                                             <svg
                                                 xmlns='http://www.w3.org/2000/svg'
-                                                className='h-5 w-5'
+                                                className='h-4 w-4 lg:h-5 lg:w-5'
                                                 viewBox='0 0 20 20'
                                                 fill='currentColor'
                                             >

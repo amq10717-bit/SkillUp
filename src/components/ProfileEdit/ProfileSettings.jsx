@@ -313,84 +313,84 @@ function ProfileSettings() {
     }
 
     return (
-        <div className="min-h-screen mt-30 mb-30">
-            <div className='max-w-6xl mx-auto'>
+        <div className="min-h-screen pt-[50px] my-10 lg:mt-30 lg:mb-30">
+            <div className='max-w-7xl mx-auto px-[15px] lg:px-0'>
                 {/* Header */}
-                <div className='text-left mb-10'>
-                    <h1 className='heading-text-lg font-poppins'>
+                <div className='text-left mb-6 lg:mb-10'>
+                    <h1 className='text-2xl lg:heading-text-lg font-bold font-poppins'>
                         Account Settings
                     </h1>
-                    <p className='text-gray-600 mt-2'>Manage your account information and preferences</p>
+                    <p className='text-sm lg:text-base text-gray-600 mt-1 lg:mt-2'>Manage your account information and preferences</p>
                 </div>
 
                 {/* Main Content Grid */}
-                <div className='grid grid-cols-4 gap-8'>
+                <div className='flex flex-col lg:grid lg:grid-cols-4 gap-6 lg:gap-8'>
                     {/* Sidebar Navigation */}
-                    <div className='col-span-1'>
-                        <div className='bg-white rounded-xl shadow-md p-6 space-y-4 sticky top-25'>
+                    <div className='col-span-1 w-full'>
+                        <div className='bg-white rounded-xl shadow-md p-4 lg:p-6 flex lg:flex-col gap-2 lg:gap-4 lg:sticky lg:top-25 overflow-x-auto no-scrollbar whitespace-nowrap lg:whitespace-normal'>
                             <button
                                 onClick={() => setActiveTab('profile')}
-                                className={`w-full text-left p-3 rounded-lg transition ${activeTab === 'profile'
+                                className={`flex-shrink-0 lg:w-full text-left px-4 py-2 lg:p-3 rounded-lg transition text-sm lg:text-base ${activeTab === 'profile'
                                     ? 'bg-[#4CBC9A] text-white'
-                                    : 'hover:bg-gray-50'
+                                    : 'bg-gray-50 lg:bg-transparent hover:bg-gray-100 lg:hover:bg-gray-50 text-gray-700'
                                     }`}
                             >
-                                <i className="fas fa-user mr-3"></i>
+                                <i className="fas fa-user mr-2 lg:mr-3"></i>
                                 Profile Information
                             </button>
                             <button
                                 onClick={() => setActiveTab('email')}
-                                className={`w-full text-left p-3 rounded-lg transition ${activeTab === 'email'
+                                className={`flex-shrink-0 lg:w-full text-left px-4 py-2 lg:p-3 rounded-lg transition text-sm lg:text-base ${activeTab === 'email'
                                     ? 'bg-[#4CBC9A] text-white'
-                                    : 'hover:bg-gray-50'
+                                    : 'bg-gray-50 lg:bg-transparent hover:bg-gray-100 lg:hover:bg-gray-50 text-gray-700'
                                     }`}
                             >
-                                <i className="fas fa-envelope mr-3"></i>
+                                <i className="fas fa-envelope mr-2 lg:mr-3"></i>
                                 Email Settings
                             </button>
                             <button
                                 onClick={() => setActiveTab('password')}
-                                className={`w-full text-left p-3 rounded-lg transition ${activeTab === 'password'
+                                className={`flex-shrink-0 lg:w-full text-left px-4 py-2 lg:p-3 rounded-lg transition text-sm lg:text-base ${activeTab === 'password'
                                     ? 'bg-[#4CBC9A] text-white'
-                                    : 'hover:bg-gray-50'
+                                    : 'bg-gray-50 lg:bg-transparent hover:bg-gray-100 lg:hover:bg-gray-50 text-gray-700'
                                     }`}
                             >
-                                <i className="fas fa-lock mr-3"></i>
+                                <i className="fas fa-lock mr-2 lg:mr-3"></i>
                                 Change Password
                             </button>
                         </div>
                     </div>
 
                     {/* Main Content Area */}
-                    <div className='col-span-3'>
+                    <div className='col-span-1 lg:col-span-3 w-full'>
                         {/* Status Message */}
                         {message.text && (
-                            <div className={`mb-6 p-4 rounded-lg ${message.type === 'success'
+                            <div className={`mb-6 p-3 lg:p-4 rounded-lg text-sm lg:text-base flex items-start ${message.type === 'success'
                                 ? 'bg-green-100 text-green-800 border border-green-200'
                                 : message.type === 'error'
                                     ? 'bg-red-100 text-red-800 border border-red-200'
                                     : 'bg-blue-100 text-blue-800 border border-blue-200'
                                 }`}>
-                                <i className={`mr-2 ${message.type === 'success' ? 'fas fa-check-circle' :
+                                <i className={`mt-0.5 mr-2 flex-shrink-0 ${message.type === 'success' ? 'fas fa-check-circle' :
                                     message.type === 'error' ? 'fas fa-exclamation-circle' :
                                         'fas fa-info-circle'
                                     }`}></i>
-                                {message.text}
+                                <span>{message.text}</span>
                             </div>
                         )}
 
                         {/* Profile Information Tab */}
                         {activeTab === 'profile' && (
-                            <div className='bg-white rounded-xl shadow-md p-8'>
-                                <h2 className='text-2xl font-bold mb-6'>Profile Information</h2>
+                            <div className='bg-white rounded-xl shadow-md p-4 lg:p-8'>
+                                <h2 className='text-xl lg:text-2xl font-bold mb-4 lg:mb-6'>Profile Information</h2>
                                 <form onSubmit={handleProfileUpdate}>
-                                    <div className='grid grid-cols-2 gap-6 mb-6'>
+                                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6'>
                                         {/* Avatar Selection */}
-                                        <div className='col-span-2'>
+                                        <div className='col-span-1 lg:col-span-2'>
                                             <label className='block text-sm font-medium text-gray-700 mb-3'>
                                                 Choose Avatar
                                             </label>
-                                            <div className='flex flex-wrap gap-4 mb-4'>
+                                            <div className='flex flex-wrap gap-3 lg:gap-4 mb-4'>
                                                 {avatars.map((avatar) => (
                                                     <div
                                                         key={avatar.id}
@@ -403,23 +403,23 @@ function ProfileSettings() {
                                                         <img
                                                             src={avatar.src}
                                                             alt={avatar.alt}
-                                                            className="w-16 h-16 rounded-full object-cover"
+                                                            className="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover"
                                                         />
                                                     </div>
                                                 ))}
                                             </div>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-xs lg:text-sm text-gray-500">
                                                 Click on an avatar to select it
                                             </p>
                                         </div>
 
                                         {/* Current Avatar Preview */}
-                                        <div className='col-span-2'>
+                                        <div className='col-span-1 lg:col-span-2'>
                                             <label className='block text-sm font-medium text-gray-700 mb-3'>
                                                 Selected Avatar Preview
                                             </label>
-                                            <div className='flex items-center space-x-6'>
-                                                <div className='w-20 h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300'>
+                                            <div className='flex items-center space-x-4 lg:space-x-6'>
+                                                <div className='w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300 flex-shrink-0'>
                                                     {selectedAvatar ? (
                                                         <img
                                                             src={selectedAvatar}
@@ -433,7 +433,7 @@ function ProfileSettings() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-600">
+                                                    <p className="text-xs lg:text-sm text-gray-600">
                                                         This is how your avatar will appear to others
                                                     </p>
                                                 </div>
@@ -450,7 +450,7 @@ function ProfileSettings() {
                                                 name="displayName"
                                                 value={userData.displayName}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                                 required
                                             />
                                         </div>
@@ -465,7 +465,7 @@ function ProfileSettings() {
                                                 name="phone"
                                                 value={userData.phone}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                             />
                                         </div>
 
@@ -479,7 +479,7 @@ function ProfileSettings() {
                                                 name="location"
                                                 value={userData.location}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                             />
                                         </div>
 
@@ -493,12 +493,12 @@ function ProfileSettings() {
                                                 name="website"
                                                 value={userData.website}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                             />
                                         </div>
 
                                         {/* Bio */}
-                                        <div className='col-span-2'>
+                                        <div className='col-span-1 lg:col-span-2'>
                                             <label className='block text-sm font-medium text-gray-700 mb-2'>
                                                 Bio
                                             </label>
@@ -507,7 +507,7 @@ function ProfileSettings() {
                                                 value={userData.bio}
                                                 onChange={handleInputChange}
                                                 rows="4"
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                                 placeholder="Tell us about yourself..."
                                             />
                                         </div>
@@ -516,7 +516,7 @@ function ProfileSettings() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="btn-primary disabled:opacity-50 flex items-center justify-center"
+                                        className="btn-primary w-full lg:w-auto disabled:opacity-50 flex items-center justify-center py-3 lg:py-2 px-6"
                                     >
                                         {loading ? (
                                             <>
@@ -533,8 +533,8 @@ function ProfileSettings() {
 
                         {/* Email Settings Tab */}
                         {activeTab === 'email' && (
-                            <div className='bg-white rounded-xl shadow-md p-8'>
-                                <h2 className='text-2xl font-bold mb-6'>Email Settings</h2>
+                            <div className='bg-white rounded-xl shadow-md p-4 lg:p-8'>
+                                <h2 className='text-xl lg:text-2xl font-bold mb-4 lg:mb-6'>Email Settings</h2>
                                 <form onSubmit={handleEmailUpdate}>
                                     <div className='mb-6'>
                                         <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -545,10 +545,10 @@ function ProfileSettings() {
                                             name="email"
                                             value={userData.email}
                                             onChange={handleInputChange}
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                             required
                                         />
-                                        <p className="text-sm text-gray-500 mt-1">
+                                        <p className="text-xs lg:text-sm text-gray-500 mt-1">
                                             We'll send account-related emails to this address.
                                         </p>
                                     </div>
@@ -556,7 +556,7 @@ function ProfileSettings() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="btn-primary disabled:opacity-50 flex items-center justify-center"
+                                        className="btn-primary w-full lg:w-auto disabled:opacity-50 flex items-center justify-center py-3 lg:py-2 px-6"
                                     >
                                         {loading ? (
                                             <>
@@ -573,8 +573,8 @@ function ProfileSettings() {
 
                         {/* Change Password Tab */}
                         {activeTab === 'password' && (
-                            <div className='bg-white rounded-xl shadow-md p-8'>
-                                <h2 className='text-2xl font-bold mb-6'>Change Password</h2>
+                            <div className='bg-white rounded-xl shadow-md p-4 lg:p-8'>
+                                <h2 className='text-xl lg:text-2xl font-bold mb-4 lg:mb-6'>Change Password</h2>
                                 <form onSubmit={handlePasswordUpdate}>
                                     <div className='space-y-4 mb-6'>
                                         <div>
@@ -586,7 +586,7 @@ function ProfileSettings() {
                                                 name="currentPassword"
                                                 value={userData.currentPassword}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                                 required
                                             />
                                         </div>
@@ -599,7 +599,7 @@ function ProfileSettings() {
                                                 name="newPassword"
                                                 value={userData.newPassword}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                                 required
                                                 minLength="6"
                                             />
@@ -613,7 +613,7 @@ function ProfileSettings() {
                                                 name="confirmPassword"
                                                 value={userData.confirmPassword}
                                                 onChange={handleInputChange}
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CBC9A] focus:border-transparent text-sm lg:text-base"
                                                 required
                                                 minLength="6"
                                             />
@@ -623,7 +623,7 @@ function ProfileSettings() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="btn-primary disabled:opacity-50 flex items-center justify-center"
+                                        className="btn-primary w-full lg:w-auto disabled:opacity-50 flex items-center justify-center py-3 lg:py-2 px-6"
                                     >
                                         {loading ? (
                                             <>

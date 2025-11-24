@@ -1,58 +1,49 @@
-from PyPDF2 import PdfReader
-from pdf2image import convert_from_bytes
-from PIL import Image
-import pytesseract
+import os
+import docx
+from pypdf import PdfReader
 
-def extract_content(file):
+def extract_content(file_path):
     """
-    Extract content from PDF or TXT file
-    Args:
-        file: Can be either a file object (from Streamlit file_uploader) or a string file path
+    Extracts text from PDF, DOCX, or TXT files.
+    Returns the text as a single string.
     """
+    ext = os.path.splitext(file_path)[1].lower()
     text = ""
-    
-    # Handle string file path
-    if isinstance(file, str):
-        try:
-            with open(file, 'rb') as f:
-                reader = PdfReader(f)
-                for page in reader.pages:
-                    text += page.extract_text() or ""
-                if text.strip():
-                    return text.strip()
-        except Exception as e:
-            print(f"PyPDF2 extraction error from file path: {e}")
-            # Try reading as text file if PDF extraction fails
-            try:
-                with open(file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    if content.strip():
-                        return content.strip()
-            except Exception as txt_error:
-                print(f"Text file reading error: {txt_error}")
-            return f"Error reading file: {file}. File may not exist or be accessible."
-    
-    # Handle file object (from Streamlit file_uploader)
-    else:
-        try:
-            reader = PdfReader(file)
+
+    try:
+        # 1. Handle Word Documents (.docx)
+        if ext == ".docx":
+            doc = docx.Document(file_path)
+            full_text = []
+            for para in doc.paragraphs:
+                full_text.append(para.text)
+            text = "\n".join(full_text)
+
+        # 2. Handle PDFs (.pdf)
+        elif ext == ".pdf":
+            reader = PdfReader(file_path)
             for page in reader.pages:
-                text += page.extract_text() or ""
-            if text.strip():
-                return text.strip()
-        except Exception as e:
-            print(f"PyPDF2 extraction error from file object: {e}")
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted + "\n"
 
-        # OCR fallback for file objects
-        try:
-            file.seek(0)
-            images = convert_from_bytes(file.read())
+        # 3. Handle Text Files (.txt)
+        elif ext == ".txt":
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
 
-            ocr_text = ""
-            for img in images:
-                ocr_text += pytesseract.image_to_string(img)
+        # 4. Fallback / Unsupported
+        else:
+            print(f"⚠️ Unsupported file format: {ext}")
+            return ""
 
-            return ocr_text.strip() if ocr_text.strip() else "No readable text found in the PDF."
-        except Exception as e:
-            print(f"OCR fallback error: {e}")
-            return "Error extracting text from PDF."
+        # Clean up text (remove excessive whitespace)
+        return text.strip()
+
+    except Exception as e:
+        print(f"❌ Error extracting text from {file_path}: {e}")
+        return ""
+
+if __name__ == "__main__":
+    # Simple test
+    print("Text Extractor Module Loaded")

@@ -248,22 +248,20 @@ function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen mt-30 mb-30 font-poppins">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-                    <p className="text-gray-600">Manage your platform and monitor performance</p>
+        <div className="min-h-screen mt-[100px] lg:mt-30 mb-8 lg:mb-30 font-poppins">
+            <div className="max-w-7xl mx-auto px-[15px] lg:px-6">
+                <div className="mb-6 lg:mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                    <p className="text-sm lg:text-base text-gray-600">Manage your platform and monitor performance</p>
                 </div>
 
-                {/* Navigation Tabs */}
-                <div className="mb-6 border-b border-gray-200">
-                    <nav className="-mb-px flex space-x-8">
+                <div className="mb-6 border-b border-gray-200 overflow-x-auto no-scrollbar">
+                    <nav className="-mb-px flex space-x-6 lg:space-x-8 min-w-max">
                         {['overview', 'users', 'courses', 'content', 'analytics'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize ${activeTab === tab
+                                className={`whitespace-nowrap py-3 lg:py-4 px-1 border-b-2 font-medium text-sm capitalize ${activeTab === tab
                                     ? 'border-[#6c5dd3] text-[#6c5dd3]'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
@@ -274,150 +272,148 @@ function AdminDashboard() {
                     </nav>
                 </div>
 
-                {/* Overview Tab */}
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#6c5dd3]">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md border-l-4 border-[#6c5dd3]">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-900">{platformStats.totalStudents}</p>
-                                        <p className="text-gray-600">Total Students</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{platformStats.totalStudents}</p>
+                                        <p className="text-sm lg:text-base text-gray-600">Total Students</p>
                                     </div>
-                                    <div className="w-12 h-12 bg-[#6c5dd3] rounded-lg flex items-center justify-center">
-                                        <i className="fas fa-users text-white text-xl"></i>
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#6c5dd3] rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-users text-white text-lg lg:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#4CBC9A]">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md border-l-4 border-[#4CBC9A]">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-900">{platformStats.totalTutors}</p>
-                                        <p className="text-gray-600">Total Tutors</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{platformStats.totalTutors}</p>
+                                        <p className="text-sm lg:text-base text-gray-600">Total Tutors</p>
                                     </div>
-                                    <div className="w-12 h-12 bg-[#4CBC9A] rounded-lg flex items-center justify-center">
-                                        <i className="fas fa-chalkboard-teacher text-white text-xl"></i>
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#4CBC9A] rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-chalkboard-teacher text-white text-lg lg:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#FEC64F]">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md border-l-4 border-[#FEC64F]">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-900">{platformStats.totalCourses}</p>
-                                        <p className="text-gray-600">Active Courses</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{platformStats.totalCourses}</p>
+                                        <p className="text-sm lg:text-base text-gray-600">Active Courses</p>
                                     </div>
-                                    <div className="w-12 h-12 bg-[#FEC64F] rounded-lg flex items-center justify-center">
-                                        <i className="fas fa-book-open text-white text-xl"></i>
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#FEC64F] rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-book-open text-white text-lg lg:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#FF6B6B]">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md border-l-4 border-[#FF6B6B]">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-900">{platformStats.pendingApprovals}</p>
-                                        <p className="text-gray-600">Pending Approvals</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{platformStats.pendingApprovals}</p>
+                                        <p className="text-sm lg:text-base text-gray-600">Pending Approvals</p>
                                     </div>
-                                    <div className="w-12 h-12 bg-[#FF6B6B] rounded-lg flex items-center justify-center">
-                                        <i className="fas fa-clock text-white text-xl"></i>
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#FF6B6B] rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-clock text-white text-lg lg:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Charts Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* User Growth Chart */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">User Growth</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={userGrowthData}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="month" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="students" stroke="#6c5dd3" strokeWidth={2} />
-                                        <Line type="monotone" dataKey="tutors" stroke="#4CBC9A" strokeWidth={2} />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                                <div className="w-full overflow-hidden">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart data={userGrowthData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="month" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Line type="monotone" dataKey="students" stroke="#6c5dd3" strokeWidth={2} />
+                                            <Line type="monotone" dataKey="tutors" stroke="#4CBC9A" strokeWidth={2} />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
 
-                            {/* User Roles Distribution */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">User Roles Distribution</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={userRoleData}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {userRoleData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                <div className="w-full overflow-hidden">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie
+                                                data={userRoleData}
+                                                cx="50%"
+                                                cy="50%"
+                                                labelLine={false}
+                                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                outerRadius={80}
+                                                fill="#8884d8"
+                                                dataKey="value"
+                                            >
+                                                {userRoleData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Second Charts Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Course Enrollment */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">Course Enrollment & Assignments</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart data={courseEnrollmentData}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="name" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Bar dataKey="enrolled" fill="#6c5dd3" name="Students Enrolled" />
-                                        <Bar dataKey="assignments" fill="#4CBC9A" name="Assignments" />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                <div className="w-full overflow-hidden">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <BarChart data={courseEnrollmentData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Bar dataKey="enrolled" fill="#6c5dd3" name="Students Enrolled" />
+                                            <Bar dataKey="assignments" fill="#4CBC9A" name="Assignments" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
 
-                            {/* Platform Statistics */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">Platform Statistics</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={platformStatsData}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {platformStatsData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                <div className="w-full overflow-hidden">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie
+                                                data={platformStatsData}
+                                                cx="50%"
+                                                cy="50%"
+                                                labelLine={false}
+                                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                outerRadius={80}
+                                                fill="#8884d8"
+                                                dataKey="value"
+                                            >
+                                                {platformStatsData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Recent Activity & Pending Requests */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Pending Enrollment Requests */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="font-bold">Pending Enrollment Requests</h3>
                                     <span className="bg-red-100 text-red-800 text-sm px-2 py-1 rounded-full">
@@ -429,22 +425,22 @@ function AdminDashboard() {
                                         <p className="text-gray-500 text-center py-4">No pending requests</p>
                                     ) : (
                                         enrollmentRequests.slice(0, 5).map((request) => (
-                                            <div key={request.id} className="flex justify-between items-center p-3 border rounded-lg">
+                                            <div key={request.id} className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3 lg:gap-0 p-3 border rounded-lg">
                                                 <div>
                                                     <p className="font-semibold">{request.studentName}</p>
                                                     <p className="text-sm text-gray-600">{request.course}</p>
                                                     <p className="text-xs text-gray-500">{request.date}</p>
                                                 </div>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 w-full lg:w-auto">
                                                     <button
                                                         onClick={() => handleApproveEnrollment(request.id)}
-                                                        className="bg-[#4CBC9A] text-white px-3 py-1 rounded text-sm hover:bg-[#3aa384]"
+                                                        className="flex-1 lg:flex-none bg-[#4CBC9A] text-white px-3 py-1 rounded text-sm hover:bg-[#3aa384]"
                                                     >
                                                         Approve
                                                     </button>
                                                     <button
                                                         onClick={() => handleRejectEnrollment(request.id)}
-                                                        className="bg-[#FF6B6B] text-white px-3 py-1 rounded text-sm hover:bg-[#e55a5a]"
+                                                        className="flex-1 lg:flex-none bg-[#FF6B6B] text-white px-3 py-1 rounded text-sm hover:bg-[#e55a5a]"
                                                     >
                                                         Reject
                                                     </button>
@@ -455,8 +451,7 @@ function AdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* System Status */}
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">System Status</h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
@@ -493,11 +488,10 @@ function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Users Management Tab */}
                 {activeTab === 'users' && (
                     <div className="bg-white rounded-xl shadow-md">
-                        <div className="p-6 border-b">
-                            <div className="flex justify-between items-center">
+                        <div className="p-4 lg:p-6 border-b">
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 lg:gap-0">
                                 <h2 className="text-xl font-semibold">User Management</h2>
                                 <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
                                     Total: {users.length}
@@ -508,27 +502,17 @@ function AdminDashboard() {
                             <table className="w-full">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            User
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Role
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Join Date
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
-                                        </th>
+                                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {users.map((user) => (
                                         <tr key={user.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0 h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
                                                         {user.photoURL ? (
@@ -545,7 +529,7 @@ function AdminDashboard() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin'
                                                     ? 'bg-purple-100 text-purple-800'
                                                     : user.role === 'tutor'
@@ -555,7 +539,7 @@ function AdminDashboard() {
                                                     {user.role || 'student'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'approved'
                                                     ? 'bg-green-100 text-green-800'
                                                     : user.status === 'pending'
@@ -565,10 +549,10 @@ function AdminDashboard() {
                                                     {user.status || 'approved'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex space-x-2">
                                                     {user.status === 'pending' && (
                                                         <button
@@ -594,18 +578,17 @@ function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Courses Management Tab */}
                 {activeTab === 'courses' && (
                     <div className="space-y-6">
                         <div className="bg-white rounded-xl shadow-md">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-4 lg:p-6 border-b flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-0">
                                 <div>
                                     <h2 className="text-xl font-semibold">Course Management</h2>
                                     <p className="text-gray-600 text-sm">Total: {courses.length} courses</p>
                                 </div>
                                 <Link
                                     to="/add-course"
-                                    className="bg-[#6c5dd3] text-white px-4 py-2 rounded-lg hover:bg-[#5a4bc2] transition"
+                                    className="w-full lg:w-auto text-center bg-[#6c5dd3] text-white px-4 py-2 rounded-lg hover:bg-[#5a4bc2] transition"
                                 >
                                     <i className="fas fa-plus mr-2"></i>Add New Course
                                 </Link>
@@ -614,30 +597,18 @@ function AdminDashboard() {
                                 <table className="w-full">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Course
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Instructor
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Students
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Created
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                            <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {courses.map((course) => (
                                             <tr key={course.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center">
                                                             <i className="fas fa-book text-gray-600"></i>
@@ -652,13 +623,13 @@ function AdminDashboard() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {course.instructorName || course.instructor || 'Unknown'}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {course.enrolledStudents || 0}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${course.status === 'published'
                                                         ? 'bg-green-100 text-green-800'
                                                         : course.status === 'draft'
@@ -668,10 +639,10 @@ function AdminDashboard() {
                                                         {course.status || 'draft'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {course.createdAt ? new Date(course.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div className="flex space-x-2">
                                                         <button className="text-blue-600 hover:text-blue-900">
                                                             Edit
@@ -702,28 +673,26 @@ function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Content Management Tab */}
                 {activeTab === 'content' && (
                     <div className="space-y-6">
-                        {/* Assignments Section */}
                         <div className="bg-white rounded-xl shadow-md">
-                            <div className="p-6 border-b">
+                            <div className="p-4 lg:p-6 border-b">
                                 <h2 className="text-xl font-semibold">Assignments Management</h2>
                                 <p className="text-gray-600 text-sm">Total: {assignments.length} assignments</p>
                             </div>
-                            <div className="p-6">
+                            <div className="p-4 lg:p-6">
                                 {assignments.length === 0 ? (
                                     <p className="text-gray-500 text-center py-4">No assignments found</p>
                                 ) : (
                                     <div className="space-y-4">
                                         {assignments.map((assignment) => (
-                                            <div key={assignment.id} className="flex justify-between items-center p-4 border rounded-lg">
+                                            <div key={assignment.id} className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 lg:gap-0 p-4 border rounded-lg">
                                                 <div>
                                                     <h3 className="font-semibold">{assignment.AssignmentTitle}</h3>
                                                     <p className="text-sm text-gray-600">Due: {assignment.DeadLine}</p>
                                                     <p className="text-sm text-gray-500">Course: {assignment.courseName || 'Unknown Course'}</p>
                                                 </div>
-                                                <div className="flex space-x-2">
+                                                <div className="flex space-x-2 self-end lg:self-auto">
                                                     <button className="text-blue-600 hover:text-blue-900 text-sm">
                                                         View Submissions
                                                     </button>
@@ -738,25 +707,24 @@ function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Quizzes Section */}
                         <div className="bg-white rounded-xl shadow-md">
-                            <div className="p-6 border-b">
+                            <div className="p-4 lg:p-6 border-b">
                                 <h2 className="text-xl font-semibold">Quizzes Management</h2>
                                 <p className="text-gray-600 text-sm">Total: {quizzes.length} quizzes</p>
                             </div>
-                            <div className="p-6">
+                            <div className="p-4 lg:p-6">
                                 {quizzes.length === 0 ? (
                                     <p className="text-gray-500 text-center py-4">No quizzes found</p>
                                 ) : (
                                     <div className="space-y-4">
                                         {quizzes.map((quiz) => (
-                                            <div key={quiz.id} className="flex justify-between items-center p-4 border rounded-lg">
+                                            <div key={quiz.id} className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 lg:gap-0 p-4 border rounded-lg">
                                                 <div>
                                                     <h3 className="font-semibold">{quiz.quizTitle}</h3>
                                                     <p className="text-sm text-gray-600">Due: {quiz.deadline} | Time: {quiz.timeLimit} mins</p>
                                                     <p className="text-sm text-gray-500">Course: {quiz.courseName || 'Unknown Course'}</p>
                                                 </div>
-                                                <div className="flex space-x-2">
+                                                <div className="flex space-x-2 self-end lg:self-auto">
                                                     <button className="text-blue-600 hover:text-blue-900 text-sm">
                                                         View Results
                                                     </button>
@@ -773,11 +741,10 @@ function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                                 <h3 className="font-bold mb-4">Platform Performance</h3>
                                 <div className="space-y-4">
                                     <div>
@@ -810,7 +777,7 @@ function AdminDashboard() {
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+                            <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md lg:col-span-2">
                                 <h3 className="font-bold mb-4">System Health</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="text-center p-4 border rounded-lg">
@@ -833,13 +800,15 @@ function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-md">
+                        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
                             <h3 className="font-bold mb-4">Recent Activities</h3>
                             <div className="space-y-3">
                                 {users.slice(0, 5).map((user, index) => (
-                                    <div key={user.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                            <i className="fas fa-user-plus text-green-600 text-sm"></i>
+                                    <div key={user.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg">
+                                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i className="fas fa-user-plus text-green-600 text-sm"></i>
+                                            </div>
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm">

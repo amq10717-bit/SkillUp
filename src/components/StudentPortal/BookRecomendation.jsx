@@ -125,14 +125,15 @@ function BookRecommendation() {
                 ]}
             />
 
-            <div className="mt-8 mb-12 font-poppins max-w-7xl mx-auto px-4">
-                <div className='grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6'>
+            <div className="my-8 lg:mt-30 lg:mb-30 font-poppins max-w-7xl mx-auto px-[15px] lg:px-4">
+                {/* Mobile-first: Flex-col for mobile, Grid for desktop */}
+                <div className='flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-6'>
 
-                    {/* Left: main content */}
-                    <div>
-                        <div className='bg-white rounded-2xl p-6 shadow'>
-                            <h1 className='text-3xl font-extrabold mb-3'>Personalized Book Recommendations</h1>
-                            <p className='text-gray-600 mb-4'>
+                    {/* Main content */}
+                    <div className="order-1 lg:order-1">
+                        <div className='bg-white rounded-2xl p-4 lg:p-6 shadow'>
+                            <h1 className='text-2xl lg:text-3xl font-extrabold mb-3 text-gray-900'>Personalized Book Recommendations</h1>
+                            <p className='text-sm lg:text-base text-gray-600 mb-4 leading-relaxed'>
                                 Use the form below to tell the recommender what you like and what you're working on.
                                 The AI will use this to suggest the most relevant technical books.
                             </p>
@@ -146,7 +147,7 @@ function BookRecommendation() {
                                         value={interestsInput}
                                         onChange={(e) => setInterestsInput(e.target.value)}
                                         placeholder="e.g. programming, web-development, data-science"
-                                        className='w-full p-2 border rounded'
+                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                                     />
                                 </div>
 
@@ -155,7 +156,7 @@ function BookRecommendation() {
                                     <select
                                         value={desiredDifficulty}
                                         onChange={(e) => setDesiredDifficulty(e.target.value)}
-                                        className='w-full p-2 border rounded'
+                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white'
                                     >
                                         <option>Beginner</option>
                                         <option>Intermediate</option>
@@ -171,7 +172,7 @@ function BookRecommendation() {
                                         max="5"
                                         value={skillLevel}
                                         onChange={(e) => setSkillLevel(Number(e.target.value))}
-                                        className='w-full'
+                                        className='w-full accent-indigo-600'
                                     />
                                     <div className='text-xs text-gray-600 mt-1'>Current skill level: {skillLevel}</div>
                                 </div>
@@ -184,7 +185,7 @@ function BookRecommendation() {
                                         max="20"
                                         value={numResults}
                                         onChange={(e) => setNumResults(e.target.value)}
-                                        className='w-full p-2 border rounded'
+                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                                     />
                                 </div>
                             </div>
@@ -196,41 +197,41 @@ function BookRecommendation() {
                                     value={recentAssignmentsText}
                                     onChange={(e) => setRecentAssignmentsText(e.target.value)}
                                     placeholder="Paste assignment summaries, topics, or notes..."
-                                    className='w-full p-2 border rounded'
+                                    className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                                 />
                                 <div className='text-xs text-gray-500 mt-1'>Optional — helps the model match books to recent work.</div>
                             </div>
 
-                            <div className='flex gap-3 items-center'>
+                            <div className='flex flex-col sm:flex-row gap-3 items-center'>
                                 <button
                                     onClick={handleGetRecommendations}
                                     disabled={loading}
-                                    className='btn-primary px-4 py-2 rounded bg-indigo-600 text-white shadow'
+                                    className='w-full sm:w-auto btn-primary px-6 py-2.5 rounded-lg bg-indigo-600 text-white shadow hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm font-medium'
                                 >
                                     {loading ? 'Generating...' : 'Generate AI Recommendations'}
                                 </button>
 
                                 <button
                                     onClick={() => {
-                                        // quick demo fallback: populate with a small sample without calling backend
                                         setRecommendations([
                                             { id: 1, title: 'Clean Code', author: 'Robert C. Martin', description: 'Learn to write maintainable code.', genre: 'programming', rating: 4.7, pages: 464, aiExplanation: 'Suggested for improving code quality', difficulty: 'Intermediate' },
                                             { id: 2, title: 'Design Patterns', author: 'Gamma et al.', description: 'Classic design patterns book.', genre: 'programming', rating: 4.6, pages: 395, aiExplanation: 'Good for architecture & design', difficulty: 'Advanced' }
                                         ]);
                                         setRecError(null);
                                     }}
-                                    className='px-3 py-2 border rounded'
+                                    className='w-full sm:w-auto px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium'
                                 >
                                     Demo results
                                 </button>
 
-                                <div className='ml-auto text-sm text-gray-500'>
+                                <div className='w-full sm:w-auto sm:ml-auto text-center sm:text-right text-sm text-gray-500'>
                                     {recommendations.length} recommendations
                                 </div>
                             </div>
 
                             {recError && (
-                                <div className="mt-4 p-3 bg-red-50 text-red-800 rounded">
+                                <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm flex items-center">
+                                    <i className="fas fa-exclamation-circle mr-2"></i>
                                     Recommendation error: {recError}
                                 </div>
                             )}
@@ -238,18 +239,21 @@ function BookRecommendation() {
 
                         {/* Search + Filters for results */}
                         <div className='bg-white rounded-2xl p-4 mt-6 shadow'>
-                            <div className='flex flex-col md:flex-row md:items-center gap-3'>
-                                <input
-                                    type="text"
-                                    placeholder='Search in recommendations...'
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className='flex-1 p-2 border rounded'
-                                />
+                            <div className='flex flex-col sm:flex-row gap-3'>
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        placeholder='Search in recommendations...'
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className='w-full pl-9 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
+                                    />
+                                    <i className="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                                </div>
                                 <select
                                     value={selectedGenre}
                                     onChange={(e) => setSelectedGenre(e.target.value)}
-                                    className='p-2 border rounded'
+                                    className='w-full sm:w-auto p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white'
                                 >
                                     {genres.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
                                 </select>
@@ -259,41 +263,47 @@ function BookRecommendation() {
                         {/* Results */}
                         <div className='mt-6 space-y-4'>
                             {filteredBooks.length === 0 ? (
-                                <div className='bg-white p-6 rounded shadow text-gray-600'>No recommendations yet — generate some above.</div>
+                                <div className='bg-white p-8 rounded-xl shadow text-center text-gray-500'>
+                                    <i className="fas fa-book-reader text-4xl mb-3 text-gray-300"></i>
+                                    <p>No recommendations yet — generate some above.</p>
+                                </div>
                             ) : (
                                 filteredBooks.map(book => (
-                                    <div key={book.id} className='bg-white p-4 rounded shadow flex gap-4 items-start'>
-                                        <div className='w-20 h-28 bg-gray-100 rounded flex items-center justify-center'>
-                                            <BookOpenIcon className='w-8 h-8 text-gray-400' />
+                                    <div key={book.id} className='bg-white p-4 lg:p-5 rounded-xl shadow flex flex-col sm:flex-row gap-4 items-start hover:shadow-md transition-shadow'>
+                                        <div className='w-full sm:w-24 h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 self-center sm:self-start'>
+                                            <BookOpenIcon className='w-10 h-10 text-gray-400' />
                                         </div>
 
-                                        <div className='flex-1'>
-                                            <div className='flex justify-between items-start'>
+                                        <div className='flex-1 w-full'>
+                                            <div className='flex flex-col sm:flex-row justify-between items-start gap-2 mb-2'>
                                                 <div>
-                                                    <h3 className='text-lg font-semibold'>{book.title}</h3>
-                                                    <div className='text-sm text-gray-600'>by {book.author}</div>
+                                                    <h3 className='text-lg font-bold text-gray-900 leading-tight'>{book.title}</h3>
+                                                    <div className='text-sm text-gray-600 mt-0.5'>by {book.author}</div>
                                                 </div>
 
-                                                <div className='text-right'>
-                                                    <div className={`px-2 py-1 rounded text-xs font-medium ${difficultyLevels[book.difficulty] || 'bg-gray-100 text-gray-800'}`}>
+                                                <div className='flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto justify-between sm:justify-start'>
+                                                    <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${difficultyLevels[book.difficulty] || 'bg-gray-100 text-gray-800'}`}>
                                                         {book.difficulty || 'Unknown'}
                                                     </div>
-                                                    <div className='text-sm text-gray-500 mt-1'>{book.rating ?? '-'} ★</div>
+                                                    <div className='text-sm font-semibold text-yellow-500 sm:mt-1 flex items-center gap-1'>
+                                                        {book.rating ?? '-'} <i className="fas fa-star text-xs"></i>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <p className='text-gray-700 mt-2'>{book.description}</p>
+                                            <p className='text-sm text-gray-700 mt-2 line-clamp-3 leading-relaxed'>{book.description}</p>
 
-                                            <div className='mt-3 flex flex-wrap items-center gap-3'>
-                                                <div className='bg-blue-50 p-2 rounded text-sm text-blue-800'>
-                                                    <strong>AI Insight:</strong> {book.aiExplanation ?? book.reason ?? 'No explanation provided.'}
+                                            <div className='mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3'>
+                                                <div className='bg-blue-50 p-2.5 rounded-lg text-xs lg:text-sm text-blue-800 w-full sm:w-auto flex-1 border border-blue-100'>
+                                                    <strong className="block sm:inline mb-1 sm:mb-0 mr-1">AI Insight:</strong>
+                                                    {book.aiExplanation ?? book.reason ?? 'No explanation provided.'}
                                                 </div>
 
                                                 <button
                                                     onClick={() => addToReadingList(book)}
-                                                    className='ml-auto px-3 py-1 bg-green-600 text-white rounded text-sm'
+                                                    className='w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm active:scale-95'
                                                 >
-                                                    Add to Reading List
+                                                    Add to List
                                                 </button>
                                             </div>
                                         </div>
@@ -303,42 +313,71 @@ function BookRecommendation() {
                         </div>
                     </div>
 
-                    {/* Right: sidebar */}
-                    <aside>
-                        <div className='bg-white p-4 rounded shadow mb-4'>
-                            <h4 className='font-semibold mb-2'>Quick Stats</h4>
-                            <div className='text-sm text-gray-600'>
-                                <div className='flex justify-between py-1'><span>Recommendations</span><span className='font-medium'>{recommendations.length}</span></div>
-                                <div className='flex justify-between py-1'><span>Reading List</span><span className='font-medium'>{readingList.length}</span></div>
-                                <div className='flex justify-between py-1'><span>Skill Level</span><span className='font-medium'>{skillLevel}/5</span></div>
-                            </div>
-                        </div>
-
-                        <div className='bg-white p-4 rounded shadow mb-4'>
-                            <h4 className='font-semibold mb-2'>Recommendation Criteria</h4>
+                    {/* Right: sidebar (Stacked below on mobile) */}
+                    <aside className="order-2 lg:order-2 space-y-4 lg:sticky lg:top-6 h-fit">
+                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
+                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base'>Quick Stats</h4>
                             <div className='text-sm text-gray-600 space-y-2'>
-                                <div className='flex items-center gap-2'><AcademicCapIcon className='w-4 h-4 text-gray-500' /> Assignment Performance</div>
-                                <div className='flex items-center gap-2'><BookOpenIcon className='w-4 h-4 text-gray-500' /> Learning Objectives</div>
-                                <div className='flex items-center gap-2'><StarIcon className='w-4 h-4 text-gray-500' /> Skill Level & Interests</div>
+                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
+                                    <span>Recommendations</span>
+                                    <span className='font-medium text-gray-900'>{recommendations.length}</span>
+                                </div>
+                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
+                                    <span>Reading List</span>
+                                    <span className='font-medium text-gray-900'>{readingList.length}</span>
+                                </div>
+                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
+                                    <span>Skill Level</span>
+                                    <span className='font-medium text-gray-900'>{skillLevel}/5</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className='bg-white p-4 rounded shadow'>
-                            <h4 className='font-semibold mb-2'>My Reading List</h4>
+                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
+                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base'>Recommendation Criteria</h4>
+                            <div className='text-sm text-gray-600 space-y-3'>
+                                <div className='flex items-center gap-2'>
+                                    <div className="p-1.5 bg-indigo-50 rounded text-indigo-600"><AcademicCapIcon className='w-4 h-4' /></div>
+                                    Assignment Performance
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <div className="p-1.5 bg-green-50 rounded text-green-600"><BookOpenIcon className='w-4 h-4' /></div>
+                                    Learning Objectives
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <div className="p-1.5 bg-yellow-50 rounded text-yellow-600"><StarIcon className='w-4 h-4' /></div>
+                                    Skill Level & Interests
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
+                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base flex items-center justify-between'>
+                                My Reading List
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">{readingList.length}</span>
+                            </h4>
                             {readingList.length === 0 ? (
-                                <div className='text-sm text-gray-600'>No books added yet.</div>
+                                <div className='text-sm text-gray-500 text-center py-4 italic bg-gray-50 rounded-lg border border-dashed border-gray-200'>
+                                    No books added yet.
+                                </div>
                             ) : (
-                                <div className='space-y-2'>
+                                <div className='space-y-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar'>
                                     {readingList.map((b, idx) => (
-                                        <div key={idx} className='flex items-start gap-3'>
-                                            <div className='w-10 h-12 bg-gray-100 rounded flex items-center justify-center'>
+                                        <div key={idx} className='flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group'>
+                                            <div className='w-10 h-12 bg-gray-200 rounded flex items-center justify-center flex-shrink-0'>
                                                 <BookOpenIcon className='w-5 h-5 text-gray-400' />
                                             </div>
-                                            <div className='flex-1 text-sm'>
-                                                <div className='font-medium'>{b.title}</div>
-                                                <div className='text-gray-500'>{b.author}</div>
+                                            <div className='flex-1 min-w-0'>
+                                                <div className='font-medium text-sm text-gray-900 truncate'>{b.title}</div>
+                                                <div className='text-xs text-gray-500 truncate'>{b.author}</div>
                                             </div>
-                                            <button onClick={() => removeFromReadingList(idx)} className='text-sm text-red-600'>Remove</button>
+                                            <button
+                                                onClick={() => removeFromReadingList(idx)}
+                                                className='text-gray-400 hover:text-red-600 p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100'
+                                                aria-label="Remove book"
+                                            >
+                                                <i className="fas fa-trash-alt text-sm"></i>
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

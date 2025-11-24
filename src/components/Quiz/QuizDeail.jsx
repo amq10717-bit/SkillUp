@@ -144,11 +144,12 @@ function QuizDetail() {
                     { label: 'Quiz' },
                 ]}
             />
-            <div className="mt-30 mb-30 font-poppins">
-                <div className='grid grid-cols-[65%_35%] max-w-6xl mx-auto'>
+            <div className="my-10 lg:mt-30 lg:mb-30 font-poppins">
+                <div className='flex flex-col lg:grid lg:grid-cols-[65%_35%] max-w-6xl mx-auto px-[15px] lg:px-0 gap-8 lg:gap-0'>
 
-                    <div className='order-2 z-1'>
-                        <div className='shadow-lg rounded-sm p-5 m-4 bg-white sticky top-20 pb-10'>
+                    {/* Sidebar (Stacked on mobile) */}
+                    <div className='order-2 lg:order-2 z-1 w-full'>
+                        <div className='shadow-lg rounded-sm p-4 lg:p-5 bg-white static lg:sticky lg:top-20 pb-6 lg:pb-10'>
                             <div className='flex flex-col gap-4'>
                                 <div className='flex justify-between items-center mb-4'>
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(difficulty)}`}>
@@ -161,23 +162,23 @@ function QuizDetail() {
                                 </div>
 
                                 <div className='space-y-4 border rounded-lg p-4 bg-purple-50'>
-                                    <div className='flex items-center justify-between'>
+                                    <div className='flex items-center justify-between text-sm lg:text-base'>
                                         <span className='font-medium'>Questions</span>
                                         <span className='text-purple-600 font-bold'>{questionsCount}</span>
                                     </div>
-                                    <div className='flex items-center justify-between'>
+                                    <div className='flex items-center justify-between text-sm lg:text-base'>
                                         <span className='font-medium'>Time Limit</span>
                                         <span className='text-gray-600'>{timeLimit} mins</span>
                                     </div>
-                                    <div className='flex items-center justify-between'>
+                                    <div className='flex items-center justify-between text-sm lg:text-base'>
                                         <span className='font-medium'>Attempts</span>
                                         <span className='text-gray-600'>{attemptsLeft} remaining</span>
                                     </div>
                                 </div>
 
                                 <div className='mt-6'>
-                                    <h3 className='font-semibold mb-3'>Your Progress</h3>
-                                    <div className='space-y-2'>
+                                    <h3 className='font-semibold mb-3 text-sm lg:text-base'>Your Progress</h3>
+                                    <div className='space-y-2 text-sm lg:text-base'>
                                         <div className='flex items-center justify-between p-2 bg-gray-50 rounded'>
                                             <span>Best Score</span>
                                             <span className='font-medium text-purple-600'>{bestScore}%</span>
@@ -195,13 +196,13 @@ function QuizDetail() {
                                     <>
                                         <Link
                                             to={`/quiz/${id}/results`}
-                                            className='btn-primary w-full py-3 text-sm mt-6 bg-blue-600 hover:bg-blue-700 text-center block'
+                                            className='btn-primary w-full py-3 text-sm mt-6 bg-blue-600 hover:bg-blue-700 text-center block rounded-lg active:scale-95 transition-transform'
                                         >
                                             View Your Results
                                         </Link>
                                         <div className='mt-4 p-3 bg-green-50 border border-green-200 rounded-lg'>
                                             <div className='flex items-center text-sm text-green-800'>
-                                                <TrophyIcon className='w-4 h-4 mr-2' />
+                                                <TrophyIcon className='w-4 h-4 mr-2 flex-shrink-0' />
                                                 <span>You have already completed this quiz</span>
                                             </div>
                                         </div>
@@ -210,13 +211,13 @@ function QuizDetail() {
                                     <>
                                         <Link
                                             to={`/quiz/${id}/start`}
-                                            className='btn-primary w-full py-3 text-sm mt-6 bg-purple-600 hover:bg-purple-700 text-center block'
+                                            className='btn-primary w-full py-3 text-sm mt-6 bg-purple-600 hover:bg-purple-700 text-center block rounded-lg active:scale-95 transition-transform'
                                         >
                                             Start Quiz Now
                                         </Link>
                                         <div className='mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
                                             <div className='flex items-center text-sm text-yellow-800'>
-                                                <ClockIcon className='w-4 h-4 mr-2' />
+                                                <ClockIcon className='w-4 h-4 mr-2 flex-shrink-0' />
                                                 <span>You have {attemptsLeft} attempt{attemptsLeft !== 1 ? 's' : ''} remaining</span>
                                             </div>
                                         </div>
@@ -226,59 +227,62 @@ function QuizDetail() {
                         </div>
                     </div>
 
-                    <div className='order-1 pr-5'>
-                        <div className='bg-white rounded-2xl pb-10 px-10 shadow-2xl'>
+                    {/* Main Content */}
+                    <div className='order-1 w-full lg:pr-5'>
+                        <div className='bg-white rounded-xl lg:rounded-2xl pb-6 lg:pb-10 px-4 lg:px-10 shadow-lg lg:shadow-2xl'>
                             <div className="pt-6 pb-6 max-w-4xl mx-auto text-gray-800">
-                                <h1 className='font-poppins text-4xl font-extrabold mb-5'>{quizTitle}</h1>
+                                <h1 className='font-poppins text-2xl lg:text-4xl font-extrabold mb-5 break-words'>{quizTitle}</h1>
 
                                 <div className='mb-8'>
-                                    <h2 className='text-2xl font-semibold mb-3'>Quiz Overview</h2>
-                                    <p className='text-gray-600 leading-relaxed'>{quizDescription}</p>
+                                    <h2 className='text-xl lg:text-2xl font-semibold mb-3'>Quiz Overview</h2>
+                                    <p className='text-gray-600 leading-relaxed text-sm lg:text-base'>{quizDescription}</p>
                                 </div>
 
                                 {hasAttempted && previousAttempt && (
-                                    <div className='mb-8 bg-green-50 p-6 rounded-xl border border-green-200'>
-                                        <h2 className='text-2xl font-semibold mb-3 text-green-800'>🎯 Your Previous Attempt</h2>
-                                        <div className='grid grid-cols-3 gap-4'>
+                                    <div className='mb-8 bg-green-50 p-4 lg:p-6 rounded-xl border border-green-200'>
+                                        <h2 className='text-xl lg:text-2xl font-semibold mb-3 text-green-800 flex items-center gap-2'>
+                                            <span>🎯</span> Your Previous Attempt
+                                        </h2>
+                                        <div className='grid grid-cols-3 gap-2 lg:gap-4'>
                                             <div className='text-center'>
-                                                <div className='text-3xl font-bold text-green-600'>{previousAttempt.score}%</div>
-                                                <div className='text-sm text-green-700'>Score</div>
+                                                <div className='text-2xl lg:text-3xl font-bold text-green-600'>{previousAttempt.score}%</div>
+                                                <div className='text-xs lg:text-sm text-green-700'>Score</div>
                                             </div>
                                             <div className='text-center'>
-                                                <div className='text-3xl font-bold text-blue-600'>
+                                                <div className='text-2xl lg:text-3xl font-bold text-blue-600'>
                                                     {previousAttempt.correctAnswers}/{previousAttempt.totalQuestions}
                                                 </div>
-                                                <div className='text-sm text-blue-700'>Correct Answers</div>
+                                                <div className='text-xs lg:text-sm text-blue-700'>Correct Answers</div>
                                             </div>
                                             <div className='text-center'>
-                                                <div className='text-3xl font-bold text-purple-600'>
+                                                <div className='text-2xl lg:text-3xl font-bold text-purple-600'>
                                                     {previousAttempt.timeSpent?.toFixed(1) || 'N/A'} min
                                                 </div>
-                                                <div className='text-sm text-purple-700'>Time Spent</div>
+                                                <div className='text-xs lg:text-sm text-purple-700'>Time Spent</div>
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className='mb-8 bg-blue-50 p-6 rounded-xl'>
-                                    <h2 className='text-2xl font-semibold mb-3'>📌 Quick Facts</h2>
-                                    <div className='grid grid-cols-2 gap-4'>
-                                        <div className='flex items-center'>
-                                            <ChartBarIcon className='w-5 h-5 mr-2 text-blue-600' />
+                                <div className='mb-8 bg-blue-50 p-4 lg:p-6 rounded-xl'>
+                                    <h2 className='text-xl lg:text-2xl font-semibold mb-3'>📌 Quick Facts</h2>
+                                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                        <div className='flex items-center text-sm lg:text-base'>
+                                            <ChartBarIcon className='w-5 h-5 mr-2 text-blue-600 flex-shrink-0' />
                                             <span>Passing Score: {passingScore}%</span>
                                         </div>
-                                        <div className='flex items-center'>
-                                            <ClockIcon className='w-5 h-5 mr-2 text-blue-600' />
+                                        <div className='flex items-center text-sm lg:text-base'>
+                                            <ClockIcon className='w-5 h-5 mr-2 text-blue-600 flex-shrink-0' />
                                             <span>Time Per Question: {timePerQuestion}s</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className='mt-10'>
-                                    <div className='flex gap-0 mb-10 border-b'>
+                                    <div className='flex gap-0 mb-6 lg:mb-10 border-b overflow-x-auto no-scrollbar'>
                                         <button
                                             onClick={() => setActiveTab('instructions')}
-                                            className={`text-xl font-semibold px-4 py-2 ${activeTab === 'instructions'
+                                            className={`text-base lg:text-xl font-semibold px-4 py-2 whitespace-nowrap ${activeTab === 'instructions'
                                                 ? 'border-b-2 border-purple-600 text-black'
                                                 : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -287,7 +291,7 @@ function QuizDetail() {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('attempts')}
-                                            className={`text-xl font-semibold px-4 py-2 ${activeTab === 'attempts'
+                                            className={`text-base lg:text-xl font-semibold px-4 py-2 whitespace-nowrap ${activeTab === 'attempts'
                                                 ? 'border-b-2 border-purple-600 text-black'
                                                 : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -298,15 +302,15 @@ function QuizDetail() {
 
                                     {activeTab === 'instructions' && (
                                         <div className='prose max-w-none'>
-                                            <h3 className='text-xl font-semibold mb-3'>📝 Quiz Structure</h3>
-                                            <ul className='list-disc pl-6 space-y-2'>
+                                            <h3 className='text-lg lg:text-xl font-semibold mb-3'>📝 Quiz Structure</h3>
+                                            <ul className='list-disc pl-6 space-y-2 text-sm lg:text-base'>
                                                 {structure.map((item, index) => (
                                                     <li key={index} className='text-gray-600'>{item}</li>
                                                 ))}
                                             </ul>
 
-                                            <h3 className='text-xl font-semibold mt-6 mb-3'>🎯 Scoring Policy</h3>
-                                            <div className='space-y-3'>
+                                            <h3 className='text-lg lg:text-xl font-semibold mt-6 mb-3'>🎯 Scoring Policy</h3>
+                                            <div className='space-y-3 text-sm lg:text-base'>
                                                 {scoringPolicy.map((policy, index) => (
                                                     <div key={index} className='flex justify-between items-center p-3 bg-gray-50 rounded-lg'>
                                                         <span>{policy.category}</span>
@@ -321,30 +325,33 @@ function QuizDetail() {
                                         <div className='space-y-4'>
                                             {attempts.length === 0 ? (
                                                 <div className="text-center py-8 text-gray-500">
-                                                    <TrophyIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                                    <p>No previous attempts yet</p>
+                                                    <TrophyIcon className="w-10 h-10 lg:w-12 lg:h-12 text-gray-300 mx-auto mb-3" />
+                                                    <p className="text-base lg:text-lg">No previous attempts yet</p>
                                                     <p className="text-sm">Complete the quiz to see your results here</p>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-4">
                                                     {attempts.map((attempt, index) => (
                                                         <div key={index} className='p-4 border rounded-lg hover:bg-gray-50 transition-colors'>
-                                                            <div className='flex justify-between items-center mb-2'>
+                                                            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 sm:gap-0'>
                                                                 <div className='flex items-center gap-3'>
-                                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${attempt.score >= 80 ? 'bg-green-100 text-green-600' :
+                                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${attempt.score >= 80 ? 'bg-green-100 text-green-600' :
                                                                         attempt.score >= 60 ? 'bg-yellow-100 text-yellow-600' :
                                                                             'bg-red-100 text-red-600'
                                                                         }`}>
                                                                         <TrophyIcon className="w-5 h-5" />
                                                                     </div>
                                                                     <div>
-                                                                        <span className='font-medium'>Attempt #{index + 1}</span>
+                                                                        <span className='font-medium text-sm lg:text-base'>Attempt #{index + 1}</span>
+                                                                        // In the QuizDetail component, update the date display:
                                                                         <p className="text-xs text-gray-500">
-                                                                            {attempt.date?.toDate?.().toLocaleDateString() || 'Unknown date'}
+                                                                            {attempt.date?.toDate ? attempt.date.toDate().toLocaleDateString() :
+                                                                                attempt.date instanceof Date ? attempt.date.toLocaleDateString() :
+                                                                                    new Date(attempt.timestamp || attempt.date).toLocaleDateString() || 'Unknown date'}
                                                                         </p>
                                                                     </div>
                                                                 </div>
-                                                                <div className="text-right">
+                                                                <div className="text-left sm:text-right w-full sm:w-auto pl-13 sm:pl-0">
                                                                     <span className={`text-lg font-bold ${attempt.score >= passingScore ? 'text-green-600' : 'text-red-600'
                                                                         }`}>
                                                                         {attempt.score}%
@@ -354,14 +361,14 @@ function QuizDetail() {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className='flex justify-between text-sm text-gray-500 mb-3'>
-                                                                <span>Time Spent: {attempt.timeSpent ? `${attempt.timeSpent.toFixed(1)}m` : 'N/A'}</span>
+                                                            <div className='flex justify-between text-sm text-gray-500 mb-3 pl-13 sm:pl-0'>
+                                                                <span>Time: {attempt.timeSpent ? `${attempt.timeSpent.toFixed(1)}m` : 'N/A'}</span>
                                                                 <span>Score: {attempt.score}%</span>
                                                             </div>
-                                                            <div className="flex gap-2">
+                                                            <div className="flex gap-2 pl-0 sm:pl-13">
                                                                 <Link
                                                                     to={`/quiz/${id}/results/${attempt.attemptId}`}
-                                                                    className="flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
+                                                                    className="w-full sm:w-auto text-center bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
                                                                 >
                                                                     View Detailed Results
                                                                 </Link>
@@ -374,13 +381,13 @@ function QuizDetail() {
                                     )}
                                 </div>
 
-                                <div className='mt-10 bg-green-50 p-6 rounded-xl'>
-                                    <h3 className='text-xl font-semibold mb-4'>🔍 Sample Question</h3>
+                                <div className='mt-10 bg-green-50 p-4 lg:p-6 rounded-xl'>
+                                    <h3 className='text-lg lg:text-xl font-semibold mb-4'>🔍 Sample Question</h3>
                                     <div className='space-y-4'>
-                                        <p className='font-medium'>{sampleQuestion.text}</p>
-                                        <div className='grid grid-cols-2 gap-4'>
+                                        <p className='font-medium text-sm lg:text-base'>{sampleQuestion.text}</p>
+                                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4'>
                                             {sampleQuestion.options.map((option, index) => (
-                                                <div key={index} className='p-3 border rounded hover:bg-white transition-colors'>
+                                                <div key={index} className='p-3 border rounded hover:bg-white transition-colors text-sm lg:text-base bg-white/50'>
                                                     {option}
                                                 </div>
                                             ))}

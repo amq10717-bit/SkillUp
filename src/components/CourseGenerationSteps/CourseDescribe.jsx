@@ -1,261 +1,423 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getModuleNamesFromAPI } from '../../services/moduleService';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from '../../firebase.js';
+import { extractTopicsFromCourse } from '../../services/geminiService.js';
 
-function CourseDescribe({ courses, setCourses }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [expertiseLevel, setExpertiseLevel] = useState('');
-    const [includeVideos, setIncludeVideos] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false);
+const CourseDescribe = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [generatingModules, setGeneratingModules] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const [courseData, setCourseData] = useState({
+        title: '',
+        description: '',
+        category: '',
+        difficulty: 'beginner',
+        duration: '',
+        lessonsCount: 0,
+        whatYouWillLearn: [''],
+        requirements: [''],
+        targetAudience: ['']
+    });
 
-        if (title.trim() === '' || description.trim() === '' || expertiseLevel === '') {
-            setError('All fields are required.');
-            setSuccess('');
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setCourseData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleArrayInputChange = (field, index, value) => {
+        setCourseData(prev => ({
+            ...prev,
+            [field]: prev[field].map((item, i) => i === index ? value : item)
+        }));
+    };
+
+    const addArrayItem = (field) => {
+        setCourseData(prev => ({
+            ...prev,
+            [field]: [...prev[field], '']
+        }));
+    };
+
+    const removeArrayItem = (field, index) => {
+        setCourseData(prev => ({
+            ...prev,
+            [field]: prev[field].filter((_, i) => i !== index)
+        }));
+    };
+
+    const generateModules = async () => {
+        if (!courseData.title || !courseData.description) {
+            alert('Please fill in course title and description first');
             return;
         }
 
+        setGeneratingModules(true);
+        try {
+            const modules = await extractTopicsFromCourse(courseData.title, courseData.description);
+            return modules;
+        } catch (error) {
+            console.error('Error generating modules:', error);
+            alert('Failed to generate modules. Please try again.');
+            return null;
+        } finally {
+            setGeneratingModules(false);
+        }
+    };
+
+    const handleCreateCourse = async (e) => {
+        e.preventDefault();
         setLoading(true);
-        setError('');
 
         try {
-            // Call the API to get module names
-            const moduleNames = await getModuleNamesFromAPI(
-                title.trim(),
-                description.trim(),
-                expertiseLevel
-            );
+            const user = auth.currentUser;
+            if (!user) throw new Error("User not authenticated");
 
-            // Create module objects from the API response
-            const generatedModules = moduleNames.map((name, index) => ({
-                id: index + 1,
-                name: name
-            }));
+            // Generate modules first
+            const generatedModules = await generateModules();
+            if (!generatedModules) return;
 
-            const newCourse = {
-                id: courses.length + 1,
-                title,
-                description,
-                expertiseLevel,
-                includeVideos,
-                modules: generatedModules
+            // Prepare course data
+            const courseToCreate = {
+                // Basic info
+                title: courseData.title,
+                description: courseData.description,
+                category: courseData.category,
+                difficulty: courseData.difficulty,
+                duration: courseData.duration,
+                lessonsCount: Number(courseData.lessonsCount) || 0,
+
+                // Arrays
+                whatYouWillLearn: courseData.whatYouWillLearn.filter(item => item.trim()),
+                requirements: courseData.requirements.filter(item => item.trim()),
+                targetAudience: courseData.targetAudience.filter(item => item.trim()),
+
+                // Generated modules
+                modules: generatedModules.map((module, index) => ({
+                    id: `module-${Date.now()}-${index}`,
+                    title: module,
+                    content: '',
+                    order: index,
+                    generated: true
+                })),
+
+                // Tutor info
+                tutorId: user.uid,
+                tutorName: user.displayName || user.email?.split('@')[0] || 'Tutor',
+
+                // System fields
+                status: 'draft',
+                creationStep: 'modules', // Next step
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                enrolledCount: 0,
+                rating: 0,
+                reviewsCount: 0
             };
 
-            setCourses([...courses, newCourse]);
-            setSuccess('Course added successfully! Modules generated.');
+            // Save to Firestore
+            const docRef = await addDoc(collection(db, "courses"), courseToCreate);
 
-            // Navigate to modules page with the generated modules
-            setTimeout(() => {
-                navigate('/add-course/modules', {
-                    state: {
-                        modules: generatedModules,
-                        courseInfo: {
-                            title,
-                            description,
-                            expertiseLevel,
-                            includeVideos
-                        }
-                    }
-                });
-            }, 1500);
-
+            alert("✅ Course created! Now let's organize the modules.");
+            navigate(`/add-course/modules/${docRef.id}`);
         } catch (error) {
-            // This should rarely happen now since moduleService handles errors gracefully
-            console.error("Unexpected error in course generation:", error);
-            setError('An unexpected error occurred. Please try again.');
+            console.error("Error creating course:", error);
+            alert("❌ Failed to create course: " + error.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen mt-30 mb-30">
-            <div className='max-w-6xl mx-auto flex flex-row justify-between items-center p-4'>
-                <h1 className='heading-text-lg'>
-                    Generate your course in 4 easy steps!
-                </h1>
-                <div className="flex items-center gap-4 text-[15px] text-black ">
-                    <i className="fas fa-calendar-alt cursor-pointer"></i>
-                    <i className="fas fa-bookmark cursor-pointer"></i>
-                    <i className="fas fa-share-alt cursor-pointer"></i>
-                </div>
-            </div>
-
-            {/* Progress Steps Component - Step 1 Active */}
-            <div className="flex justify-center pt-10">
-                {/* Step 1 - Active */}
-                <div className="relative flex items-center justify-center w-20 h-20">
-                    <div className="z-10 w-16 h-16 bg-BgPrimary rounded-full flex items-center justify-center text-white text-xl font-bold">
-                        1
-                    </div>
-                    <div className="absolute bottom-0 w-20 h-10 border-2 border-hoverGreen rounded-b-full border-t-0"></div>
-                    <div className="absolute -left-[2.9px] bottom-[35px] w-2 h-2 bg-white border-1 border-hoverGreen rounded-full"></div>
-                    <div className="absolute -right-[2.9px] bottom-[35px] w-2 h-2 bg-white z-1 border-1 border-hoverGreen rounded-full"></div>
-                </div>
-                {/* Step 2 - Inactive */}
-                <div className="relative flex items-center justify-center w-20 h-20">
-                    <div className="z-10 w-16 h-16 bg-BgSecondary rounded-full flex items-center justify-center text-black text-xl font-bold">
-                        2
-                    </div>
-                    <div className="absolute top-0 w-20 h-10 border-2 border-hoverLightGreen rounded-t-full border-b-0"></div>
-                    <div className="absolute -right-[2.9px] bottom-[35px] w-2 h-2 bg-white border-1 z-1 border-hoverLightGreen rounded-full"></div>
-                </div>
-                {/* Step 3 - Inactive */}
-                <div className="relative flex items-center justify-center w-20 h-20">
-                    <div className="z-10 w-16 h-16 bg-BgSecondary rounded-full flex items-center justify-center text-black text-xl font-bold">
-                        3
-                    </div>
-                    <div className="absolute bottom-0 w-20 h-10 border-2 border-hoverLightGreen rounded-b-full border-t-0"></div>
-                    <div className="absolute -right-[2.9px] bottom-[35px] w-2 h-2 bg-white z-1 border-1 border-hoverLightGreen rounded-full"></div>
-                </div>
-                {/* Step 4 - Inactive */}
-                <div className="relative flex items-center justify-center w-20 h-20">
-                    <div className="z-10 w-16 h-16 bg-BgSecondary rounded-full flex items-center justify-center text-black text-xl font-bold">
-                        4
-                    </div>
-                    <div className="absolute top-0 w-20 h-10 border-2 border-hoverLightGreen rounded-t-full border-b-0"></div>
-                    <div className="absolute -right-[2.9px] bottom-[35px] w-2 h-2 bg-white z-1 border-1 border-hoverLightGreen rounded-full"></div>
-                </div>
-            </div>
-
-            <div className='max-w-6xl mx-auto pt-20 p-4 flex flex-col'>
-                <h1 className='text-2xl font-bold pb-10'>
-                    Describe your Course
-                </h1>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="title" className="block font-medium text-gray-700 mb-1">
-                            Name of Your Core Topic:
-                        </label>
-                        <input
-                            type="text"
-                            id="title"
-                            placeholder="Type Your core topic here..."
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="pl-10 w-full rounded-md bg-BgGreyColor focus:outline-none focus:border-primary py-2"
-                            disabled={loading}
-                        />
+        <div className="min-h-screen bg-gray-50 py-8 mt-20 pb-10">
+            <div className="max-w-4xl mx-auto px-4">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] p-4 lg:p-6 text-white">
+                        <h1 className="text-xl lg:text-2xl font-bold">Describe Your Course</h1>
+                        <p className="text-blue-100 mt-2">Step 1: Tell us about your course and we'll generate the modules</p>
                     </div>
 
-                    <div>
-                        <label htmlFor="description" className="block font-medium text-gray-700 mb-1">
-                            Describe Your Course in simple words:
-                        </label>
-                        <textarea
-                            id="description"
-                            placeholder="Brief description about the course..."
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="pl-10 w-full rounded-md bg-BgGreyColor focus:outline-none focus:border-primary py-2"
-                            rows={10}
-                            disabled={loading}
-                        ></textarea>
-                    </div>
-
-                    <div>
-                        <label className="block font-medium text-gray-700 mb-3">
-                            Your Previous Knowledge about this topic:
-                        </label>
-                        <div className='flex flex-row gap-10 pl-5'>
-                            <label className="flex items-center space-x-2">
+                    {/* Form */}
+                    <form onSubmit={handleCreateCourse} className="p-4 lg:p-6 space-y-6 lg:space-y-8">
+                        {/* Basic Info */}
+                        <div className="grid grid-cols-1 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Course Title *
+                                </label>
                                 <input
-                                    type="radio"
-                                    name="expertise"
-                                    value="Beginners"
-                                    className="accent-green-700"
-                                    onChange={(e) => setExpertiseLevel(e.target.value)}
-                                    disabled={loading}
+                                    type="text"
+                                    name="title"
+                                    value={courseData.title}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                    required
+                                    placeholder="e.g., Complete Web Development Bootcamp 2024"
                                 />
-                                <span>Beginners</span>
-                            </label>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description *
+                                </label>
+                                <textarea
+                                    name="description"
+                                    value={courseData.description}
+                                    onChange={handleInputChange}
+                                    rows="5"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                    required
+                                    placeholder="Describe what students will learn in this course, the approach you'll take, and what makes it unique..."
+                                />
+                            </div>
+                        </div>
 
-                            <label className="flex items-center space-x-2">
+                        {/* Course Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Category *
+                                </label>
+                                <select
+                                    name="category"
+                                    value={courseData.category}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base bg-white"
+                                    required
+                                >
+                                    <option value="">Select Category</option>
+                                    <option value="Programming">Programming</option>
+                                    <option value="Web Development">Web Development</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="Mobile Development">Mobile Development</option>
+                                    <option value="Game Development">Game Development</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Design">Design</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Photography">Photography</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Difficulty Level
+                                </label>
+                                <select
+                                    name="difficulty"
+                                    value={courseData.difficulty}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base bg-white"
+                                >
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                    <option value="all-levels">All Levels</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Estimated Duration
+                                </label>
                                 <input
-                                    type="radio"
-                                    name="expertise"
-                                    value="Intermediate"
-                                    className="accent-green-700"
-                                    onChange={(e) => setExpertiseLevel(e.target.value)}
-                                    disabled={loading}
+                                    type="text"
+                                    name="duration"
+                                    value={courseData.duration}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                    placeholder="e.g., 8 weeks, 40 hours"
                                 />
-                                <span>Intermediate</span>
-                            </label>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Number of Lessons
+                                </label>
+                                <input
+                                    type="number"
+                                    name="lessonsCount"
+                                    value={courseData.lessonsCount}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                    min="0"
+                                    placeholder="Estimated number of lessons"
+                                />
+                            </div>
+                        </div>
 
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    name="expertise"
-                                    value="Advance"
-                                    className="accent-green-700"
-                                    onChange={(e) => setExpertiseLevel(e.target.value)}
-                                    disabled={loading}
-                                />
-                                <span>Advance</span>
+                        {/* What Students Will Learn */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                What Students Will Learn *
                             </label>
+                            <div className="space-y-3">
+                                {courseData.whatYouWillLearn.map((item, index) => (
+                                    <div key={index} className="flex gap-3">
+                                        <input
+                                            type="text"
+                                            value={item}
+                                            onChange={(e) => handleArrayInputChange('whatYouWillLearn', index, e.target.value)}
+                                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                            placeholder="e.g., Build responsive websites with HTML, CSS, and JavaScript"
+                                        />
+                                        {courseData.whatYouWillLearn.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeArrayItem('whatYouWillLearn', index)}
+                                                className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => addArrayItem('whatYouWillLearn')}
+                                    className="flex items-center gap-2 text-[#6c5dd3] hover:text-[#5a4bbf] transition"
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    Add Learning Outcome
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Requirements */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                Requirements
+                            </label>
+                            <div className="space-y-3">
+                                {courseData.requirements.map((item, index) => (
+                                    <div key={index} className="flex gap-3">
+                                        <input
+                                            type="text"
+                                            value={item}
+                                            onChange={(e) => handleArrayInputChange('requirements', index, e.target.value)}
+                                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                            placeholder="e.g., Basic computer knowledge"
+                                        />
+                                        {courseData.requirements.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeArrayItem('requirements', index)}
+                                                className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => addArrayItem('requirements')}
+                                    className="flex items-center gap-2 text-[#6c5dd3] hover:text-[#5a4bbf] transition"
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    Add Requirement
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Target Audience */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                Target Audience
+                            </label>
+                            <div className="space-y-3">
+                                {courseData.targetAudience.map((item, index) => (
+                                    <div key={index} className="flex gap-3">
+                                        <input
+                                            type="text"
+                                            value={item}
+                                            onChange={(e) => handleArrayInputChange('targetAudience', index, e.target.value)}
+                                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5dd3] text-sm lg:text-base"
+                                            placeholder="e.g., Beginners who want to learn web development"
+                                        />
+                                        {courseData.targetAudience.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeArrayItem('targetAudience', index)}
+                                                className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => addArrayItem('targetAudience')}
+                                    className="flex items-center gap-2 text-[#6c5dd3] hover:text-[#5a4bbf] transition"
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    Add Target Audience
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex flex-col-reverse sm:flex-row gap-4 pt-6 border-t">
+                            <button
+                                type="button"
+                                onClick={() => navigate("/tutor-dashboard")}
+                                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-sm lg:text-base"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading || generatingModules}
+                                className="flex-1 bg-[#6c5dd3] text-white py-3 rounded-lg hover:bg-[#5a4bbf] disabled:opacity-50 font-medium text-sm lg:text-base flex items-center justify-center gap-2"
+                            >
+                                {loading || generatingModules ? (
+                                    <>
+                                        <i className="fas fa-spinner fa-spin"></i>
+                                        {generatingModules ? 'Generating Modules...' : 'Creating Course...'}
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-magic"></i>
+                                        Generate Course Modules
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* AI Features Preview */}
+                <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">🎯 AI-Powered Features</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                            <i className="fas fa-robot text-blue-600 text-xl mt-1"></i>
+                            <div>
+                                <h4 className="font-semibold text-blue-800">Smart Module Generation</h4>
+                                <p className="text-blue-700 text-sm">AI will create relevant course modules based on your description</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                            <i className="fas fa-book text-green-600 text-xl mt-1"></i>
+                            <div>
+                                <h4 className="font-semibold text-green-800">Detailed Content</h4>
+                                <p className="text-green-700 text-sm">Each module will have comprehensive learning materials</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
+                            <i className="fas fa-edit text-purple-600 text-xl mt-1"></i>
+                            <div>
+                                <h4 className="font-semibold text-purple-800">Full Control</h4>
+                                <p className="text-purple-700 text-sm">Edit and customize everything before publishing</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div>
-                        <label className="block font-medium text-gray-700 mb-3">
-                            Want to add videos in your course?
-                        </label>
-                        <div className='flex flex-row gap-10 pl-5'>
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    name="videos"
-                                    value="Yes"
-                                    className="accent-green-700"
-                                    onChange={(e) => setIncludeVideos(e.target.value)}
-                                    disabled={loading}
-                                />
-                                <span>Yes</span>
-                            </label>
-
-                            <label className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    name="videos"
-                                    value="No"
-                                    className="accent-green-700"
-                                    onChange={(e) => setIncludeVideos(e.target.value)}
-                                    disabled={loading}
-                                />
-                                <span>No</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="btn-primary"
-                        disabled={loading}
-                    >
-                        {loading ? 'Generating Modules...' : 'Generate Modules'}
-                    </button>
-                </form>
-
-                {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
-                {success && <p className="text-green-600 mt-4 text-center">{success}</p>}
-
-                {loading && (
-                    <div className="mt-4 text-center">
-                        <div className="inline-flex items-center">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mr-2"></div>
-                            <span>Generating your course modules...</span>
-                        </div>
-                    </div>
-                )}
+                </div>
             </div>
         </div>
     );
-}
+};
 
 export default CourseDescribe;

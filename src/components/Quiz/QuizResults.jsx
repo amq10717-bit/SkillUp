@@ -142,53 +142,55 @@ function QuizResults() {
                 ]}
             />
 
-            <div className="mt-30 mb-30 font-poppins">
-                <div className="max-w-6xl mx-auto px-4">
+            <div className="my-10 lg:mt-30 lg:mb-30 font-poppins">
+                <div className="max-w-6xl mx-auto px-[15px] lg:px-4">
                     {/* Results Summary */}
-                    <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
-                        <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-4">{quizTitle}</h1>
-                            <p className="text-xl text-gray-600">Your Quiz Results</p>
+                    <div className="bg-white rounded-2xl shadow-2xl p-4 lg:p-8 mb-6 lg:mb-8">
+                        <div className="text-center mb-6 lg:mb-8">
+                            <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-4 break-words">{quizTitle}</h1>
+                            <p className="text-lg lg:text-xl text-gray-600">Your Quiz Results</p>
                         </div>
 
                         {/* Score Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 text-center">
-                                <TrophyIcon className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                                <div className="text-3xl font-bold text-green-700">{attempt.score}%</div>
-                                <div className="text-green-800 font-medium">Overall Score</div>
-                                <div className="text-sm text-green-600 mt-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 lg:p-6 rounded-xl border border-green-200 text-center">
+                                <TrophyIcon className="w-10 h-10 lg:w-12 lg:h-12 text-green-600 mx-auto mb-3 lg:mb-4" />
+                                <div className="text-2xl lg:text-3xl font-bold text-green-700">{attempt.score}%</div>
+                                <div className="text-green-800 font-medium text-sm lg:text-base">Overall Score</div>
+                                <div className="text-xs lg:text-sm text-green-600 mt-1 lg:mt-2">
                                     {attempt.score >= 80 ? 'Excellent! 🎉' :
                                         attempt.score >= 60 ? 'Good job! 👍' :
                                             'Keep practicing! 💪'}
                                 </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 text-center">
-                                <CheckCircleIcon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                                <div className="text-3xl font-bold text-blue-700">
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 lg:p-6 rounded-xl border border-blue-200 text-center">
+                                <CheckCircleIcon className="w-10 h-10 lg:w-12 lg:h-12 text-blue-600 mx-auto mb-3 lg:mb-4" />
+                                <div className="text-2xl lg:text-3xl font-bold text-blue-700">
                                     {attempt.correctAnswers}/{attempt.totalQuestions}
                                 </div>
-                                <div className="text-blue-800 font-medium">Correct Answers</div>
-                                <div className="text-sm text-blue-600 mt-2">
+                                <div className="text-blue-800 font-medium text-sm lg:text-base">Correct Answers</div>
+                                <div className="text-xs lg:text-sm text-blue-600 mt-1 lg:mt-2">
                                     {Math.round((attempt.correctAnswers / attempt.totalQuestions) * 100)}% accuracy
                                 </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 text-center">
-                                <ClockIcon className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-                                <div className="text-3xl font-bold text-purple-700">
+                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 lg:p-6 rounded-xl border border-purple-200 text-center">
+                                <ClockIcon className="w-10 h-10 lg:w-12 lg:h-12 text-purple-600 mx-auto mb-3 lg:mb-4" />
+                                <div className="text-2xl lg:text-3xl font-bold text-purple-700">
                                     {attempt.timeSpent ? attempt.timeSpent.toFixed(1) : 'N/A'} min
                                 </div>
-                                <div className="text-purple-800 font-medium">Time Spent</div>
-                                <div className="text-sm text-purple-600 mt-2">
-                                    Completed on {attempt.completedAt?.toDate?.().toLocaleDateString() || 'Unknown date'}
+                                <div className="text-purple-800 font-medium text-sm lg:text-base">Time Spent</div>
+                                <div className="text-xs lg:text-sm text-purple-600 mt-1 lg:mt-2">
+                                    Completed on {attempt.completedAt?.toDate ? attempt.completedAt.toDate().toLocaleDateString() :
+                                        attempt.date instanceof Date ? attempt.date.toLocaleDateString() :
+                                            new Date(attempt.timestamp || attempt.date).toLocaleDateString() || 'Unknown date'}
                                 </div>
                             </div>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="mb-8">
+                        <div className="mb-6 lg:mb-8">
                             <div className="flex justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-700">Performance</span>
                                 <span className="text-sm font-medium text-gray-700">{attempt.score}%</span>
@@ -210,36 +212,31 @@ function QuizResults() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-4 justify-center">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3 lg:gap-4 justify-center">
                             <button
                                 onClick={() => setShowDetails(!showDetails)}
-                                className="btn-primary bg-purple-600 hover:bg-purple-700 py-3 px-6"
+                                className="btn-primary bg-purple-600 hover:bg-purple-700 py-3 px-6 text-sm lg:text-base w-full sm:w-auto text-center rounded-lg"
                             >
                                 {showDetails ? 'Hide Details' : 'Show Question Details'}
                             </button>
                             <Link
-                                to={`/quiz/${id}`}
-                                className="btn-secondary py-3 px-6 border border-gray-300 hover:bg-gray-50"
+                                to={`/student-dashboard`}
+                                className="btn-secondary py-3 px-6 border border-gray-300 hover:bg-gray-50 text-sm lg:text-base w-full sm:w-auto text-center rounded-lg block sm:inline-block"
                             >
                                 Back to Dashboard
                             </Link>
-                            <Link
-                                to="/student-dashboard"
-                                className="btn-primary bg-green-600 hover:bg-green-700 py-3 px-6"
-                            >
-                                View Performance
-                            </Link>
+
                         </div>
                     </div>
 
                     {/* Detailed Question Results */}
                     {showDetails && (
-                        <div className="bg-white rounded-2xl shadow-2xl p-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+                        <div className="bg-white rounded-2xl shadow-2xl p-4 lg:p-8">
+                            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6 text-center">
                                 Detailed Question Analysis
                             </h2>
 
-                            <div className="space-y-8">
+                            <div className="space-y-6 lg:space-y-8">
                                 {questions.map((question, qIndex) => {
                                     const questionText = getQuestionText(question);
                                     const questionOptions = getQuestionOptions(question);
@@ -248,46 +245,46 @@ function QuizResults() {
                                     const isCorrect = userAnswer === correctAnswerIndex;
 
                                     return (
-                                        <div key={qIndex} className="border-b pb-8 last:border-b-0">
-                                            <div className="flex items-center gap-3 mb-4">
+                                        <div key={qIndex} className="border-b pb-6 lg:pb-8 last:border-b-0">
+                                            <div className="flex items-start lg:items-center gap-3 mb-4">
                                                 {isCorrect ? (
-                                                    <CheckCircleIcon className="w-7 h-7 text-green-600" />
+                                                    <CheckCircleIcon className="w-6 h-6 lg:w-7 lg:h-7 text-green-600 flex-shrink-0 mt-1 lg:mt-0" />
                                                 ) : (
-                                                    <XCircleIcon className="w-7 h-7 text-red-600" />
+                                                    <XCircleIcon className="w-6 h-6 lg:w-7 lg:h-7 text-red-600 flex-shrink-0 mt-1 lg:mt-0" />
                                                 )}
-                                                <h3 className="text-xl font-semibold">Question {qIndex + 1}</h3>
-                                                <span className="text-sm text-gray-500 ml-auto">
+                                                <h3 className="text-lg lg:text-xl font-semibold flex-1">Question {qIndex + 1}</h3>
+                                                <span className="text-xs lg:text-sm text-gray-500 ml-auto whitespace-nowrap">
                                                     {question.points || 1} point{question.points !== 1 ? 's' : ''}
                                                 </span>
                                             </div>
 
-                                            <p className="text-lg mb-6 font-medium text-gray-800">{questionText}</p>
+                                            <p className="text-base lg:text-lg mb-4 lg:mb-6 font-medium text-gray-800">{questionText}</p>
 
                                             <div className="grid grid-cols-1 gap-3">
                                                 {questionOptions.map((option, oIndex) => (
                                                     <div
                                                         key={oIndex}
-                                                        className={`p-4 rounded-lg border-2 transition-all ${oIndex === correctAnswerIndex
+                                                        className={`p-3 lg:p-4 rounded-lg border-2 transition-all ${oIndex === correctAnswerIndex
                                                             ? 'border-green-500 bg-green-50 shadow-sm'
                                                             : userAnswer === oIndex
                                                                 ? 'border-red-500 bg-red-50 shadow-sm'
                                                                 : 'border-gray-200 bg-gray-50'
                                                             }`}
                                                     >
-                                                        <div className="flex items-center justify-between">
-                                                            <span className={`font-medium ${oIndex === correctAnswerIndex ? 'text-green-800' :
+                                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                                                            <span className={`font-medium text-sm lg:text-base ${oIndex === correctAnswerIndex ? 'text-green-800' :
                                                                 userAnswer === oIndex ? 'text-red-800' : 'text-gray-700'
                                                                 }`}>
                                                                 {option}
                                                             </span>
-                                                            <div className="flex gap-2">
+                                                            <div className="flex gap-2 w-full sm:w-auto justify-end">
                                                                 {oIndex === correctAnswerIndex && (
-                                                                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
+                                                                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs lg:text-sm font-medium whitespace-nowrap">
                                                                         ✓ Correct
                                                                     </span>
                                                                 )}
                                                                 {userAnswer === oIndex && oIndex !== correctAnswerIndex && (
-                                                                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">
+                                                                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs lg:text-sm font-medium whitespace-nowrap">
                                                                         ✗ Your Choice
                                                                     </span>
                                                                 )}
@@ -298,9 +295,9 @@ function QuizResults() {
                                             </div>
 
                                             {/* Explanation */}
-                                            <div className={`mt-4 p-4 rounded-lg ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                                            <div className={`mt-4 p-3 lg:p-4 rounded-lg ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
                                                 }`}>
-                                                <p className={`font-medium ${isCorrect ? 'text-green-800' : 'text-red-800'
+                                                <p className={`font-medium text-sm lg:text-base ${isCorrect ? 'text-green-800' : 'text-red-800'
                                                     }`}>
                                                     {isCorrect
                                                         ? '✅ You answered this question correctly!'
@@ -316,25 +313,25 @@ function QuizResults() {
                     )}
 
                     {/* Next Steps */}
-                    <div className="bg-blue-50 rounded-2xl p-6 mt-8 border border-blue-200">
-                        <h3 className="text-xl font-semibold text-blue-900 mb-3">What's Next?</h3>
+                    <div className="bg-blue-50 rounded-2xl p-4 lg:p-6 mt-6 lg:mt-8 border border-blue-200">
+                        <h3 className="text-lg lg:text-xl font-semibold text-blue-900 mb-3">What's Next?</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span className="text-blue-600 font-bold">1</span>
+                                    <span className="text-blue-600 font-bold text-sm lg:text-base">1</span>
                                 </div>
                                 <div>
-                                    <h4 className="font-medium text-blue-800">Review Your Performance</h4>
-                                    <p className="text-blue-600 text-sm">Check your performance analysis for detailed insights</p>
+                                    <h4 className="font-medium text-blue-800 text-sm lg:text-base">Review Your Performance</h4>
+                                    <p className="text-blue-600 text-xs lg:text-sm">Check your performance analysis for detailed insights</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span className="text-blue-600 font-bold">2</span>
+                                    <span className="text-blue-600 font-bold text-sm lg:text-base">2</span>
                                 </div>
                                 <div>
-                                    <h4 className="font-medium text-blue-800">Practice More</h4>
-                                    <p className="text-blue-600 text-sm">Take similar quizzes to improve your skills</p>
+                                    <h4 className="font-medium text-blue-800 text-sm lg:text-base">Practice More</h4>
+                                    <p className="text-blue-600 text-xs lg:text-sm">Take similar quizzes to improve your skills</p>
                                 </div>
                             </div>
                         </div>

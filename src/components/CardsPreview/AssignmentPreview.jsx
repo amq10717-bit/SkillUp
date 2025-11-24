@@ -14,7 +14,7 @@ function AssignmentPreview({ assignment }) {
     }
 
     return (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5 w-full">
             {assignment.map((assignmentItem, index) => (
                 <AssignmentCard
                     key={assignmentItem.id || assignmentItem.AssignmentId || index}

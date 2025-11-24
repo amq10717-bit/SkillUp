@@ -4,6 +4,8 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase
 import { db, auth } from '../firebase.js';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import HeroSection from './Hero Section/HeroSection';
+import { Link } from 'react-router-dom';
+
 
 function CourseDetail() {
     const { id } = useParams();
@@ -194,10 +196,10 @@ function CourseDetail() {
                 ]}
             />
             <div className='min-h-screen mt-0'>
-                <div className="mt-13 mb-30 font-poppins ">
-                    <div className='grid grid-cols-[70%_30%] max-w-6xl mx-auto gap-5'>
-                        <div className='order-1 z-1 bg-white rounded-2xl py-10 px-10 shadow-md'>
-                            <div className='flex flex-row justify-between items-center mb-5 '>
+                <div className="mt-6 lg:mt-13 mb-10 lg:mb-30 font-poppins px-[15px] lg:px-0">
+                    <div className='flex flex-col lg:grid lg:grid-cols-[70%_30%] max-w-6xl mx-auto gap-5'>
+                        <div className='order-1 z-1 bg-white rounded-2xl py-5 px-4 lg:py-10 lg:px-10 shadow-md'>
+                            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3 sm:gap-0'>
                                 <h1 className='heading-text-lg'>
                                     {course?.title || 'Course Title'}
                                 </h1>
@@ -206,8 +208,7 @@ function CourseDetail() {
                                 </div>
                             </div>
 
-                            {/* Course Meta Info */}
-                            <div className="flex items-center gap-4 mb-6 text-sm text-gray-600">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-6 text-sm text-gray-600">
                                 {course?.difficulty && (
                                     <span className={`px-2 py-1 rounded-full text-xs ${course.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
                                         course.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
@@ -229,35 +230,35 @@ function CourseDetail() {
                                 )}
                             </div>
 
-                            <div className='flex flex-row gap-0 mb-10'>
-                                <button onClick={() => setActiveTab('course')} className={`text-[20px] font-bold font-poppins px-4 py-2 ${activeTab === 'course' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
+                            <div className='flex flex-row gap-0 mb-6 lg:mb-10 overflow-x-auto pb-2 lg:pb-0'>
+                                <button onClick={() => setActiveTab('course')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'course' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Course
                                 </button>
-                                <button onClick={() => setActiveTab('videos')} className={`text-[20px] font-bold font-poppins px-4 py-2 ${activeTab === 'videos' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
+                                <button onClick={() => setActiveTab('videos')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'videos' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Videos
                                 </button>
-                                <button onClick={() => setActiveTab('animations')} className={` text-[20px] font-bold font-poppins px-4 py-2 ${activeTab === 'animations' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
+                                <button onClick={() => setActiveTab('animations')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'animations' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Animations
                                 </button>
                             </div>
                             <div className=' '>
                                 {activeTab == 'course' && <div>
                                     <div >
-                                        <h1 className="text-3xl font-bold mb-6 text-left text-black">
+                                        <h1 className="text-2xl lg:text-3xl font-bold mb-6 text-left text-black">
                                             {course?.title || 'Course Title'}
                                         </h1>
 
                                         <section className="mb-10">
-                                            <h2 className="text-2xl font-semibold mb-3 text-gray-800">Course Description</h2>
-                                            <p className="text-gray-700 mb-4">
+                                            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Course Description</h2>
+                                            <p className="text-gray-700 mb-4 text-sm lg:text-base">
                                                 {course?.description || 'No description available for this course.'}
                                             </p>
                                         </section>
 
                                         {course?.whatYouWillLearn && course.whatYouWillLearn.length > 0 && (
                                             <section className="mb-10">
-                                                <h2 className="text-2xl font-semibold mb-3 text-gray-800">What You'll Learn</h2>
-                                                <ul className="list-disc list-inside text-gray-700 space-y-2">
+                                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">What You'll Learn</h2>
+                                                <ul className="list-disc list-inside text-gray-700 space-y-2 text-sm lg:text-base">
                                                     {course.whatYouWillLearn.map((item, index) => (
                                                         <li key={index}>{item}</li>
                                                     ))}
@@ -267,8 +268,8 @@ function CourseDetail() {
 
                                         {course?.requirements && course.requirements.length > 0 && (
                                             <section className="mb-10">
-                                                <h2 className="text-2xl font-semibold mb-3 text-gray-800">Requirements</h2>
-                                                <ul className="list-disc list-inside text-gray-700 space-y-2">
+                                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Requirements</h2>
+                                                <ul className="list-disc list-inside text-gray-700 space-y-2 text-sm lg:text-base">
                                                     {course.requirements.map((item, index) => (
                                                         <li key={index}>{item}</li>
                                                     ))}
@@ -278,8 +279,8 @@ function CourseDetail() {
 
                                         {course?.targetAudience && course.targetAudience.length > 0 && (
                                             <section className="mb-10">
-                                                <h2 className="text-2xl font-semibold mb-3 text-gray-800">Who This Course Is For</h2>
-                                                <ul className="list-disc list-inside text-gray-700 space-y-2">
+                                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Who This Course Is For</h2>
+                                                <ul className="list-disc list-inside text-gray-700 space-y-2 text-sm lg:text-base">
                                                     {course.targetAudience.map((item, index) => (
                                                         <li key={index}>{item}</li>
                                                     ))}
@@ -291,14 +292,13 @@ function CourseDetail() {
                                             <img
                                                 src={course.thumbnail}
                                                 alt={course.title}
-                                                className="w-full max-w-2xl mx-auto object-cover mb-13 rounded-lg"
+                                                className="w-full max-w-2xl mx-auto object-cover mb-6 lg:mb-13 rounded-lg"
                                             />
                                         )}
 
-                                        {/* Sample content for demonstration */}
                                         <section className="mb-10">
-                                            <h2 className="text-2xl font-semibold mb-3 text-gray-800">Course Content Overview</h2>
-                                            <p className="text-gray-700 mb-4">
+                                            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Course Content Overview</h2>
+                                            <p className="text-gray-700 mb-4 text-sm lg:text-base">
                                                 This course will take you from beginner to advanced level with hands-on projects and real-world examples.
                                             </p>
                                         </section>
@@ -329,12 +329,12 @@ function CourseDetail() {
                                 )}
                             </div>
                         </div>
-                        <div className='order-2 pr-5'>
-                            <div className="shadow-md rounded-2xl p-5 bg-white sticky top-20">
+                        <div className='order-2 pr-0 lg:pr-5'>
+                            <div className="shadow-md rounded-2xl p-5 bg-white static lg:sticky lg:top-20">
                                 <div className="mb-6 p-4 bg-green-50 rounded-lg">
                                     <div className="text-center mb-4">
                                         <span className="text-2xl font-bold text-[#4CBC9A]">
-                                            FREE
+                                            FREEsd
                                         </span>
                                     </div>
                                     <button
@@ -347,7 +347,11 @@ function CourseDetail() {
                                                 : 'bg-[#6c5dd3] text-white hover:bg-[#5a4bbf]'
                                             }`}
                                     >
-                                        {enrolling ? 'Enrolling...' : isEnrolled ? 'Already Enrolled' : 'Enroll Now'}
+                                        {enrolling ? 'Enrolling...' : isEnrolled ? (
+                                            <Link to={`/learn/course/${course.id}`} className="block">
+                                                Start Learning
+                                            </Link>
+                                        ) : 'Enroll Now'}
                                     </button>
                                 </div>
 
@@ -382,7 +386,6 @@ function CourseDetail() {
                                     </div>
                                 ))}
 
-                                {/* Course Stats */}
                                 <div className="mt-6 pt-6 border-t">
                                     <h3 className="font-semibold mb-3">Course Details</h3>
                                     <div className="space-y-2 text-sm">

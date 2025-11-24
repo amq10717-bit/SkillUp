@@ -86,29 +86,28 @@ function AdminLoginScreen() {
     }
 
     return (
-        <div className="min-h-screen bg-BgGradient flex items-center justify-center sm:p-10">
-            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-20">
+        <div className="min-h-screen bg-BgGradient flex items-center justify-center px-[15px] py-8 lg:p-10">
+            <div className="flex flex-col lg:flex-row max-w-6xl w-full bg-transparent pt-4 lg:pt-20">
                 {/* Logo Section */}
-                <div className="lg:w-1/2 flex flex-col justify-center sm:items-center lg:items-start p-8">
-                    <img src={logoWhite} alt="logo" className="w-80 mb-8" />
-
+                <div className="lg:w-1/2 flex flex-col justify-center items-center lg:items-start p-0 mb-8 lg:mb-0 lg:p-8">
+                    <img src={logoWhite} alt="logo" className="w-48 lg:w-80 mb-4 lg:mb-8" />
                 </div>
 
                 {/* Form Section */}
-                <div className="lg:w-1/2 bg-white flex flex-col p-10 justify-center rounded-2xl shadow-lg">
+                <div className="lg:w-1/2 bg-white flex flex-col p-6 lg:p-10 justify-center rounded-2xl shadow-lg">
                     <div className="text-center mb-6">
-                        <div className="w-16 h-16 bg-[#6c5dd3] rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i className="fas fa-lock text-white text-2xl"></i>
+                        <div className="w-14 h-14 lg:w-16 lg:h-16 bg-[#6c5dd3] rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i className="fas fa-lock text-white text-xl lg:text-2xl"></i>
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                             Admin Sign In
                         </h1>
-                        <p className="text-gray-600 mt-2">
+                        <p className="text-sm lg:text-base text-gray-600 mt-2">
                             Access the admin dashboard
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6 py-5">
+                    <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6 py-2 lg:py-5">
                         {/* Email */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -120,11 +119,11 @@ function AdminLoginScreen() {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent text-sm lg:text-base"
                                     placeholder="admin@skillup.com"
                                     disabled={loading}
                                 />
-                                <i className="fas fa-envelope absolute right-3 top-3 text-gray-400"></i>
+                                <i className="fas fa-envelope absolute right-3 top-3.5 text-gray-400"></i>
                             </div>
                         </div>
 
@@ -139,30 +138,30 @@ function AdminLoginScreen() {
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#6c5dd3] focus:border-transparent text-sm lg:text-base"
                                     placeholder="••••••••"
                                     disabled={loading}
                                 />
-                                <i className="fas fa-lock absolute right-3 top-3 text-gray-400"></i>
+                                <i className="fas fa-lock absolute right-3 top-3.5 text-gray-400"></i>
                             </div>
                         </div>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="p-3 lg:p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <div className="flex items-center">
-                                    <i className="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-                                    <span className="text-red-700">{error}</span>
+                                    <i className="fas fa-exclamation-triangle text-red-500 mr-3 flex-shrink-0"></i>
+                                    <span className="text-red-700 text-sm lg:text-base">{error}</span>
                                 </div>
                             </div>
                         )}
 
                         {/* Success Message */}
                         {success && (
-                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="p-3 lg:p-4 bg-green-50 border border-green-200 rounded-lg">
                                 <div className="flex items-center">
-                                    <i className="fas fa-check-circle text-green-500 mr-3"></i>
-                                    <span className="text-green-700">{success}</span>
+                                    <i className="fas fa-check-circle text-green-500 mr-3 flex-shrink-0"></i>
+                                    <span className="text-green-700 text-sm lg:text-base">{success}</span>
                                 </div>
                             </div>
                         )}
@@ -171,7 +170,7 @@ function AdminLoginScreen() {
                         <div>
                             <button
                                 type="submit"
-                                className="w-full bg-[#6c5dd3] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#5a4bc2] transition-colors disabled:opacity-50 flex items-center justify-center"
+                                className="w-full bg-[#6c5dd3] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#5a4bc2] transition-colors disabled:opacity-50 flex items-center justify-center text-sm lg:text-base"
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -202,12 +201,12 @@ function AdminLoginScreen() {
                         </div>
 
                         {/* Security Notice */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4 mt-4">
                             <div className="flex items-start">
-                                <i className="fas fa-shield-alt text-blue-500 mr-3 mt-1"></i>
+                                <i className="fas fa-shield-alt text-blue-500 mr-3 mt-1 flex-shrink-0"></i>
                                 <div>
                                     <p className="text-sm text-blue-800 font-semibold">Security Notice</p>
-                                    <p className="text-xs text-blue-700">
+                                    <p className="text-xs text-blue-700 mt-1">
                                         This portal is restricted to authorized administrators only.
                                     </p>
                                 </div>
