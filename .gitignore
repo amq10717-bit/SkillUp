@@ -1,14 +1,36 @@
 # -------------------
+# Dependency Directories (The Heaviest Items)
+# -------------------
+# Python Virtual Environment (Where torch, sklearn, pandas live)
+.venv/
+venv/
+env/
+ENV/
+
+# Node Modules (Where React dependencies live)
+node_modules/
+
+# -------------------
 # Python Standard
 # -------------------
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+
+# -------------------
+# Runtime & Build Files
+# -------------------
+# API Uploads folder (Don't push user files)
+uploads/
+backend/uploads/
+
+# React Build Output
+build/
+dist/
 
 # Distribution / Packaging
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -23,90 +45,63 @@ wheels/
 *.egg
 
 # -------------------
-# Virtual Environments
-# (Crucial: This keeps the heavy libraries out)
-# -------------------
-.venv/
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# -------------------
 # Environment Variables & Secrets
 # -------------------
 .env
 .env.local
-.env.*.local
 .env.production
 .env.development
 .env.test
 
 # -------------------
-# Machine Learning & Data Science (The Heavy Stuff)
+# Machine Learning Models & Cache
 # -------------------
-# Scikit-learn & Joblib models
+# Large binary models (Don't push these unless you use Git LFS)
 *.joblib
 *.pkl
 *.pickle
-
-# PyTorch / Deep Learning models
 *.pt
 *.pth
 *.bin
 *.onnx
 *.safetensors
 
-# HuggingFace / Sentence Transformers cache
+# Cache for HuggingFace/NLTK
 .cache/
 hf_cache/
-
-# NLTK Data
 nltk_data/
 
 # -------------------
-# Datasets & Media
+# Datasets (Critical Config)
 # -------------------
-# Large Data Files
+# Ignore large datasets by default
 *.csv
 *.xlsx
 *.parquet
-*.feather
-*.h5
-*.hdf5
 
-# PDFs & Images (Input data)
-# Keep these out unless they are small test files
-*.pdf
-*.jpg
-*.jpeg
-*.png
-# Exception: Keep git-related images or documentation assets if needed
-!docs/images/
+# !!! EXCEPTION: Force Git to track the book dataset !!!
+# This is required for your recommender system to work on the cloud
+!merged_books_dataset.csv
+!backend/merged_books_dataset.csv
 
 # -------------------
-# Logs & Databases
+# Logs & System
 # -------------------
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-celerybeat-schedule
-*.sqlite3
-*.db
+.DS_Store
+Thumbs.db
 
 # -------------------
 # Editor / IDE
 # -------------------
 .vscode/*
 !.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
 .idea/
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
