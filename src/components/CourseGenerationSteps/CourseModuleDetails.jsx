@@ -113,7 +113,7 @@ const CourseModuleDetails = () => {
         setEditMode(prev => ({ ...prev, [index]: false }));
     };
 
-    const saveAndPublish = async (status = 'published') => {
+    const saveAndContinue = async () => {
         if (modules.some(module => !module.content.trim())) {
             alert('Please ensure all modules have content');
             return;
@@ -123,13 +123,12 @@ const CourseModuleDetails = () => {
         try {
             await updateDoc(doc(db, 'courses', courseId), {
                 modules: modules,
-                status: status,
                 updatedAt: new Date(),
-                creationStep: 'completed'
+                creationStep: 'video-generation' // Changed from 'completed'
             });
 
-            alert(`Course ${status === 'published' ? 'published' : 'saved as draft'} successfully!`);
-            navigate('/tutor-dashboard');
+            alert('Content saved! Now generate a promotional video for your course.');
+            navigate(`/add-course/video-generation/${courseId}`); // Navigate to single video generation
         } catch (error) {
             console.error('Error saving course:', error);
             alert('Failed to save course');
@@ -339,7 +338,7 @@ const CourseModuleDetails = () => {
                                 )}
                             </button>
                             <button
-                                onClick={() => saveAndPublish('published')}
+                                onClick={saveAndContinue}
                                 disabled={saving}
                                 className="flex-1 bg-[#4CBC9A] text-white py-3 rounded-lg hover:bg-[#3aa384] disabled:opacity-50 font-medium flex items-center justify-center gap-2"
                             >
@@ -347,8 +346,8 @@ const CourseModuleDetails = () => {
                                     <i className="fas fa-spinner fa-spin"></i>
                                 ) : (
                                     <>
-                                        <i className="fas fa-rocket"></i>
-                                        Publish Course
+                                        <i className="fas fa-arrow-right"></i>
+                                        Continue to Video Generation
                                     </>
                                 )}
                             </button>

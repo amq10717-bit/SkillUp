@@ -13,4 +13,6 @@ PyPDF2
 tqdm
 pandas
 python-dotenv
+kokoro>=0.9.4
+soundfile
 

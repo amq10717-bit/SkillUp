@@ -1,14 +1,29 @@
-// server/server.js  (ESM)
+// server/server.js (ESM)
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 
+// --- NEW IMPORTS FOR FILE PATHS ---
+import path from "path";
+import { fileURLToPath } from "url";
+
 dotenv.config();
 const app = express();
 
+// --- SETUP DIRNAME FOR ESM ---
+// (Required because __dirname is not available by default in ESM "import" syntax)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
+
+// --- CRITICAL FIX: ENABLE STATIC FILE SERVING ---
+// This makes the "uploads" folder publicly accessible via HTTP
+// Example: http://localhost:8000/uploads/final_trees_video.mp4
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Configure Cloudinary
 cloudinary.config({
@@ -55,5 +70,6 @@ app.post("/api/delete-cloudinary", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Cloudinary signature server running on port ${PORT}`));
+// --- NOTE: CHANGED DEFAULT PORT TO 8000 TO MATCH YOUR FRONTEND CONFIG ---
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -10,7 +10,11 @@ import 'react-circular-progressbar/dist/styles.css';
 // Initialize Gemini AI
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// Use gemini-2.0-flash-exp model
+const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash"
+});
 
 function PerformanceAnalysis() {
     const [loading, setLoading] = useState(true);
@@ -282,44 +286,48 @@ function PerformanceAnalysis() {
         };
     };
 
-    // Generate professional report using Gemini AI
+    // Generate professional report using Gemini AI with better error handling
     const generatePerformanceReport = async () => {
         try {
             setReportLoading(true);
+            setGeneratedReport(null);
+
+            // Check if API key is available
+            if (!API_KEY) {
+                throw new Error('Gemini API key is not configured. Please check your environment variables.');
+            }
 
             const prompt = `
-                Create a comprehensive and professional performance analysis report for a student based on the following data:
+                Create a concise performance analysis report based on this real student data:
 
-                OVERALL PERFORMANCE:
+                PERFORMANCE DATA:
                 - Overall Score: ${performanceData.overallScore}%
                 - Assignment Average: ${performanceData.avgAssignmentScore}%
                 - Quiz Average: ${performanceData.avgQuizScore}%
                 - Completed Courses: ${performanceData.completedCourses}
-                - Total Assignments: ${performanceData.totalAssignments}
-                - Total Quizzes: ${performanceData.totalQuizzes}
+                - Total Assignments Submitted: ${performanceData.totalAssignments}
+                - Total Quizzes Taken: ${performanceData.totalQuizzes}
+                - Recent Activities: ${recentActivities.length}
+                - Tutor Feedback Received: ${tutorRemarks.length}
 
-                COURSE PERFORMANCE:
+                ${performanceData.subjectPerformance.length > 0 ? `COURSE PERFORMANCE:
                 ${performanceData.subjectPerformance.map(course =>
                 `- ${course.subject}: ${course.score}% (${course.activityCount} activities)`
-            ).join('\n')}
+            ).join('\n')}` : 'No course performance data available'}
 
-                RECENT ACTIVITIES: ${recentActivities.length} activities in the last period
-                TUTOR FEEDBACK: ${tutorRemarks.length} remarks received
+                ${performanceData.weeklyProgress.length > 0 ? `RECENT TRENDS:
+                ${performanceData.weeklyProgress.slice(-4).map(week =>
+                `${week.week}: ${week.overall}% overall`
+            ).join(' | ')}` : 'No recent trend data available'}
 
-                WEEKLY TREND: ${performanceData.weeklyProgress.map(week =>
-                `${week.week}: ${week.overall}% overall (${week.assignmentCount} assignments, ${week.quizCount} quizzes)`
-            ).join(' | ')}
+                Create a brief, professional report that:
+                1. Summarizes current performance level
+                2. Highlights key strengths based on actual data
+                3. Identifies specific areas for improvement
+                4. Provides 2-3 actionable recommendations
+                5. Gives encouragement and next steps
 
-                Please generate a professional educational performance report that includes:
-                1. Executive Summary with overall assessment
-                2. Strengths and key achievements
-                3. Areas for improvement with specific recommendations
-                4. Learning patterns and study habits analysis
-                5. Personalized recommendations for academic growth
-                6. Progress trajectory and future outlook
-
-                Format the report professionally with clear sections, using appropriate educational terminology.
-                Make it insightful and actionable for the student.
+                Keep it concise and focused only on the actual data provided. Use clear, direct language. Do NOT use markdown symbols like # or * in the output, instead format it as plain paragraphs and bullet points.
             `;
 
             const result = await model.generateContent(prompt);
@@ -329,62 +337,82 @@ function PerformanceAnalysis() {
             setGeneratedReport(reportContent);
         } catch (error) {
             console.error('Error generating report:', error);
-            setGeneratedReport('Unable to generate report at this time. Please try again later.');
+
+            // Provide user-friendly error messages
+            if (error.message.includes('API key') || !API_KEY) {
+                setGeneratedReport('Error: Gemini AI API key is not configured. Please contact your administrator to set up the API key.');
+            } else if (error.message.includes('quota') || error.message.includes('rate limit')) {
+                setGeneratedReport('Error: API quota exceeded. Please try again later or contact your administrator.');
+            } else if (error.message.includes('model') || error.message.includes('not found')) {
+                setGeneratedReport('Error: AI model is currently unavailable. Please try again later.');
+            } else {
+                setGeneratedReport('Unable to generate report at this time. Please try again later. If the problem persists, contact support.');
+            }
         } finally {
             setReportLoading(false);
         }
     };
 
-    // Download report as PDF
+    // Download report as PDF with fallback
     const downloadReportAsPDF = () => {
         if (!generatedReport) return;
 
-        const element = document.createElement('div');
-        element.innerHTML = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-                <h1 style="color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
-                    Student Performance Report
-                </h1>
-                <div style="color: #7f8c8d; text-align: center; margin-bottom: 30px;">
-                    Generated on ${new Date().toLocaleDateString()}
-                </div>
-                <div style="line-height: 1.6; color: #2c3e50;">
-                    ${generatedReport.replace(/\n/g, '<br>')}
-                </div>
-                <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #bdc3c7; color: #7f8c8d;">
-                    <p><strong>Performance Summary:</strong></p>
-                    <p>Overall Score: ${performanceData.overallScore}%</p>
-                    <p>Assignments Completed: ${performanceData.totalAssignments}</p>
-                    <p>Quizzes Taken: ${performanceData.totalQuizzes}</p>
-                    <p>Courses Completed: ${performanceData.completedCourses}</p>
-                </div>
-            </div>
-        `;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Student Performance Report</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        @media print {
-                            body { margin: 0; }
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${element.innerHTML}
-                    <div class="no-print" style="text-align: center; margin-top: 20px;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            Print as PDF
-                        </button>
+        try {
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+                    <h1 style="color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
+                        Student Performance Report
+                    </h1>
+                    <div style="color: #7f8c8d; text-align: center; margin-bottom: 30px;">
+                        Generated on ${new Date().toLocaleDateString()}
                     </div>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
+                    <div style="line-height: 1.6; color: #2c3e50;">
+                        ${generatedReport.replace(/\n/g, '<br>')}
+                    </div>
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #bdc3c7; color: #7f8c8d;">
+                        <p><strong>Performance Summary:</strong></p>
+                        <p>Overall Score: ${performanceData.overallScore}%</p>
+                        <p>Assignments Completed: ${performanceData.totalAssignments}</p>
+                        <p>Quizzes Taken: ${performanceData.totalQuizzes}</p>
+                        <p>Courses Completed: ${performanceData.completedCourses}</p>
+                    </div>
+                </div>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                alert('Please allow pop-ups to download the report.');
+                return;
+            }
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Student Performance Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            @media print {
+                                body { margin: 0; }
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${element.innerHTML}
+                        <div class="no-print" style="text-align: center; margin-top: 20px;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Print as PDF
+                            </button>
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF. Please try again.');
+        }
     };
 
     const learningPace = calculateLearningPace();
@@ -417,7 +445,7 @@ function PerformanceAnalysis() {
                     </div>
                 </div>
 
-                {/* Navigation Tabs - Removed Knowledge tab */}
+                {/* Navigation Tabs */}
                 <div className="border-b border-gray-200 mb-8">
                     <nav className="-mb-px flex space-x-8">
                         {[
@@ -539,7 +567,66 @@ function PerformanceAnalysis() {
     );
 }
 
-// Sub-components for each tab (OverviewTab, ProgressTab, FeedbackTab remain the same as previous version)
+// Helper to format raw text response into structured JSX
+const formatReportContent = (text) => {
+    if (!text) return null;
+
+    // Split by lines to handle paragraphs
+    return text.split('\n').map((line, idx) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return <br key={idx} />;
+
+        // Format bold headers (e.g., **Header**)
+        const boldMatch = trimmedLine.match(/^\*\*(.*?)\*\*$/);
+        if (boldMatch) {
+            return (
+                <h3 key={idx} className="text-lg font-bold text-indigo-700 mt-4 mb-2 border-b border-indigo-100 pb-1">
+                    {boldMatch[1]}
+                </h3>
+            );
+        }
+
+        // Format bullet points (* or -)
+        const bulletMatch = trimmedLine.match(/^[\*\-]\s+(.*)/);
+        if (bulletMatch) {
+            // Handle bold text within bullet points
+            const content = bulletMatch[1].split(/(\*\*.*?\*\*)/).map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i} className="text-indigo-900">{part.slice(2, -2)}</strong>;
+                }
+                return part;
+            });
+
+            return (
+                <div key={idx} className="flex items-start gap-2 mb-2 ml-4">
+                    <span className="text-indigo-500 mt-1.5 text-xs">●</span>
+                    <p className="text-gray-700 leading-relaxed flex-1">{content}</p>
+                </div>
+            );
+        }
+
+        // Regular paragraphs with potential bold text inside
+        const content = trimmedLine.split(/(\*\*.*?\*\*)/).map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i} className="text-gray-900">{part.slice(2, -2)}</strong>;
+            }
+            return part;
+        });
+
+        // Check if line looks like a header (all caps or ends with :)
+        if (/^[A-Z\s]+:$/.test(trimmedLine) || trimmedLine.startsWith('#')) {
+            return (
+                <h4 key={idx} className="font-bold text-gray-800 mt-4 mb-2">
+                    {trimmedLine.replace(/^#+\s*/, '')}
+                </h4>
+            );
+        }
+
+        return <p key={idx} className="text-gray-600 mb-2 leading-relaxed">{content}</p>;
+    });
+};
+
+// Overview Tab Component
 const OverviewTab = ({ data, activities }) => (
     <div className="space-y-8">
         {/* Score Cards */}
@@ -660,6 +747,7 @@ const OverviewTab = ({ data, activities }) => (
     </div>
 );
 
+// Progress Tab Component
 const ProgressTab = ({ data }) => (
     <div className="space-y-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -754,6 +842,7 @@ const ProgressTab = ({ data }) => (
     </div>
 );
 
+// Feedback Tab Component
 const FeedbackTab = ({ remarks, courses }) => (
     <div className="space-y-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -855,7 +944,7 @@ const FeedbackTab = ({ remarks, courses }) => (
     </div>
 );
 
-// Updated ReportsTab with Gemini AI integration
+// Reports Tab Component
 const ReportsTab = ({ data, onGenerateReport, reportLoading, generatedReport, onDownloadReport }) => (
     <div className="space-y-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -907,9 +996,41 @@ const ReportsTab = ({ data, onGenerateReport, reportLoading, generatedReport, on
                                 Download PDF
                             </button>
                         </div>
-                        <div className="prose max-w-none">
-                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                                {generatedReport}
+
+                        {/* Beautiful Report Display */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 max-h-96 overflow-y-auto">
+                            {/* Header */}
+                            <div className="text-center border-b-2 border-indigo-500 pb-4 mb-6">
+                                <h1 className="text-2xl font-bold text-gray-800 mb-2">Student Performance Report</h1>
+                                <p className="text-gray-500 text-sm">Generated on {new Date().toLocaleDateString()}</p>
+                            </div>
+
+                            {/* Report Content */}
+                            <div className="prose max-w-none text-gray-700">
+                                {formatReportContent(generatedReport)}
+                            </div>
+
+                            {/* Performance Summary Footer */}
+                            <div className="mt-8 pt-4 border-t-2 border-gray-200 bg-gray-50 p-4 rounded-lg">
+                                <h4 className="text-sm font-semibold text-gray-800 mb-3">Performance Summary</h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Overall Score:</span>
+                                        <span className="font-semibold text-gray-800">{data.overallScore || 0}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Assignments:</span>
+                                        <span className="font-semibold text-gray-800">{data.totalAssignments || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Quizzes:</span>
+                                        <span className="font-semibold text-gray-800">{data.totalQuizzes || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Courses Completed:</span>
+                                        <span className="font-semibold text-gray-800">{data.completedCourses || 0}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -942,6 +1063,7 @@ const ReportsTab = ({ data, onGenerateReport, reportLoading, generatedReport, on
     </div>
 );
 
+// AI Feedback Component
 const AIFeedback = ({ overallScore, assignmentsCount, quizzesCount }) => {
     const getFeedback = () => {
         if (overallScore >= 90) {

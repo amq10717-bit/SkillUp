@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # <--- NEW IMPORT
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
@@ -15,6 +17,7 @@ from pre_processing import giving_avg_score, split_into_500_word_chunks
 
 # CORRECT IMPORT: import the function 'get_recommendations'
 from recommender import get_recommendations 
+from video_generator import generate_video_pipeline
 
 app = FastAPI()
 
@@ -27,8 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- STATIC FILES SETUP (CRITICAL FIX) ---
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# This makes the "uploads" folder accessible at http://localhost:8000/uploads/
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
 
 # --- DATA MODELS ---
 
@@ -48,6 +56,9 @@ class RecommendationRequest(BaseModel):
     desired_difficulty: str
     skill_level: int
     num_results: int = 5
+
+class VideoRequest(BaseModel):
+    topic: str
 
 # --- HELPER FUNCTIONS ---
 
@@ -98,7 +109,81 @@ def download_file(url, save_path):
         print(f"Error downloading: {e}")
         return False
 
+def map_topic_to_available(module_title):
+    """
+    Map any module title to available content topics
+    """
+    available_topics = {
+        'arrays', 'graphs', 'linked_list', 'queue', 
+        'stack', 'trees', 'random_clips', 'other_clips'
+    }
+    
+    title_lower = module_title.lower()
+    
+    # Direct matches
+    for topic in available_topics:
+        if topic in title_lower:
+            return topic
+    
+    # Common variations and mappings
+    topic_mappings = {
+        'array': 'arrays',
+        'graph': 'graphs', 
+        'linked list': 'linked_list',
+        'linked-list': 'linked_list',
+        'queues': 'queue',
+        'stacks': 'stack',
+        'tree': 'trees',
+        'data structure': 'arrays',  # default for general data structure topics
+        'algorithm': 'arrays',       # default for algorithm topics
+    }
+    
+    for keyword, topic in topic_mappings.items():
+        if keyword in title_lower:
+            return topic
+    
+    # Default fallback
+    return 'arrays'
+
 # --- API ENDPOINTS ---
+
+@app.post("/api/generate-video")
+async def generate_video_endpoint(request: VideoRequest):
+    """
+    Generates a short educational video about a specific topic.
+    """
+    print(f"🎥 Request received to generate video for: {request.topic}")
+    
+    # Map the requested topic to available content
+    mapped_topic = map_topic_to_available(request.topic)
+    if mapped_topic != request.topic:
+        print(f"🔀 Mapped topic '{request.topic}' -> '{mapped_topic}'")
+    
+    result = generate_video_pipeline(mapped_topic)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    # Ensure the result points to the mounted path
+    # If generate_video_pipeline returns "uploads\video.mp4", we want "uploads/video.mp4"
+    if "file_path" in result:
+         # Normalize path separators
+        clean_path = result["file_path"].replace("\\", "/")
+        # Ensure it starts with uploads/ for the URL
+        if clean_path.startswith("uploads/"):
+             result["url"] = f"http://localhost:8000/{clean_path}"
+        else:
+             result["url"] = f"http://localhost:8000/uploads/{clean_path}"
+
+    return result
+
+# You can keep this manual endpoint as a backup, but the StaticFiles mount above is what fixes the issue
+@app.get("/api/video/{filename}")
+async def get_video(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Video not found")
+    return FileResponse(file_path, media_type="video/mp4")
 
 @app.get("/")
 def root():
@@ -111,11 +196,24 @@ def recommend_endpoint(payload: RecommendationRequest):
         interests=payload.interests,
         recent_assignments=payload.recent_assignments,
         difficulty=payload.desired_difficulty,
-        # Note: get_recommendations definition in recommender.py needs to accept num_results
-        # If your recommender.py didn't have num_results, remove that argument below.
+        skill_level=payload.skill_level,
         num_results=payload.num_results 
     )
     return { "books": books }
+
+@app.get("/api/test")
+async def test_endpoint():
+    return {"status": "ok", "message": "Backend is working"}
+
+@app.post("/api/test-video")
+async def test_video_endpoint(request: VideoRequest):
+    print(f"Test video request for: {request.topic}")
+    return {
+        "status": "success", 
+        "file_path": "/uploads/test-video.mp4", # Updated to use the mounted path
+        "filename": "test-video.mp4",
+        "message": "This is a test response"
+    }
 
 @app.post("/api/analyze")
 async def analyze(request: AnalysisRequest):

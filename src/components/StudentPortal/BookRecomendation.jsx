@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
-import { BookOpenIcon, StarIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
-import HeroSection from '../Hero Section/HeroSection';
+import React, { useState, useEffect } from 'react';
+import { BookOpenIcon, StarIcon, AcademicCapIcon, BookmarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { readingListService } from '../../firebase'; // Adjust path as needed
 
 function BookRecommendation() {
     // UI state
     const [activeTab, setActiveTab] = useState('recommendations');
 
     // Inputs the user can provide to influence the recommender
-    const [interestsInput, setInterestsInput] = useState('programming, web-development'); // comma-separated
+    const [interestsInput, setInterestsInput] = useState('programming, web-development');
     const [recentAssignmentsText, setRecentAssignmentsText] = useState('');
     const [desiredDifficulty, setDesiredDifficulty] = useState('Intermediate');
-    const [skillLevel, setSkillLevel] = useState(3); // 1..5
+    const [skillLevel, setSkillLevel] = useState(3);
     const [numResults, setNumResults] = useState(5);
 
     // Recommendation state
     const [loading, setLoading] = useState(false);
-    const [recommendations, setRecommendations] = useState([]); // results from backend
+    const [recommendations, setRecommendations] = useState([]);
     const [recError, setRecError] = useState(null);
 
-    // Reading list (local)
+    // Reading list (now with Firebase persistence)
     const [readingList, setReadingList] = useState([]);
+    const [readingListLoading, setReadingListLoading] = useState(true);
+    const userId = "student123"; // In real app, get from auth
 
     // Client-side filtering/search UI
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,24 +37,49 @@ function BookRecommendation() {
     ];
 
     const difficultyLevels = {
-        'Beginner': 'bg-green-100 text-green-800',
-        'Intermediate': 'bg-yellow-100 text-yellow-800',
-        'Advanced': 'bg-red-100 text-red-800'
+        'Beginner': 'bg-green-100 text-green-800 border border-green-200',
+        'Intermediate': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+        'Advanced': 'bg-red-100 text-red-800 border border-red-200'
+    };
+
+    // Load reading list from Firebase on component mount
+    useEffect(() => {
+        loadReadingList();
+    }, []);
+
+    const loadReadingList = async () => {
+        setReadingListLoading(true);
+        try {
+            const books = await readingListService.getReadingList(userId);
+            setReadingList(books);
+        } catch (error) {
+            console.error('Failed to load reading list:', error);
+        } finally {
+            setReadingListLoading(false);
+        }
+    };
+    const getRandomCoverColor = () => {
+        const colors = [
+
+            'bg-gradient-to-br from-purple-500 to-purple-600',
+
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
     };
 
     // helper: parse comma-separated interests into array
     const parseInterests = (str) =>
         str.split(',').map(s => s.trim()).filter(Boolean);
 
-    // Call backend recommender
+    // Call backend recommender with artificial delay
     const handleGetRecommendations = async () => {
         setLoading(true);
         setRecError(null);
-        setRecommendations([]); // clear previous
+        setRecommendations([]);
 
         try {
             const payload = {
-                user_id: "student123", // replace with actual logged-in id when available
+                user_id: userId,
                 interests: parseInterests(interestsInput),
                 recent_assignments:
                     recentAssignmentsText
@@ -63,6 +90,10 @@ function BookRecommendation() {
                 skill_level: skillLevel,
                 num_results: Number(numResults) || 5
             };
+
+            // Add artificial delay of 4-5 seconds
+            const delay = Math.random() * 1000 + 4000; // 4000-5000ms
+            await new Promise(resolve => setTimeout(resolve, delay));
 
             const res = await fetch('http://localhost:8000/api/recommend', {
                 method: 'POST',
@@ -81,8 +112,11 @@ function BookRecommendation() {
                 throw new Error('Invalid response format. Expected { books: [...] }');
             }
 
-            // Ensure each book has an id (fallback)
-            const books = data.books.map((b, i) => ({ id: b.id ?? i + 1, ...b }));
+            const books = data.books.map((b, i) => ({
+                id: b.id ?? i + 1,
+                ...b,
+                coverColor: getRandomCoverColor()
+            }));
             setRecommendations(books);
         } catch (err) {
             console.error('Recommendation error:', err);
@@ -91,6 +125,70 @@ function BookRecommendation() {
             setLoading(false);
         }
     };
+
+    // Demo books with proper cover colors
+    const demoBooks = [
+        {
+            id: 1,
+            title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
+            author: 'Robert C. Martin',
+            description: 'Learn to write clean, maintainable code with practical examples and best practices that will make you a better programmer.',
+            genre: 'programming',
+            rating: 4.7,
+            pages: 464,
+            aiExplanation: 'Perfect for improving code quality and learning software craftsmanship principles that align with your recent assignments.',
+            difficulty: 'Intermediate',
+            coverColor: 'bg-gradient-to-br from-blue-500 to-blue-600'
+        },
+        {
+            id: 2,
+            title: 'Design Patterns: Elements of Reusable Object-Oriented Software',
+            author: 'Gamma, Helm, Johnson, Vlissides',
+            description: 'The classic book on design patterns that every serious software developer should read. Learn reusable solutions to common problems.',
+            genre: 'software-engineering',
+            rating: 4.6,
+            pages: 395,
+            aiExplanation: 'Excellent for understanding software architecture and design principles relevant to your current projects.',
+            difficulty: 'Advanced',
+            coverColor: 'bg-gradient-to-br from-purple-500 to-purple-600'
+        },
+        {
+            id: 3,
+            title: 'The Pragmatic Programmer',
+            author: 'Andrew Hunt, David Thomas',
+            description: 'A practical guide to software development that covers everything from personal responsibility to architectural techniques.',
+            genre: 'programming',
+            rating: 4.8,
+            pages: 352,
+            aiExplanation: 'Great for developing practical programming skills and professional development.',
+            difficulty: 'Intermediate',
+            coverColor: 'bg-gradient-to-br from-green-500 to-green-600'
+        },
+        {
+            id: 4,
+            title: 'Introduction to Algorithms',
+            author: 'Cormen, Leiserson, Rivest, Stein',
+            description: 'The comprehensive guide to algorithms used by students and professionals worldwide.',
+            genre: 'computer-science',
+            rating: 4.5,
+            pages: 1312,
+            aiExplanation: 'Essential for building strong fundamentals in algorithms and data structures.',
+            difficulty: 'Advanced',
+            coverColor: 'bg-gradient-to-br from-red-500 to-red-600'
+        },
+        {
+            id: 5,
+            title: 'You Don\'t Know JS',
+            author: 'Kyle Simpson',
+            description: 'Deep dive into JavaScript mechanisms and how to effectively use the language.',
+            genre: 'web-development',
+            rating: 4.6,
+            pages: 450,
+            aiExplanation: 'Perfect for mastering JavaScript fundamentals and advanced concepts.',
+            difficulty: 'Intermediate',
+            coverColor: 'bg-gradient-to-br from-indigo-500 to-indigo-600'
+        }
+    ];
 
     // client-side filtered list shown on page
     const filteredBooks = recommendations.filter(book => {
@@ -102,61 +200,137 @@ function BookRecommendation() {
         return matchesGenre && matchesSearch;
     });
 
-    // add to local reading list
-    const addToReadingList = (book) => {
-        setReadingList(prev => {
-            if (prev.find(b => b.title === book.title && b.author === book.author)) return prev;
-            return [book, ...prev];
-        });
+    // Updated: add to reading list with Firebase persistence
+    const addToReadingList = async (book) => {
+        // Check if book already exists in reading list
+        const existingBook = readingList.find(b =>
+            b.id === book.id || b.title === book.title && b.author === book.author
+        );
+
+        if (existingBook) {
+            return; // Book already in reading list
+        }
+
+        // Optimistic update
+        const newBook = {
+            ...book,
+            addedAt: new Date().toISOString(),
+            firebaseId: book.id || Date.now() // Ensure unique ID
+        };
+
+        setReadingList(prev => [newBook, ...prev]);
+
+        // Sync with Firebase
+        try {
+            const success = await readingListService.addToReadingList(userId, newBook);
+            if (!success) {
+                // Revert on error
+                setReadingList(prev => prev.filter(b => b.firebaseId !== newBook.firebaseId));
+                console.error('Failed to add book to reading list');
+            }
+        } catch (error) {
+            // Revert on error
+            setReadingList(prev => prev.filter(b => b.firebaseId !== newBook.firebaseId));
+            console.error('Error adding to reading list:', error);
+        }
     };
 
-    // remove from reading list
-    const removeFromReadingList = (idx) => {
-        setReadingList(prev => prev.filter((_, i) => i !== idx));
+    // Updated: remove from reading list with Firebase persistence
+    const removeFromReadingList = async (bookId) => {
+        // Optimistic update
+        setReadingList(prev => prev.filter(book =>
+            book.firebaseId !== bookId && book.id !== bookId
+        ));
+
+        // Sync with Firebase
+        try {
+            const success = await readingListService.removeFromReadingList(userId, bookId);
+            if (!success) {
+                // Reload from Firebase on error
+                loadReadingList();
+            }
+        } catch (error) {
+            // Reload from Firebase on error
+            loadReadingList();
+            console.error('Error removing from reading list:', error);
+        }
+    };
+
+    // Updated: clear reading list with Firebase persistence
+    const clearReadingList = async () => {
+        // Optimistic update
+        setReadingList([]);
+
+        // Sync with Firebase
+        try {
+            const success = await readingListService.clearReadingList(userId);
+            if (!success) {
+                // Reload from Firebase on error
+                loadReadingList();
+            }
+        } catch (error) {
+            // Reload from Firebase on error
+            loadReadingList();
+            console.error('Error clearing reading list:', error);
+        }
     };
 
     return (
-        <div>
-            <HeroSection
-                title="Book Recommendations"
-                breadcrumb={[
-                    { label: 'Home', path: '/' },
-                    { label: 'Book Recommendations' },
-                ]}
-            />
+        <div className="min-h-screen bg-gray-50 font-poppins">
+            <div className="max-w-7xl mt-[70px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className='flex flex-col lg:flex-row gap-8'>
 
-            <div className="my-8 lg:mt-30 lg:mb-30 font-poppins max-w-7xl mx-auto px-[15px] lg:px-4">
-                {/* Mobile-first: Flex-col for mobile, Grid for desktop */}
-                <div className='flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-6'>
-
-                    {/* Main content */}
-                    <div className="order-1 lg:order-1">
-                        <div className='bg-white rounded-2xl p-4 lg:p-6 shadow'>
-                            <h1 className='text-2xl lg:text-3xl font-extrabold mb-3 text-gray-900'>Personalized Book Recommendations</h1>
-                            <p className='text-sm lg:text-base text-gray-600 mb-4 leading-relaxed'>
-                                Use the form below to tell the recommender what you like and what you're working on.
-                                The AI will use this to suggest the most relevant technical books.
-                            </p>
-
-                            {/* Input form */}
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                    {/* Main Content */}
+                    <div className="lg:w-3/4 space-y-8">
+                        {/* Header Card */}
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 lg:p-8 text-white shadow-lg">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-1'>Interests (comma-separated)</label>
+                                    <h1 className="text-2xl md:text-4xl font-bold mb-2">Personalized Book Recommendations</h1>
+                                    <p className="text-indigo-100 text-base lg:text-lg max-w-2xl">
+                                        Get AI-powered book suggestions tailored to your interests, skill level, and learning goals.
+                                    </p>
+                                </div>
+                                <div className="mt-4 lg:mt-0">
+                                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-3">
+                                        <div className="text-2xl font-bold">{recommendations.length}</div>
+                                        <div className="text-sm text-indigo-100">Books Recommended</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Input Form Card */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:p-8">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                                <i className="fas fa-robot text-indigo-600"></i>
+                                AI Recommendation Settings
+                            </h2>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <i className="fas fa-heart text-red-500"></i>
+                                        Interests
+                                    </label>
                                     <input
                                         type="text"
                                         value={interestsInput}
                                         onChange={(e) => setInterestsInput(e.target.value)}
                                         placeholder="e.g. programming, web-development, data-science"
-                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-1'>Desired difficulty</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <i className="fas fa-chart-line text-blue-500"></i>
+                                        Desired Difficulty
+                                    </label>
                                     <select
                                         value={desiredDifficulty}
                                         onChange={(e) => setDesiredDifficulty(e.target.value)}
-                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white'
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
                                     >
                                         <option>Beginner</option>
                                         <option>Intermediate</option>
@@ -165,215 +339,381 @@ function BookRecommendation() {
                                 </div>
 
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-1'>Skill level (1-5)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <i className="fas fa-brain text-purple-500"></i>
+                                        Skill Level: {skillLevel}/5
+                                    </label>
                                     <input
                                         type="range"
                                         min="1"
                                         max="5"
                                         value={skillLevel}
                                         onChange={(e) => setSkillLevel(Number(e.target.value))}
-                                        className='w-full accent-indigo-600'
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                     />
-                                    <div className='text-xs text-gray-600 mt-1'>Current skill level: {skillLevel}</div>
+                                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>Beginner</span>
+                                        <span>Expert</span>
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-1'>Number of results</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <i className="fas fa-list-ol text-green-500"></i>
+                                        Number of Results
+                                    </label>
                                     <input
                                         type="number"
                                         min="1"
                                         max="20"
                                         value={numResults}
                                         onChange={(e) => setNumResults(e.target.value)}
-                                        className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
                                     />
                                 </div>
                             </div>
 
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700 mb-1'>Recent assignments or topics (one per line)</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                    <i className="fas fa-tasks text-orange-500"></i>
+                                    Recent Assignments & Topics
+                                </label>
                                 <textarea
                                     rows={4}
                                     value={recentAssignmentsText}
                                     onChange={(e) => setRecentAssignmentsText(e.target.value)}
-                                    placeholder="Paste assignment summaries, topics, or notes..."
-                                    className='w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
+                                    placeholder="Paste assignment summaries, topics, or notes (one per line)..."
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
                                 />
-                                <div className='text-xs text-gray-500 mt-1'>Optional — helps the model match books to recent work.</div>
+                                <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                                    <i className="fas fa-info-circle text-blue-500"></i>
+                                    Optional — helps the AI match books to your recent work
+                                </div>
                             </div>
 
-                            <div className='flex flex-col sm:flex-row gap-3 items-center'>
+                            <div className="flex flex-col sm:flex-row gap-4 items-center">
                                 <button
                                     onClick={handleGetRecommendations}
                                     disabled={loading}
-                                    className='w-full sm:w-auto btn-primary px-6 py-2.5 rounded-lg bg-indigo-600 text-white shadow hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm font-medium'
+                                    className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-8 rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center gap-2"
                                 >
-                                    {loading ? 'Generating...' : 'Generate AI Recommendations'}
+                                    {loading ? (
+                                        <>
+                                            <i className="fas fa-spinner fa-spin"></i>
+                                            Generating Recommendations...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fas fa-magic"></i>
+                                            Generate AI Recommendations
+                                        </>
+                                    )}
                                 </button>
 
                                 <button
                                     onClick={() => {
-                                        setRecommendations([
-                                            { id: 1, title: 'Clean Code', author: 'Robert C. Martin', description: 'Learn to write maintainable code.', genre: 'programming', rating: 4.7, pages: 464, aiExplanation: 'Suggested for improving code quality', difficulty: 'Intermediate' },
-                                            { id: 2, title: 'Design Patterns', author: 'Gamma et al.', description: 'Classic design patterns book.', genre: 'programming', rating: 4.6, pages: 395, aiExplanation: 'Good for architecture & design', difficulty: 'Advanced' }
-                                        ]);
+                                        setRecommendations(demoBooks);
                                         setRecError(null);
                                     }}
-                                    className='w-full sm:w-auto px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium'
+                                    disabled={loading}
+                                    className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium shadow-sm hover:shadow flex items-center gap-2 disabled:opacity-50"
                                 >
-                                    Demo results
+                                    <i className="fas fa-eye"></i>
+                                    View Demo Results
                                 </button>
-
-                                <div className='w-full sm:w-auto sm:ml-auto text-center sm:text-right text-sm text-gray-500'>
-                                    {recommendations.length} recommendations
-                                </div>
                             </div>
 
                             {recError && (
-                                <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm flex items-center">
-                                    <i className="fas fa-exclamation-circle mr-2"></i>
-                                    Recommendation error: {recError}
+                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                                    <i className="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                                    <div>
+                                        <div className="font-medium text-red-800">Recommendation Error</div>
+                                        <div className="text-sm text-red-600 mt-1">{recError}</div>
+                                    </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Search + Filters for results */}
-                        <div className='bg-white rounded-2xl p-4 mt-6 shadow'>
-                            <div className='flex flex-col sm:flex-row gap-3'>
-                                <div className="relative flex-1">
-                                    <input
-                                        type="text"
-                                        placeholder='Search in recommendations...'
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className='w-full pl-9 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm'
-                                    />
-                                    <i className="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
-                                </div>
-                                <select
-                                    value={selectedGenre}
-                                    onChange={(e) => setSelectedGenre(e.target.value)}
-                                    className='w-full sm:w-auto p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white'
-                                >
-                                    {genres.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-                                </select>
-                            </div>
-                        </div>
+                        {/* Loading Animation */}
+                        {loading && (
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+                                <div className="max-w-md mx-auto">
+                                    {/* Animated AI Icon */}
+                                    <div className="w-20 h-20 mx-auto mb-6 relative">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full animate-pulse z-0"></div>
 
-                        {/* Results */}
-                        <div className='mt-6 space-y-4'>
-                            {filteredBooks.length === 0 ? (
-                                <div className='bg-white p-8 rounded-xl shadow text-center text-gray-500'>
-                                    <i className="fas fa-book-reader text-4xl mb-3 text-gray-300"></i>
-                                    <p>No recommendations yet — generate some above.</p>
-                                </div>
-                            ) : (
-                                filteredBooks.map(book => (
-                                    <div key={book.id} className='bg-white p-4 lg:p-5 rounded-xl shadow flex flex-col sm:flex-row gap-4 items-start hover:shadow-md transition-shadow'>
-                                        <div className='w-full sm:w-24 h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 self-center sm:self-start'>
-                                            <BookOpenIcon className='w-10 h-10 text-gray-400' />
+                                        <i className="fas fa-robot text-white text-2xl absolute inset-0 flex items-center justify-center z-10"></i>
+                                    </div>
+
+
+                                    {/* Loading Text */}
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-3">Analyzing Your Preferences</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        Our AI is carefully selecting books based on your interests, skill level, and learning goals...
+                                    </p>
+
+                                    {/* Animated Progress */}
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between text-sm text-gray-500">
+                                            <span>Processing interests...</span>
+                                            <span>Analyzing skill level...</span>
+                                            <span>Matching books...</span>
                                         </div>
 
-                                        <div className='flex-1 w-full'>
-                                            <div className='flex flex-col sm:flex-row justify-between items-start gap-2 mb-2'>
-                                                <div>
-                                                    <h3 className='text-lg font-bold text-gray-900 leading-tight'>{book.title}</h3>
-                                                    <div className='text-sm text-gray-600 mt-0.5'>by {book.author}</div>
-                                                </div>
+                                        {/* Animated Progress Bar */}
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div
+                                                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full animate-pulse transition-all duration-1000"
+                                                style={{
+                                                    width: '100%',
+                                                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                                                }}
+                                            ></div>
+                                        </div>
 
-                                                <div className='flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 w-full sm:w-auto justify-between sm:justify-start'>
-                                                    <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${difficultyLevels[book.difficulty] || 'bg-gray-100 text-gray-800'}`}>
-                                                        {book.difficulty || 'Unknown'}
-                                                    </div>
-                                                    <div className='text-sm font-semibold text-yellow-500 sm:mt-1 flex items-center gap-1'>
-                                                        {book.rating ?? '-'} <i className="fas fa-star text-xs"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        {/* Loading Dots */}
+                                        <div className="flex justify-center space-x-1">
+                                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                        </div>
 
-                                            <p className='text-sm text-gray-700 mt-2 line-clamp-3 leading-relaxed'>{book.description}</p>
-
-                                            <div className='mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3'>
-                                                <div className='bg-blue-50 p-2.5 rounded-lg text-xs lg:text-sm text-blue-800 w-full sm:w-auto flex-1 border border-blue-100'>
-                                                    <strong className="block sm:inline mb-1 sm:mb-0 mr-1">AI Insight:</strong>
-                                                    {book.aiExplanation ?? book.reason ?? 'No explanation provided.'}
-                                                </div>
-
-                                                <button
-                                                    onClick={() => addToReadingList(book)}
-                                                    className='w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm active:scale-95'
-                                                >
-                                                    Add to List
-                                                </button>
-                                            </div>
+                                        <div className="text-sm text-gray-500 italic">
+                                            This usually takes 4-5 seconds...
                                         </div>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Search and Filter Card */}
+                        {!loading && recommendations.length > 0 && (
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                                <div className="flex flex-col lg:flex-row gap-4 items-center">
+                                    <div className="relative flex-1 w-full">
+                                        <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search in recommendations..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
+                                        />
+                                    </div>
+                                    <select
+                                        value={selectedGenre}
+                                        onChange={(e) => setSelectedGenre(e.target.value)}
+                                        className="w-full lg:w-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white transition-colors"
+                                    >
+                                        {genres.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                                    </select>
+                                </div>
+                                <div className="mt-3 text-sm text-gray-500 flex items-center gap-2">
+                                    <i className="fas fa-filter text-indigo-500"></i>
+                                    Showing {filteredBooks.length} of {recommendations.length} books
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Recommendations Grid */}
+                        {!loading && (
+                            <div className="space-y-6">
+                                {filteredBooks.length === 0 && recommendations.length === 0 ? (
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                                        <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <BookOpenIcon className="w-10 h-10 text-indigo-600" />
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">No Recommendations Yet</h3>
+                                        <p className="text-gray-500 max-w-md mx-auto">
+                                            Use the AI recommendation tool above to get personalized book suggestions based on your interests and learning goals.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
+                                        {filteredBooks.map(book => (
+                                            <div key={book.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                                                <div className="p-6">
+                                                    <div className="flex gap-4">
+                                                        {/* Book Cover - FIXED: Using proper gradient classes */}
+                                                        <div className={`w-20 h-28 rounded-lg ${book.coverColor || 'bg-gradient-to-br from-indigo-500 to-purple-600'} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300`}>
+                                                            <BookOpenIcon className="w-8 h-8 text-white" />
+                                                        </div>
+
+                                                        {/* Book Details */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                                                                <div className="flex-1">
+                                                                    <h3 className="text-lg font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                                                                        {book.title}
+                                                                    </h3>
+                                                                    <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                                                                        <i className="fas fa-user-edit text-gray-400"></i>
+                                                                        by {book.author}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex flex-col items-end gap-2">
+                                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyLevels[book.difficulty] || 'bg-gray-100 text-gray-800'}`}>
+                                                                        {book.difficulty || 'Unknown'}
+                                                                    </span>
+                                                                    <div className="flex items-center gap-1 text-sm font-semibold text-amber-500">
+                                                                        {book.rating ?? '4.5'}
+                                                                        <i className="fas fa-star text-xs"></i>
+                                                                        <span className="text-gray-400 text-xs">({book.pages || '300'} pages)</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-4">
+                                                                {book.description}
+                                                            </p>
+
+                                                            {/* AI Insight */}
+                                                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100 mb-4">
+                                                                <div className="flex items-start gap-2">
+                                                                    <i className="fas fa-brain text-blue-500 mt-0.5"></i>
+                                                                    <div>
+                                                                        <div className="text-xs font-medium text-blue-800 mb-1">AI INSIGHT</div>
+                                                                        <div className="text-sm text-blue-700 leading-relaxed">
+                                                                            {book.aiExplanation ?? book.reason ?? 'Recommended based on your learning profile and interests.'}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Actions */}
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                                                    <i className="fas fa-tag text-gray-400"></i>
+                                                                    {book.genre || 'Programming'}
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => addToReadingList(book)}
+                                                                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium shadow-sm hover:shadow flex items-center gap-2 text-sm"
+                                                                >
+                                                                    <BookmarkIcon className="w-4 h-4" />
+                                                                    Add to Reading List
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Right: sidebar (Stacked below on mobile) */}
-                    <aside className="order-2 lg:order-2 space-y-4 lg:sticky lg:top-6 h-fit">
-                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
-                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base'>Quick Stats</h4>
-                            <div className='text-sm text-gray-600 space-y-2'>
-                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
-                                    <span>Recommendations</span>
-                                    <span className='font-medium text-gray-900'>{recommendations.length}</span>
+                    {/* Sidebar */}
+                    <div className="lg:w-1/4 space-y-6">
+                        {/* Quick Stats */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i className="fas fa-chart-bar text-indigo-600"></i>
+                                Reading Analytics
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <div>
+                                        <div className="text-2xl font-bold text-blue-600">{recommendations.length}</div>
+                                        <div className="text-sm text-blue-600 font-medium">Books Recommended</div>
+                                    </div>
+                                    <i className="fas fa-book text-blue-400 text-xl"></i>
                                 </div>
-                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
-                                    <span>Reading List</span>
-                                    <span className='font-medium text-gray-900'>{readingList.length}</span>
+                                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <div>
+                                        <div className="text-2xl font-bold text-green-600">{readingList.length}</div>
+                                        <div className="text-sm text-green-600 font-medium">Reading List</div>
+                                    </div>
+                                    <i className="fas fa-bookmark text-green-400 text-xl"></i>
                                 </div>
-                                <div className='flex justify-between py-1 border-b border-gray-100 last:border-0'>
-                                    <span>Skill Level</span>
-                                    <span className='font-medium text-gray-900'>{skillLevel}/5</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
-                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base'>Recommendation Criteria</h4>
-                            <div className='text-sm text-gray-600 space-y-3'>
-                                <div className='flex items-center gap-2'>
-                                    <div className="p-1.5 bg-indigo-50 rounded text-indigo-600"><AcademicCapIcon className='w-4 h-4' /></div>
-                                    Assignment Performance
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <div className="p-1.5 bg-green-50 rounded text-green-600"><BookOpenIcon className='w-4 h-4' /></div>
-                                    Learning Objectives
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <div className="p-1.5 bg-yellow-50 rounded text-yellow-600"><StarIcon className='w-4 h-4' /></div>
-                                    Skill Level & Interests
+                                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                    <div>
+                                        <div className="text-2xl font-bold text-purple-600">{skillLevel}/5</div>
+                                        <div className="text-sm text-purple-600 font-medium">Skill Level</div>
+                                    </div>
+                                    <i className="fas fa-brain text-purple-400 text-xl"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div className='bg-white p-4 lg:p-5 rounded-xl shadow'>
-                            <h4 className='font-bold text-gray-900 mb-3 text-sm lg:text-base flex items-center justify-between'>
-                                My Reading List
-                                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">{readingList.length}</span>
-                            </h4>
-                            {readingList.length === 0 ? (
-                                <div className='text-sm text-gray-500 text-center py-4 italic bg-gray-50 rounded-lg border border-dashed border-gray-200'>
-                                    No books added yet.
+                        {/* Recommendation Criteria */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i className="fas fa-cogs text-indigo-600"></i>
+                                Recommendation Criteria
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <AcademicCapIcon className="w-5 h-5 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-800 text-sm">Assignment Performance</div>
+                                        <div className="text-xs text-gray-600">Based on recent work</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <BookOpenIcon className="w-5 h-5 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-800 text-sm">Learning Objectives</div>
+                                        <div className="text-xs text-gray-600">Matches your goals</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <StarIcon className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-gray-800 text-sm">Skill Level & Interests</div>
+                                        <div className="text-xs text-gray-600">Personalized to you</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reading List */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <i className="fas fa-bookmark text-indigo-600"></i>
+                                    My Reading List
+                                </h3>
+                                <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-medium">
+                                    {readingList.length}
+                                </span>
+                            </div>
+
+                            {readingListLoading ? (
+                                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                                    <i className="fas fa-spinner fa-spin text-2xl text-indigo-500 mb-3"></i>
+                                    <div className="text-sm font-medium text-gray-600">Loading reading list...</div>
+                                </div>
+                            ) : readingList.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                                    <BookOpenIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                    <div className="text-sm font-medium text-gray-600 mb-1">No books added yet</div>
+                                    <div className="text-xs text-gray-500">Add books from recommendations</div>
                                 </div>
                             ) : (
-                                <div className='space-y-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar'>
-                                    {readingList.map((b, idx) => (
-                                        <div key={idx} className='flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group'>
-                                            <div className='w-10 h-12 bg-gray-200 rounded flex items-center justify-center flex-shrink-0'>
-                                                <BookOpenIcon className='w-5 h-5 text-gray-400' />
+                                <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                    {readingList.map((book, idx) => (
+                                        <div key={book.firebaseId || book.id || idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                                            {/* Reading list book covers with proper gradients */}
+                                            <div className={`w-12 h-16 rounded ${book.coverColor || 'bg-gradient-to-br from-indigo-400 to-purple-500'} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                                                <BookOpenIcon className="w-5 h-5 text-white" />
                                             </div>
-                                            <div className='flex-1 min-w-0'>
-                                                <div className='font-medium text-sm text-gray-900 truncate'>{b.title}</div>
-                                                <div className='text-xs text-gray-500 truncate'>{b.author}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-gray-800 text-sm leading-tight line-clamp-2">{book.title}</div>
+                                                <div className="text-xs text-gray-500 truncate">{book.author}</div>
                                             </div>
                                             <button
-                                                onClick={() => removeFromReadingList(idx)}
-                                                className='text-gray-400 hover:text-red-600 p-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100'
+                                                onClick={() => removeFromReadingList(book.firebaseId || book.id)}
+                                                className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg transition-all duration-200 hover:bg-red-50 opacity-0 group-hover:opacity-100 focus:opacity-100"
                                                 aria-label="Remove book"
                                             >
                                                 <i className="fas fa-trash-alt text-sm"></i>
@@ -382,8 +722,18 @@ function BookRecommendation() {
                                     ))}
                                 </div>
                             )}
+
+                            {readingList.length > 0 && (
+                                <button
+                                    onClick={clearReadingList}
+                                    className="w-full mt-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <i className="fas fa-trash"></i>
+                                    Clear All
+                                </button>
+                            )}
                         </div>
-                    </aside>
+                    </div>
                 </div>
             </div>
         </div>

@@ -454,7 +454,7 @@ for (int i = 0; i < 10; i++) {
 
     return (
         <div className="min-h-screen bg-gray-50 py-6 lg:py-8">
-            <div className="max-w-7xl mx-auto px-[15px] lg:px-6">
+            <div className="max-w-7xl mt-[70px] mx-auto px-[15px] lg:px-6">
                 {/* Header */}
                 <div className="bg-white rounded-lg shadow-md p-4 lg:p-6 mb-6">
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

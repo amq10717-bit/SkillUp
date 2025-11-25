@@ -147,7 +147,7 @@ const CourseModules = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 mt-20 pb-10">
-            <div className="max-w-4xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] p-4 lg:p-6 text-white">
@@ -315,6 +315,15 @@ const CourseModules = () => {
                             <div>
                                 <p className="font-semibold text-gray-600">Content Generation</p>
                                 <p className="text-sm text-gray-500">Next</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center font-semibold">
+                                4
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-600">Video Generation</p>
+                                <p className="text-sm text-gray-500">Final Step</p>
                             </div>
                         </div>
                     </div>

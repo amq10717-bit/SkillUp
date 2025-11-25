@@ -29,6 +29,9 @@ import CreateAssignment from './components/TutorPortal/CreateAssignment';
 import CreateQuiz from './components/TutorPortal/CreateQuiz';
 import CourseModules from './components/CourseGenerationSteps/CourseModules';
 import CourseModuleDetails from './components/CourseGenerationSteps/CourseModuleDetails';
+import CourseSingleVideoGeneration from './components/CourseGenerationSteps/CourseSingleVideoGeneration';
+
+
 import IDE from './components/IDE';
 import AdminDashboard from './components/Admin/admindashboard';
 import AdminLoginScreen from './components/LoginScreen/AdminLoginScreen';
@@ -125,6 +128,9 @@ function App() {
                 <CourseModuleDetails />
               </TutorRoute>
             } />
+            <Route path="/add-course/video-generation/:courseId" element={<CourseSingleVideoGeneration />} />
+
+
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

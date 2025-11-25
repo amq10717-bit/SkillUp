@@ -26,7 +26,7 @@ export const extractTopicsFromCourse = async (courseTitle, courseDescription) =>
   }
 };
 
-// 2. Generate Assignment Details (UPDATED to include teacherSolution)
+// 2. Generate Assignment Details
 export const generateAssignment = async (topic, difficulty, courseContext = "") => {
   try {
     const prompt = `
@@ -80,7 +80,7 @@ export const generateQuizQuestions = async (topic, difficulty, count, courseCont
   }
 };
 
-// 4. Generate Module Content (CONCISE VERSION)
+// 4. Generate Module Content
 export const generateModuleContent = async (moduleTitle, difficulty, courseTitle, courseDescription) => {
   try {
     const prompt = `
@@ -90,7 +90,7 @@ export const generateModuleContent = async (moduleTitle, difficulty, courseTitle
       
       FORMAT RULES:
       - Use HTML-like structure with inline styles
-      - NO markdown (** or ##)
+      - STRICTLY NO MARKDOWN (** or ##). Use <strong> tags for bolding if necessary.
       - Keep content brief: 4-5 sections max
       - Include short code examples only where essential
       - Focus on key concepts only
@@ -141,7 +141,7 @@ export const generateModuleContent = async (moduleTitle, difficulty, courseTitle
   }
 };
 
-// 5. AI Learning Assistant (CONCISE VERSION)
+// 5. AI Learning Assistant
 export const askCourseAssistant = async (question, moduleContent, courseContext) => {
   try {
     const prompt = `
@@ -152,28 +152,21 @@ export const askCourseAssistant = async (question, moduleContent, courseContext)
       Focus on the core concept.
       Use simple, clear language.
       No lengthy explanations.
-      No markdown formatting.
+      STRICTLY NO MARKDOWN. Do not use ** for bolding. Use plain text only.
       
       Example format: "The answer is [brief explanation]. Try practicing with [simple example]."
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-
-    // Ensure response is concise
-    let answer = response.text();
-    if (answer.length > 200) {
-      answer = answer.substring(0, 200) + "...";
-    }
-
-    return answer;
+    return response.text();
   } catch (error) {
     console.error("AI Learning Assistant Error:", error);
     return "I'm having trouble answering right now. Please try again.";
   }
 };
 
-// 6. Code Review and Feedback (CONCISE VERSION)
+// 6. Code Review and Feedback
 export const reviewStudentCode = async (code, language, taskDescription, studentExplanation) => {
   try {
     const prompt = `
@@ -193,18 +186,12 @@ export const reviewStudentCode = async (code, language, taskDescription, student
       - Best practice tip
       
       Keep it under 150 words. No lengthy analysis.
+      STRICTLY NO MARKDOWN BOLD (**). Use plain text only.
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-
-    // Ensure concise response
-    let feedback = response.text();
-    if (feedback.length > 300) {
-      feedback = feedback.substring(0, 300) + "...";
-    }
-
-    return feedback;
+    return response.text();
   } catch (error) {
     console.error("AI Code Review Error:", error);
     return "Quick review: Check your syntax and try running the code. Focus on making it work first.";

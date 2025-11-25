@@ -390,52 +390,7 @@ function StudentDashboard() {
                     </div>
 
                     {/* Progress Report */}
-                    <div className='text-left mb-6 lg:mb-10'>
-                        <h1 className='text-xl lg:heading-text-lg font-bold font-poppins'>Progress Report</h1>
-                    </div>
-                    {/* AI Learning Assistant Quick Access */}
-                    <div className="mb-8 lg:mb-10">
-                        <div className="text-left mb-6">
-                            <h1 className="text-xl lg:heading-text-lg font-bold font-poppins">AI Learning Tools</h1>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                            <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 text-white">
-                                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
-                                    <i className="fas fa-robot text-xl"></i>
-                                </div>
-                                <h3 className="font-bold text-lg mb-2">AI Tutor</h3>
-                                <p className="text-purple-100 text-sm mb-4">Get instant help with any course concept</p>
-                                <button className="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-semibold text-sm">
-                                    Ask AI Tutor
-                                </button>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white">
-                                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
-                                    <i className="fas fa-code text-xl"></i>
-                                </div>
-                                <h3 className="font-bold text-lg mb-2">Code Review</h3>
-                                <p className="text-blue-100 text-sm mb-4">Get AI feedback on your code</p>
-                                <button
-                                    onClick={() => navigate('/ide')}
-                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-semibold text-sm"
-                                >
-                                    Practice Coding
-                                </button>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white">
-                                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
-                                    <i className="fas fa-brain text-xl"></i>
-                                </div>
-                                <h3 className="font-bold text-lg mb-2">Smart Study</h3>
-                                <p className="text-green-100 text-sm mb-4">AI-powered study recommendations</p>
-                                <button className="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-semibold text-sm">
-                                    Study Plan
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div className="flex flex-col lg:flex-row w-full gap-5 mb-10">
                         <div className="w-full lg:w-2/3 bg-white shadow-md rounded-lg p-4 lg:p-5 h-[250px]">
                             <ResponsiveContainer width="100%" height="100%">

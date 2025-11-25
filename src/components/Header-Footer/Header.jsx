@@ -308,24 +308,7 @@ export default function Header() {
                             )}
                         </div>
 
-                        {userData && userData.role === 'student' && (
-                            <div className="shadow-lg rounded-sm p-3 lg:p-5 m-3 lg:m-5 border border-gray-200">
-                                <div className="flex flex-row justify-between items-start">
-                                    <h1 className="font-poppins font-extrabold text-[16px] lg:text-[18px] w-3/4">
-                                        Upgrade your Account to Pro
-                                    </h1>
-                                    <img
-                                        src={medal}
-                                        alt="Medal"
-                                        className="w-10 h-10 lg:w-12 lg:h-12 object-contain"
-                                    />
-                                </div>
-                                <p className="font-poppins text-[12px] lg:text-[14px] mt-2 lg:mt-3 mb-4 lg:mb-6 text-gray-600">
-                                    Upgrade to premium to get exclusive features and unlimited access
-                                </p>
-                                <button className="btn-primary w-full text-sm lg:text-base">Upgrade to Pro</button>
-                            </div>
-                        )}
+
 
                         {userData && (
                             <div className="p-4 border-t border-gray-200">

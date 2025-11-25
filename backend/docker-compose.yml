@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  video-generator:
+    build: .
+    container_name: video-generator-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./content:/app/content
+      - ./uploads:/app/uploads
+      - ./templates:/app/templates
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

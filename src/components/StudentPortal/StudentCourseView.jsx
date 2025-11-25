@@ -368,6 +368,27 @@ public class Practice {
 
                     {/* Main Content */}
                     <div className="lg:w-3/4">
+
+                        {/* Video Player Section - Added */}
+                        {course.promotionalVideo && (
+                            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <i className="fas fa-video text-[#6c5dd3] text-xl"></i>
+                                    <h3 className="text-xl font-bold text-gray-800">Course Intro Video</h3>
+                                </div>
+                                <div className="bg-black rounded-xl overflow-hidden shadow-lg aspect-video">
+                                    <video
+                                        controls
+                                        className="w-full h-full object-contain"
+                                        src={course.promotionalVideo}
+                                        poster={course.thumbnail}
+                                    >
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-white rounded-2xl shadow-lg p-6">
                             {course.modules && course.modules.length > 0 && (
                                 <>

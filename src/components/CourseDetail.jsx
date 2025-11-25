@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase.js';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import HeroSection from './Hero Section/HeroSection';
-import { Link } from 'react-router-dom';
-
 
 function CourseDetail() {
     const { id } = useParams();
@@ -17,33 +15,6 @@ function CourseDetail() {
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-
-    const curriculumData = [
-        {
-            title: "1. Introduction",
-            lessons: [
-                { name: "What is Web Development?", duration: "10:00" },
-                { name: "Frontend vs Backend", duration: "12:30" },
-                { name: "How Websites Work", duration: "11:15" },
-            ],
-        },
-        {
-            title: "2. Getting Started with HTML",
-            lessons: [
-                { name: "HTML Basics", duration: "15:00" },
-                { name: "Common HTML Tags", duration: "17:20" },
-                { name: "Creating a Simple Page", duration: "14:50" },
-            ],
-        },
-        {
-            title: "3. Styling with CSS",
-            lessons: [
-                { name: "CSS Syntax and Selectors", duration: "16:45" },
-                { name: "Colors, Fonts, and Layout", duration: "19:30" },
-                { name: "Box Model & Positioning", duration: "20:10" },
-            ],
-        },
-    ];
 
     const toggleSection = (index) => {
         setActiveIndex(index === activeIndex ? null : index);
@@ -60,13 +31,10 @@ function CourseDetail() {
                     return;
                 }
 
-                console.log('Fetching course with ID:', id);
-
                 const courseDoc = await getDoc(doc(db, 'courses', id));
 
                 if (courseDoc.exists()) {
                     const courseData = courseDoc.data();
-                    console.log('Course data found:', courseData);
                     setCourse({
                         id: courseDoc.id,
                         ...courseData
@@ -84,7 +52,6 @@ function CourseDetail() {
                     }
                 } else {
                     setError('Course not found');
-                    console.log('No course found with ID:', id);
                 }
             } catch (error) {
                 console.error('Error fetching course:', error);
@@ -142,6 +109,14 @@ function CourseDetail() {
         }
     };
 
+    // Helper to estimate read time based on HTML content length
+    const getReadTime = (content) => {
+        if (!content) return "5 min";
+        const words = content.length / 5; // Rough estimate
+        const minutes = Math.ceil(words / 200); // 200 words per minute
+        return `${minutes} min read`;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen mt-30 mb-30 flex items-center justify-center">
@@ -174,7 +149,6 @@ function CourseDetail() {
             <div className="min-h-screen mt-30 mb-30 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-500 text-lg mb-4">Course Not Found</div>
-                    <div className="text-gray-600">The course you're looking for doesn't exist.</div>
                     <button
                         onClick={() => window.history.back()}
                         className="mt-4 bg-[#6c5dd3] text-white px-4 py-2 rounded-lg hover:bg-[#5a4bbf]"
@@ -222,14 +196,12 @@ function CourseDetail() {
                                         {course.category}
                                     </span>
                                 )}
-                                {course?.duration && (
-                                    <span>⏱️ {course.duration}</span>
-                                )}
-                                {course?.lessonsCount > 0 && (
-                                    <span>📚 {course.lessonsCount} lessons</span>
+                                {course?.modules && (
+                                    <span>📚 {course.modules.length} Modules</span>
                                 )}
                             </div>
 
+                            {/* Tabs Header - REMOVED ANIMATIONS TAB */}
                             <div className='flex flex-row gap-0 mb-6 lg:mb-10 overflow-x-auto pb-2 lg:pb-0'>
                                 <button onClick={() => setActiveTab('course')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'course' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Course
@@ -237,13 +209,11 @@ function CourseDetail() {
                                 <button onClick={() => setActiveTab('videos')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'videos' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Videos
                                 </button>
-                                <button onClick={() => setActiveTab('animations')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'animations' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
-                                    Animations
-                                </button>
                             </div>
+
                             <div className=' '>
-                                {activeTab == 'course' && <div>
-                                    <div >
+                                {activeTab === 'course' && (
+                                    <div>
                                         <h1 className="text-2xl lg:text-3xl font-bold mb-6 text-left text-black">
                                             {course?.title || 'Course Title'}
                                         </h1>
@@ -292,49 +262,63 @@ function CourseDetail() {
                                             <img
                                                 src={course.thumbnail}
                                                 alt={course.title}
-                                                className="w-full max-w-2xl mx-auto object-cover mb-6 lg:mb-13 rounded-lg"
+                                                className="w-full max-w-2xl mx-auto object-cover mb-6 lg:mb-13 rounded-lg shadow-sm"
                                             />
                                         )}
 
                                         <section className="mb-10">
                                             <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Course Content Overview</h2>
                                             <p className="text-gray-700 mb-4 text-sm lg:text-base">
-                                                This course will take you from beginner to advanced level with hands-on projects and real-world examples.
+                                                This course includes detailed modules designed to take you from basics to advanced concepts.
                                             </p>
                                         </section>
-
-                                    </div>
-                                </div>}
-                                {activeTab === 'videos' && (
-                                    <div className="text-center py-8">
-                                        <div className="bg-gray-100 rounded-lg p-8">
-                                            <i className="fas fa-video text-4xl text-gray-400 mb-4"></i>
-                                            <h3 className="text-xl font-semibold text-gray-600 mb-2">Video Content</h3>
-                                            <p className="text-gray-500">
-                                                Video lessons will be available once the course content is fully developed.
-                                            </p>
-                                        </div>
                                     </div>
                                 )}
-                                {activeTab == 'animations' && (
-                                    <div className="text-center py-8">
-                                        <div className="bg-gray-100 rounded-lg p-8">
-                                            <i className="fas fa-film text-4xl text-gray-400 mb-4"></i>
-                                            <h3 className="text-xl font-semibold text-gray-600 mb-2">Animation Content</h3>
-                                            <p className="text-gray-500">
-                                                Interactive animations will be available once the course content is fully developed.
-                                            </p>
-                                        </div>
+
+                                {activeTab === 'videos' && (
+                                    <div className="py-4">
+                                        {course?.promotionalVideo ? (
+                                            <div className="space-y-4">
+                                                <div className="bg-black rounded-xl overflow-hidden shadow-lg aspect-video">
+                                                    <video
+                                                        controls
+                                                        className="w-full h-full object-contain"
+                                                        src={course.promotionalVideo}
+                                                        poster={course.thumbnail}
+                                                    >
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </div>
+                                                <div className="px-2">
+                                                    <h3 className="font-bold text-xl text-gray-800">Promotional Video</h3>
+                                                    <p className="text-gray-600 mt-2">
+                                                        Watch this introduction to get a better understanding of what this course offers.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8">
+                                                <div className="bg-gray-100 rounded-lg p-8">
+                                                    <i className="fas fa-video text-4xl text-gray-400 mb-4"></i>
+                                                    <h3 className="text-xl font-semibold text-gray-600 mb-2">Video Content</h3>
+                                                    <p className="text-gray-500">
+                                                        No promotional video is currently available for this course.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
                         </div>
+
+                        {/* Sidebar */}
                         <div className='order-2 pr-0 lg:pr-5'>
                             <div className="shadow-md rounded-2xl p-5 bg-white static lg:sticky lg:top-20">
                                 <div className="mb-6 p-4 bg-green-50 rounded-lg">
                                     <div className="text-center mb-4">
                                         <span className="text-2xl font-bold text-[#4CBC9A]">
-                                            FREEsd
+                                            FREE
                                         </span>
                                     </div>
                                     <button
@@ -356,35 +340,47 @@ function CourseDetail() {
                                 </div>
 
                                 <h2 className="text-lg font-semibold mb-4">Curriculum</h2>
-                                {curriculumData.map((section, index) => (
-                                    <div key={index} className="border border-green-100 rounded-md mb-2 overflow-hidden bg-[#eefffa]">
-                                        <button
-                                            className={`w-full text-left px-4 py-4 rounded-[10px] flex justify-between items-center ${activeIndex === index ? "bg-BgPrimary text-white" : "bg-BgSecondary text-black"
-                                                }`}
-                                            onClick={() => toggleSection(index)}
-                                        >
-                                            <span className='text-[15px]'>{section.title}</span>
-                                            <i
-                                                className={`fas fa-chevron-down transition-transform duration-200 ${activeIndex === index ? "rotate-180" : ""
-                                                    }`}
-                                            ></i>
-                                        </button>
 
-                                        {activeIndex === index && (
-                                            <div className="divide-y divide-green-100">
-                                                {section.lessons.map((lesson, idx) => (
-                                                    <div key={idx} className="flex justify-between items-center px-4 py-5 text-sm">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <i className="fas fa-play-circle text-greenSmall"></i>
-                                                            {lesson.name}
+                                {/* Dynamic Curriculum Rendering */}
+                                {course?.modules && course.modules.length > 0 ? (
+                                    course.modules.map((module, index) => (
+                                        <div key={index} className="border border-green-100 rounded-md mb-2 overflow-hidden bg-[#eefffa]">
+                                            <button
+                                                className={`w-full text-left px-4 py-4 rounded-[10px] flex justify-between items-center ${activeIndex === index ? "bg-BgPrimary text-white" : "bg-BgSecondary text-black"
+                                                    }`}
+                                                onClick={() => toggleSection(index)}
+                                            >
+                                                <span className='text-[15px] font-medium truncate pr-2'>{index + 1}. {module.title}</span>
+                                                <i
+                                                    className={`fas fa-chevron-down transition-transform duration-200 flex-shrink-0 ${activeIndex === index ? "rotate-180" : ""
+                                                        }`}
+                                                ></i>
+                                            </button>
+
+                                            {activeIndex === index && (
+                                                <div className="divide-y divide-green-100 bg-white">
+                                                    {/* Since we don't have sub-lessons array, we show the main module content as the lesson item */}
+                                                    <div className="flex justify-between items-center px-4 py-4 text-sm hover:bg-gray-50 transition">
+                                                        <div className="flex items-center gap-3 text-gray-700">
+                                                            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                                                <i className="fas fa-file-alt text-xs"></i>
+                                                            </div>
+                                                            <span className="font-medium text-gray-600">Module Content</span>
                                                         </div>
-                                                        <span className="text-xs text-gray-500">{lesson.duration}</span>
+                                                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                                                            {getReadTime(module.content)}
+                                                        </span>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-6 text-gray-500 text-sm bg-gray-50 rounded-lg">
+                                        <i className="fas fa-book-open mb-2 block"></i>
+                                        Curriculum details coming soon.
                                     </div>
-                                ))}
+                                )}
 
                                 <div className="mt-6 pt-6 border-t">
                                     <h3 className="font-semibold mb-3">Course Details</h3>
