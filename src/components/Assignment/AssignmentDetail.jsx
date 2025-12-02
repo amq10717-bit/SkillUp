@@ -15,6 +15,7 @@ import {
 import { db, auth } from '../../firebase';
 import { uploadToCloudinarySigned } from '../../utils/cloudinary';
 import HeroSection from '../Hero Section/HeroSection';
+
 const FormattedDescription = ({ description }) => {
     if (!description) return null;
 

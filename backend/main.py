@@ -10,6 +10,10 @@ import uuid
 import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from fastapi import UploadFile, File, Form
+from rag_engine import generate_assignment_from_document # Import the file we just made
+import shutil
+import json
 
 # --- IMPORT CUSTOM MODULES ---
 from text_extractor import extract_content
@@ -18,6 +22,7 @@ from pre_processing import giving_avg_score, split_into_500_word_chunks
 # CORRECT IMPORT: import the function 'get_recommendations'
 from recommender import get_recommendations 
 from video_generator import generate_video_pipeline
+from rag_engine import generate_assignment_from_document, generate_quiz_from_document
 
 app = FastAPI()
 
@@ -215,6 +220,43 @@ async def test_video_endpoint(request: VideoRequest):
         "message": "This is a test response"
     }
 
+@app.post("/api/rag/generate-quiz")
+async def rag_generate_quiz(
+    file: UploadFile = File(...),
+    topic: str = Form(...), # Acts as instruction
+    difficulty: str = Form(...),
+    count: int = Form(...)
+):
+    """
+    RAG Endpoint for Quizzes
+    """
+    print(f"🧩 Processing RAG Quiz request. Topic: {topic}")
+    
+    temp_filename = f"quiz_temp_{uuid.uuid4()}_{file.filename}"
+    temp_file_path = os.path.join(UPLOAD_DIR, temp_filename)
+    
+    try:
+        # Save temp file
+        with open(temp_file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Run Generation
+        generated_text = generate_quiz_from_document(temp_file_path, topic, difficulty, count)
+        
+        # Clean JSON
+        clean_json = generated_text.replace("```json", "").replace("```", "").strip()
+        quiz_data = json.loads(clean_json)
+        
+        return quiz_data
+
+    except Exception as e:
+        print(f"❌ RAG Quiz Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+        
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+
 @app.post("/api/analyze")
 async def analyze(request: AnalysisRequest):
     print(f"Processing File: {request.file_name}")
@@ -269,6 +311,8 @@ async def analyze(request: AnalysisRequest):
         if os.path.exists(saved_path):
             os.remove(saved_path)
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

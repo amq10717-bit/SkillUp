@@ -1,6 +1,6 @@
 // src/components/GeneratedCourses/GeneratedCourses.jsx
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, orderBy, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, getDoc, doc } from 'firebase/firestore'; // Ensure 'doc' is imported
 import { db } from '../../firebase.js';
 import animation from '../../assets/animation.png';
 import Education from '../../assets/Education.png';
@@ -23,35 +23,31 @@ function GeneratedCourses() {
     });
     const [tutors, setTutors] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [tutorsData, setTutorsData] = useState({}); // Store tutor details
+    const [tutorsData, setTutorsData] = useState({});
 
     useEffect(() => {
         const fetchCoursesAndTutors = async () => {
             try {
                 setLoading(true);
-                console.log('Fetching courses from Firebase...');
 
-                // Fetch all courses with tutor information
                 const coursesQuery = query(
                     collection(db, 'courses'),
                     orderBy('createdAt', 'desc')
                 );
 
                 const unsubscribe = onSnapshot(coursesQuery, async (snapshot) => {
-                    console.log('Courses snapshot received:', snapshot.docs.length, 'courses');
-
                     const coursesData = await Promise.all(
-                        snapshot.docs.map(async (doc) => {
-                            const courseData = doc.data();
+                        // FIX: Renamed 'doc' to 'courseSnapshot' to avoid conflict
+                        snapshot.docs.map(async (courseSnapshot) => {
+                            const courseData = courseSnapshot.data();
 
-                            // Fetch tutor details for each course
                             let tutorData = {};
                             if (courseData.tutorId) {
                                 try {
-                                    const tutorDoc = await getDoc(doc(db, 'users', courseData.tutorId));
-                                    if (tutorDoc.exists()) {
-                                        tutorData = tutorDoc.data();
-                                        // Store tutor data for filters
+                                    // Now 'doc' refers correctly to the Firebase function
+                                    const tutorDocRef = await getDoc(doc(db, 'users', courseData.tutorId));
+                                    if (tutorDocRef.exists()) {
+                                        tutorData = tutorDocRef.data();
                                         setTutorsData(prev => ({
                                             ...prev,
                                             [courseData.tutorId]: tutorData
@@ -63,10 +59,9 @@ function GeneratedCourses() {
                             }
 
                             return {
-                                id: doc.id,
+                                id: courseSnapshot.id,
                                 ...courseData,
                                 tutor: tutorData,
-                                // Ensure we have safe defaults
                                 enrolledCount: courseData.enrolledCount || 0,
                                 rating: courseData.rating || 0,
                                 lessonsCount: courseData.lessonsCount || 0,
@@ -77,16 +72,11 @@ function GeneratedCourses() {
                         })
                     );
 
-                    console.log('Processed courses data:', coursesData);
                     setCourses(coursesData);
                     setFilteredCourses(coursesData);
 
-                    // Extract unique tutors and categories
                     const uniqueTutors = [...new Set(coursesData.map(course => course.tutorId).filter(Boolean))];
                     const uniqueCategories = [...new Set(coursesData.map(course => course.category).filter(Boolean))];
-
-                    console.log('Unique tutors:', uniqueTutors);
-                    console.log('Unique categories:', uniqueCategories);
 
                     setTutors(uniqueTutors);
                     setCategories(uniqueCategories);
@@ -106,26 +96,21 @@ function GeneratedCourses() {
         fetchCoursesAndTutors();
     }, []);
 
-    // Apply filters and sorting
     useEffect(() => {
         let result = [...courses];
 
-        // Category filter
         if (filters.category !== 'all') {
             result = result.filter(course => course.category === filters.category);
         }
 
-        // Difficulty filter
         if (filters.difficulty !== 'all') {
             result = result.filter(course => course.difficulty === filters.difficulty);
         }
 
-        // Tutor filter
         if (filters.tutor !== 'all') {
             result = result.filter(course => course.tutorId === filters.tutor);
         }
 
-        // Search filter
         if (filters.search) {
             const searchTerm = filters.search.toLowerCase();
             result = result.filter(course =>
@@ -136,7 +121,6 @@ function GeneratedCourses() {
             );
         }
 
-        // Sorting
         switch (filters.sortBy) {
             case 'newest':
                 result = result.sort((a, b) => new Date(b.createdAt?.toDate?.() || b.createdAt || 0) - new Date(a.createdAt?.toDate?.() || a.createdAt || 0));
@@ -177,7 +161,6 @@ function GeneratedCourses() {
         });
     };
 
-    // Get tutor display name
     const getTutorDisplayName = (tutorId) => {
         const tutor = tutorsData[tutorId];
         return tutor?.displayName || tutor?.name || tutor?.fullName || tutor?.username || `Tutor ${tutorId?.slice(0, 8)}` || 'Unknown Tutor';
@@ -204,7 +187,6 @@ function GeneratedCourses() {
             />
             <div className="min-h-screen my-10 lg:mt-30 lg:mb-30">
                 <div className="max-w-7xl mx-auto px-[15px] lg:px-4">
-                    {/* Header */}
                     <div className="text-center mb-8 lg:mb-12">
                         <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-3 lg:mb-4">
                             Discover Amazing Courses
@@ -214,17 +196,10 @@ function GeneratedCourses() {
                         </p>
                     </div>
 
-                    {/* Course Features */}
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 lg:p-8 mb-8 lg:mb-12">
                         <h2 className="text-xl lg:text-2xl font-bold text-center mb-6 lg:mb-8 text-gray-800">
                             Why Choose Our Courses?
                         </h2>
-
-
-
-                        [Image of online learning platform features diagram]
-
-
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                             <div className="flex flex-col items-center text-center p-3 lg:p-4">
                                 <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
@@ -257,7 +232,6 @@ function GeneratedCourses() {
                         </div>
                     </div>
 
-                    {/* Filters */}
                     <CourseFilters
                         filters={filters}
                         onFilterChange={handleFilterChange}
@@ -270,7 +244,6 @@ function GeneratedCourses() {
                         getTutorDisplayName={getTutorDisplayName}
                     />
 
-                    {/* Courses Grid Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 mt-6 lg:mt-0">
                         <div>
                             <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
@@ -281,7 +254,6 @@ function GeneratedCourses() {
                             </p>
                         </div>
 
-                        {/* Sort Options */}
                         <div className="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
                             <span className="text-sm text-gray-500 whitespace-nowrap">Sort by:</span>
                             <select
@@ -299,7 +271,6 @@ function GeneratedCourses() {
                         </div>
                     </div>
 
-                    {/* Courses Grid */}
                     <div className="mt-6 lg:mt-8">
                         {filteredCourses.length === 0 ? (
                             <div className="text-center py-10 lg:py-16 bg-white rounded-2xl shadow-sm">
@@ -323,7 +294,6 @@ function GeneratedCourses() {
                         )}
                     </div>
 
-                    {/* Call to Action */}
                     <div className="mt-8 lg:mt-16 bg-gradient-to-r from-[#6c5dd3] to-[#4CBC9A] rounded-2xl p-6 lg:p-8 text-center text-white">
                         <h2 className="text-xl lg:text-2xl font-bold mb-3 lg:mb-4">Ready to Start Learning?</h2>
                         <p className="text-base lg:text-lg mb-6 max-w-2xl mx-auto">
@@ -342,7 +312,6 @@ function GeneratedCourses() {
                         </div>
                     </div>
 
-                    {/* Statistics */}
                     <div className="mt-8 lg:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 text-center">
                         <div className="bg-white p-4 lg:p-6 rounded-xl shadow-sm">
                             <div className="text-xl lg:text-2xl font-bold text-[#6c5dd3] mb-1 lg:mb-2">{courses.length}</div>

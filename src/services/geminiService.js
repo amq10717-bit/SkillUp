@@ -1,8 +1,64 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+// Add to src/services/geminiService.js
+
+export const generateQuizWithRAG = async (file, topic, difficulty, count) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("topic", topic); // Passed as 'instruction' context
+    formData.append("difficulty", difficulty);
+    formData.append("count", count);
+
+    const response = await fetch("http://localhost:8000/api/rag/generate-quiz", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("RAG Quiz Generation Error:", error);
+    throw error;
+  }
+};
+// Add this function to your service file
+
+export const generateAssignmentWithRAG = async (file, topic, difficulty) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("topic", topic);
+    formData.append("difficulty", difficulty);
+
+    // Call YOUR FastAPI backend, not Google directly
+    const response = await fetch("http://localhost:8000/api/rag/generate-assignment", {
+      method: "POST",
+      body: formData, // FormData automatically sets the Content-Type to multipart/form-data
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data;
+
+  } catch (error) {
+    console.error("RAG Generation Error:", error);
+    throw error;
+  }
+};
 
 // 1. Extract Topics from Course Info
 export const extractTopicsFromCourse = async (courseTitle, courseDescription) => {

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth'; // Import standard auth listener
 import { db, auth } from '../firebase.js';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import HeroSection from './Hero Section/HeroSection';
+import PaymentModal from './Payment/PaymentModal';
 
 function CourseDetail() {
     const { id } = useParams();
-    const [user] = useAuthState(auth);
+    // Replaced external hook with local state
+    const [user, setUser] = useState(null);
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -16,9 +18,20 @@ function CourseDetail() {
     const [enrolling, setEnrolling] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
 
+    // --- PAYMENT STATE ---
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
     const toggleSection = (index) => {
         setActiveIndex(index === activeIndex ? null : index);
     };
+
+    // Listen for auth state changes (Standard Firebase SDK)
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -40,12 +53,12 @@ function CourseDetail() {
                         ...courseData
                     });
 
-                    // Check if user is enrolled
-                    if (user) {
+                    // Check if user is enrolled (only if we have a user)
+                    if (auth.currentUser) {
                         const enrollmentQuery = query(
                             collection(db, 'enrollments'),
                             where('courseId', '==', id),
-                            where('studentId', '==', user.uid)
+                            where('studentId', '==', auth.currentUser.uid)
                         );
                         const enrollmentSnapshot = await getDocs(enrollmentQuery);
                         setIsEnrolled(!enrollmentSnapshot.empty);
@@ -61,8 +74,57 @@ function CourseDetail() {
             }
         };
 
+        // Fetch immediately, and if user logs in later, we might want to re-check enrollment
         fetchCourse();
-    }, [id, user]);
+    }, [id, user]); // Re-run if user state changes to check enrollment status
+
+    // --- CHECK ENROLLMENT LIMIT LOGIC ---
+    const checkEnrollmentLimit = async (userId) => {
+        // 1. Check User Status
+        const userDocRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+        if (userData?.subscriptionStatus === 'pro') {
+            return { allowed: true };
+        }
+
+        // 2. Count enrollments this month (JavaScript Filtering)
+        const enrollmentsRef = collection(db, 'enrollments');
+        const q = query(
+            enrollmentsRef,
+            where('studentId', '==', userId)
+        );
+
+        const snapshot = await getDocs(q);
+
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const thisMonthEnrollments = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            if (!data.enrolledAt) return false;
+
+            let date;
+            if (data.enrolledAt.toDate) {
+                date = data.enrolledAt.toDate();
+            } else {
+                date = new Date(data.enrolledAt);
+            }
+
+            return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        });
+
+        const count = thisMonthEnrollments.length;
+        console.log(`[CourseDetail Limit] User has ${count} enrollments this month.`);
+
+        if (count >= 5) {
+            return { allowed: false, count };
+        }
+
+        return { allowed: true, count };
+    };
 
     const handleEnroll = async () => {
         if (!user) {
@@ -82,7 +144,16 @@ function CourseDetail() {
 
         setEnrolling(true);
         try {
-            // Create enrollment record
+            // --- STEP 1: CHECK LIMIT ---
+            const limitCheck = await checkEnrollmentLimit(user.uid);
+
+            if (!limitCheck.allowed) {
+                setEnrolling(false);
+                setIsPaymentModalOpen(true); // Open modal
+                return;
+            }
+
+            // --- STEP 2: ENROLL ---
             const enrollmentId = `${user.uid}_${id}`;
             await setDoc(doc(db, 'enrollments', enrollmentId), {
                 courseId: id,
@@ -109,11 +180,28 @@ function CourseDetail() {
         }
     };
 
-    // Helper to estimate read time based on HTML content length
+    const handlePaymentSuccess = async () => {
+        try {
+            if (user) {
+                const userRef = doc(db, 'users', user.uid);
+                await updateDoc(userRef, {
+                    subscriptionStatus: 'pro',
+                    proSince: new Date()
+                });
+
+                setIsPaymentModalOpen(false);
+                alert("🎉 Upgrade Successful! You are now a Pro member. Click 'Enroll Now' again.");
+            }
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Payment successful but profile update failed. Contact support.");
+        }
+    };
+
     const getReadTime = (content) => {
         if (!content) return "5 min";
-        const words = content.length / 5; // Rough estimate
-        const minutes = Math.ceil(words / 200); // 200 words per minute
+        const words = content.length / 5;
+        const minutes = Math.ceil(words / 200);
         return `${minutes} min read`;
     };
 
@@ -162,6 +250,14 @@ function CourseDetail() {
 
     return (
         <div>
+            {/* PAYMENT MODAL */}
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                onSuccess={handlePaymentSuccess}
+                amount={15}
+            />
+
             <HeroSection
                 title={course?.title || 'Course Title'}
                 breadcrumb={[
@@ -201,7 +297,7 @@ function CourseDetail() {
                                 )}
                             </div>
 
-                            {/* Tabs Header - REMOVED ANIMATIONS TAB */}
+                            {/* Tabs Header */}
                             <div className='flex flex-row gap-0 mb-6 lg:mb-10 overflow-x-auto pb-2 lg:pb-0'>
                                 <button onClick={() => setActiveTab('course')} className={`text-base lg:text-[20px] whitespace-nowrap font-bold font-poppins px-4 py-2 ${activeTab === 'course' ? 'border-b-3 border-hoverGreen  text-black' : 'border-b border-gray-200  text-black'}`}>
                                     Course
@@ -359,7 +455,6 @@ function CourseDetail() {
 
                                             {activeIndex === index && (
                                                 <div className="divide-y divide-green-100 bg-white">
-                                                    {/* Since we don't have sub-lessons array, we show the main module content as the lesson item */}
                                                     <div className="flex justify-between items-center px-4 py-4 text-sm hover:bg-gray-50 transition">
                                                         <div className="flex items-center gap-3 text-gray-700">
                                                             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">

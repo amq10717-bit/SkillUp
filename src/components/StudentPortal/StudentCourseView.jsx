@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import {
+    doc, getDoc, collection, query, where, getDocs,
+    addDoc, serverTimestamp, updateDoc, Timestamp
+} from 'firebase/firestore';
 import { db, auth } from '../../firebase.js';
 import { askCourseAssistant, reviewStudentCode } from '../../services/geminiService.js';
 import { useAuthState } from 'react-firebase-hooks/auth';
+
+// IMPORT THE PAYMENT MODAL
+import PaymentModal from '../Payment/PaymentModal';
 
 const StudentCourseView = () => {
     const { id } = useParams();
@@ -14,6 +20,10 @@ const StudentCourseView = () => {
     const [activeModule, setActiveModule] = useState(0);
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
+
+    // --- PAYMENT STATE ---
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
     const [aiAssistant, setAiAssistant] = useState({
         isOpen: false,
         question: '',
@@ -66,6 +76,58 @@ const StudentCourseView = () => {
         }
     }, [id, user]);
 
+    // --- NEW: LOGIC TO CHECK ENROLLMENT LIMIT ---
+    const checkEnrollmentLimit = async (userId) => {
+        // 1. Get current user data to check subscription status
+        const userDocRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+        // If user is PRO, no limit
+        if (userData?.subscriptionStatus === 'pro') {
+            console.log("User is PRO - No limit.");
+            return { allowed: true };
+        }
+
+        // 2. If FREE, count enrollments this month manually in JS
+        // We query strictly by StudentID only to avoid Index errors
+        const enrollmentsRef = collection(db, 'enrollments');
+        const q = query(
+            enrollmentsRef,
+            where('studentId', '==', userId)
+        );
+
+        const snapshot = await getDocs(q);
+
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        // Filter the docs in memory
+        const thisMonthEnrollments = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            if (!data.enrolledAt) return false; // Ignore old/invalid data
+
+            let date;
+            if (data.enrolledAt.toDate) {
+                date = data.enrolledAt.toDate();
+            } else {
+                date = new Date(data.enrolledAt);
+            }
+
+            return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        });
+
+        const count = thisMonthEnrollments.length;
+        console.log(`[Limit Check] User has enrolled in ${count} courses this month.`);
+
+        if (count >= 5) {
+            return { allowed: false, count };
+        }
+
+        return { allowed: true, count };
+    };
+
     const handleEnroll = async () => {
         if (!user) {
             alert('Please log in to enroll in this course');
@@ -75,12 +137,22 @@ const StudentCourseView = () => {
 
         setEnrolling(true);
         try {
-            const enrollmentId = `${user.uid}_${id}`;
+            // --- STEP 1: CHECK LIMIT BEFORE ENROLLING ---
+            const limitCheck = await checkEnrollmentLimit(user.uid);
+
+            if (!limitCheck.allowed) {
+                setEnrolling(false);
+                setIsPaymentModalOpen(true); // Open payment modal
+                return;
+            }
+
+            // --- STEP 2: PROCEED WITH ENROLLMENT ---
+            // Create Enrollment Document
             await addDoc(collection(db, 'enrollments'), {
                 courseId: id,
                 studentId: user.uid,
                 tutorId: course.tutorId,
-                enrolledAt: serverTimestamp(),
+                enrolledAt: serverTimestamp(), // Stores Firestore Timestamp
                 courseTitle: course.title,
                 studentName: user.displayName || user.email,
                 tutorName: course.tutorName,
@@ -89,6 +161,14 @@ const StudentCourseView = () => {
             });
 
             // Update course enrolled count
+            if (course.id) {
+                const courseRef = doc(db, 'courses', course.id);
+                await updateDoc(courseRef, {
+                    enrolledCount: (course.enrolledCount || 0) + 1
+                });
+            }
+
+            // Analytics
             await addDoc(collection(db, 'course_analytics'), {
                 courseId: id,
                 studentId: user.uid,
@@ -103,6 +183,23 @@ const StudentCourseView = () => {
             alert('Failed to enroll: ' + error.message);
         } finally {
             setEnrolling(false);
+        }
+    };
+
+    const handlePaymentSuccess = async () => {
+        try {
+            // Update user to PRO
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+                subscriptionStatus: 'pro',
+                proSince: new Date()
+            });
+
+            setIsPaymentModalOpen(false);
+            alert("🎉 Upgrade Successful! You are now a Pro member. Click 'Enroll Now' again to join the course.");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Payment successful but profile update failed. Contact support.");
         }
     };
 
@@ -259,6 +356,13 @@ public class Practice {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 mt-20 pb-10">
+            {/* PAYMENT MODAL */}
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                onSuccess={handlePaymentSuccess}
+                amount={15}
+            />
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
